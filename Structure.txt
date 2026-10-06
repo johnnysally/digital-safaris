@@ -1,0 +1,677 @@
+DigitalSafaris/
+│
+├── backend/                                    (Port 5000)
+│   ├── server.js
+│   ├── .env
+│   ├── nodemon.json
+│   ├── .gitignore
+│   ├── README.md
+│   ├── config/
+│   │   ├── env.js
+│   │   ├── db.js
+│   │   ├── hdmBridge.js
+│   │   ├── hdmAi.js
+│   │   ├── socket.js
+│   │   ├── cloudinary.js
+│   │   ├── mpesa.js
+│   │   ├── stripe.js
+│   │   ├── redis.js
+│   │   ├── brevo.js
+│   │   └── firebase.js
+│   ├── utils/
+│   │   ├── generateOTP.js
+│   │   ├── generateToken.js
+│   │   ├── hashPassword.js
+│   │   ├── comparePassword.js
+│   │   ├── calculateDistance.js
+│   │   ├── formatCurrency.js
+│   │   ├── sendResponse.js
+│   │   ├── catchAsync.js
+│   │   ├── AppError.js
+│   │   ├── logger.js
+│   │   ├── asyncHandler.js
+│   │   ├── apiError.js
+│   │   ├── ApiResponse.js
+│   │   └── helpers.js
+│   ├── services/
+│   │   ├── backupService.js
+│   │   ├── emailService.js
+│   │   ├── smsService.js
+│   │   ├── mpesaService.js
+│   │   ├── stripeService.js
+│   │   ├── notificationService.js
+│   │   ├── socketService.js
+│   │   ├── cacheService.js
+│   │   ├── uploadService.js
+│   │   └── aiService.js
+│   ├── templates/
+│   │   ├── emailTemplates.js
+│   │   └── smsTemplates.js
+│   ├── schedulers/
+│   │   ├── index.js
+│   │   ├── payoutScheduler.js
+│   │   ├── backupScheduler.js
+│   │   ├── bookingReminderScheduler.js
+│   │   ├── orderTimeoutScheduler.js
+│   │   ├── broadcastExpiryScheduler.js
+│   │   ├── driverLocationCleanupScheduler.js
+│   │   └── staleSessionCleanupScheduler.js
+│   ├── middleware/
+│   │   ├── global/
+│   │   │   ├── errorHandler.js
+│   │   │   ├── notFound.js
+│   │   │   ├── requestLogger.js
+│   │   │   ├── rateLimiter.js
+│   │   │   ├── cors.js
+│   │   │   ├── helmet.js
+│   │   │   ├── compression.js
+│   │   │   └── sanitize.js
+│   │   ├── client/
+│   │   │   ├── authenticateClient.js
+│   │   │   ├── authorizeClient.js
+│   │   │   └── validateClient.js
+│   │   └── admin/
+│   │       ├── authenticateAdmin.js
+│   │       ├── authorizeAdmin.js
+│   │       └── validateAdmin.js
+│   ├── models/
+│   │   ├── admin/
+│   │   │   ├── Admin.js
+│   │   │   ├── AdminRole.js
+│   │   │   ├── AdminLog.js
+│   │   │   ├── PaymentMethod.js
+│   │   │   ├── Commission.js
+│   │   │   ├── Payout.js
+│   │   │   ├── SystemSetting.js
+│   │   │   ├── Report.js
+│   │   │   ├── Dispute.js
+│   │   │   ├── Backup.js
+│   │   │   ├── Legal.js
+│   │   │   └── Branding.js
+│   │   ├── customer/
+│   │   │   ├── Customer.js
+│   │   │   ├── CustomerProfile.js
+│   │   │   ├── CustomerAddress.js
+│   │   │   ├── CustomerWallet.js
+│   │   │   ├── CustomerPayment.js
+│   │   │   ├── CustomerReview.js
+│   │   │   ├── CustomerNotification.js
+│   │   │   ├── CustomerSession.js
+│   │   │   ├── CustomerOTP.js
+│   │   │   └── CustomerPreference.js
+│   │   ├── trans/
+│   │   │   ├── TransportPartner.js
+│   │   │   ├── Vehicle.js
+│   │   │   ├── Trip.js
+│   │   │   ├── DeliveryJob.js
+│   │   │   ├── DriverLocation.js
+│   │   │   ├── DriverRating.js
+│   │   │   └── TransportWallet.js
+│   │   ├── accom/
+│   │   │   ├── AccommodationPartner.js
+│   │   │   ├── Property.js
+│   │   │   ├── Room.js
+│   │   │   ├── RoomAvailability.js
+│   │   │   ├── Booking.js
+│   │   │   ├── Guest.js
+│   │   │   ├── AccommodationRating.js
+│   │   │   └── AccommodationWallet.js
+│   │   └── rest/
+│   │       ├── RestaurantPartner.js
+│   │       ├── Menu.js
+│   │       ├── MenuItem.js
+│   │       ├── FoodOrder.js
+│   │       ├── DineInBooking.js
+│   │       ├── BroadcastRequest.js
+│   │       ├── RestaurantRating.js
+│   │       └── RestaurantWallet.js
+│   ├── controllers/
+│   │   ├── public/
+│   │   │   ├── registerController.js
+│   │   │   ├── searchController.js
+│   │   │   ├── uploadController.js
+│   │   │   ├── webhookController.js
+│   │   │   ├── paymentController.js
+│   │   │   └── aiConciergeController.js
+│   │   ├── admin/
+│   │   │   ├── authController.js
+│   │   │   ├── dashboardController.js
+│   │   │   ├── partnerController.js
+│   │   │   ├── customerController.js
+│   │   │   ├── paymentMethodController.js
+│   │   │   ├── commissionController.js
+│   │   │   ├── payoutController.js
+│   │   │   ├── reportController.js
+│   │   │   ├── disputeController.js
+│   │   │   ├── backupController.js
+│   │   │   ├── legalController.js
+│   │   │   ├── brandingController.js
+│   │   │   ├── systemSettingController.js
+│   │   │   └── adminUserController.js
+│   │   ├── trans/
+│   │   │   ├── authController.js
+│   │   │   ├── profileController.js
+│   │   │   ├── vehicleController.js
+│   │   │   ├── jobController.js
+│   │   │   ├── tripController.js
+│   │   │   ├── locationController.js
+│   │   │   ├── ratingController.js
+│   │   │   └── walletController.js
+│   │   ├── rest/
+│   │   │   ├── authController.js
+│   │   │   ├── profileController.js
+│   │   │   ├── menuController.js
+│   │   │   ├── menuItemController.js
+│   │   │   ├── orderController.js
+│   │   │   ├── bookingController.js
+│   │   │   ├── broadcastController.js
+│   │   │   ├── ratingController.js
+│   │   │   └── walletController.js
+│   │   ├── accom/
+│   │   │   ├── authController.js
+│   │   │   ├── profileController.js
+│   │   │   ├── propertyController.js
+│   │   │   ├── roomController.js
+│   │   │   ├── availabilityController.js
+│   │   │   ├── bookingController.js
+│   │   │   ├── guestController.js
+│   │   │   ├── ratingController.js
+│   │   │   └── walletController.js
+│   │   └── customer/
+│   │       ├── authController.js
+│   │       ├── profileController.js
+│   │       ├── addressController.js
+│   │       ├── bookingController.js
+│   │       ├── orderController.js
+│   │       ├── broadcastController.js
+│   │       ├── tripController.js
+│   │       ├── paymentController.js
+│   │       ├── walletController.js
+│   │       ├── reviewController.js
+│   │       ├── notificationController.js
+│   │       ├── trackingController.js
+│   │       ├── searchController.js
+│   │       └── aiConciergeController.js
+│   ├── routes/
+│   │   ├── public/
+│   │   │   ├── registerRoutes.js
+│   │   │   ├── searchRoutes.js
+│   │   │   ├── uploadRoutes.js
+│   │   │   ├── webhookRoutes.js
+│   │   │   ├── paymentRoutes.js
+│   │   │   └── aiConciergeRoutes.js
+│   │   ├── admin/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── dashboardRoutes.js
+│   │   │   ├── partnerRoutes.js
+│   │   │   ├── customerRoutes.js
+│   │   │   ├── paymentMethodRoutes.js
+│   │   │   ├── commissionRoutes.js
+│   │   │   ├── payoutRoutes.js
+│   │   │   ├── reportRoutes.js
+│   │   │   ├── disputeRoutes.js
+│   │   │   ├── backupRoutes.js
+│   │   │   ├── legalRoutes.js
+│   │   │   ├── brandingRoutes.js
+│   │   │   ├── systemSettingRoutes.js
+│   │   │   └── adminUserRoutes.js
+│   │   ├── trans/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── profileRoutes.js
+│   │   │   ├── vehicleRoutes.js
+│   │   │   ├── jobRoutes.js
+│   │   │   ├── tripRoutes.js
+│   │   │   ├── locationRoutes.js
+│   │   │   ├── ratingRoutes.js
+│   │   │   └── walletRoutes.js
+│   │   ├── rest/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── profileRoutes.js
+│   │   │   ├── menuRoutes.js
+│   │   │   ├── menuItemRoutes.js
+│   │   │   ├── orderRoutes.js
+│   │   │   ├── bookingRoutes.js
+│   │   │   ├── broadcastRoutes.js
+│   │   │   ├── ratingRoutes.js
+│   │   │   └── walletRoutes.js
+│   │   ├── accom/
+│   │   │   ├── authRoutes.js
+│   │   │   ├── profileRoutes.js
+│   │   │   ├── propertyRoutes.js
+│   │   │   ├── roomRoutes.js
+│   │   │   ├── availabilityRoutes.js
+│   │   │   ├── bookingRoutes.js
+│   │   │   ├── guestRoutes.js
+│   │   │   ├── ratingRoutes.js
+│   │   │   └── walletRoutes.js
+│   │   └── customer/
+│   │       ├── authRoutes.js
+│   │       ├── profileRoutes.js
+│   │       ├── addressRoutes.js
+│   │       ├── bookingRoutes.js
+│   │       ├── orderRoutes.js
+│   │       ├── broadcastRoutes.js
+│   │       ├── tripRoutes.js
+│   │       ├── paymentRoutes.js
+│   │       ├── walletRoutes.js
+│   │       ├── reviewRoutes.js
+│   │       ├── notificationRoutes.js
+│   │       ├── trackingRoutes.js
+│   │       ├── searchRoutes.js
+│   │       └── aiConciergeRoutes.js
+│   └── scripts/
+│       ├── admin.js
+│       ├── seed.js
+│       └── dnsSet.js
+│
+├── admin/                                      (Port 3001)
+│   ├── public/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── vite-env.d.ts
+│   │   ├── api/
+│   │   │   ├── axios.ts
+│   │   │   ├── authApi.ts
+│   │   │   ├── adminApi.ts
+│   │   │   ├── partnerApi.ts
+│   │   │   ├── customerApi.ts
+│   │   │   ├── operationApi.ts
+│   │   │   ├── paymentApi.ts
+│   │   │   ├── walletApi.ts
+│   │   │   ├── payoutApi.ts
+│   │   │   ├── disputeApi.ts
+│   │   │   ├── reportApi.ts
+│   │   │   ├── settingApi.ts
+│   │   │   └── socketApi.ts
+│   │   ├── context/
+│   │   │   ├── authContext.tsx
+│   │   │   ├── themeContext.tsx
+│   │   │   ├── toastContext.tsx
+│   │   │   └── socketContext.tsx
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Select.tsx
+│   │   │   │   ├── Textarea.tsx
+│   │   │   │   ├── Checkbox.tsx
+│   │   │   │   ├── Switch.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Drawer.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Tabs.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Dropdown.tsx
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   ├── Spinner.tsx
+│   │   │   │   ├── Skeleton.tsx
+│   │   │   │   ├── Alert.tsx
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   └── ConfirmDialog.tsx
+│   │   │   └── layout/
+│   │   │       ├── Layout.tsx
+│   │   │       ├── Sidebar.tsx
+│   │   │       ├── Header.tsx
+│   │   │       └── MobileNav.tsx
+│   │   ├── pages/
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Admins.tsx
+│   │   │   ├── Customers.tsx
+│   │   │   ├── Partners.tsx
+│   │   │   ├── Operations.tsx
+│   │   │   ├── Payments.tsx
+│   │   │   ├── PaymentMethods.tsx
+│   │   │   ├── Wallets.tsx
+│   │   │   ├── Disputes.tsx
+│   │   │   ├── Reports.tsx
+│   │   │   ├── Settings.tsx
+│   │   │   ├── Login.tsx
+│   │   │   └── NotFound.tsx
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx
+│   │   └── utils/
+│   │       ├── formatCurrency.ts
+│   │       ├── formatDate.ts
+│   │       ├── formatNumber.ts
+│   │       ├── validators.ts
+│   │       ├── constants.ts
+│   │       ├── permissions.ts
+│   │       ├── storage.ts
+│   │       └── helpers.ts
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── postcss.config.js
+│   ├── eslint.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   └── README.md
+│
+├── app/                                        (Port 3000)
+│   ├── public/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── vite-env.d.ts
+│   │   ├── api/
+│   │   │   ├── axios.ts
+│   │   │   ├── authApi.ts
+│   │   │   ├── customerApi.ts
+│   │   │   ├── bookingApi.ts
+│   │   │   ├── orderApi.ts
+│   │   │   ├── broadcastApi.ts
+│   │   │   ├── tripApi.ts
+│   │   │   ├── paymentApi.ts
+│   │   │   ├── walletApi.ts
+│   │   │   ├── reviewApi.ts
+│   │   │   ├── notificationApi.ts
+│   │   │   ├── trackingApi.ts
+│   │   │   ├── searchApi.ts
+│   │   │   ├── aiConciergeApi.ts
+│   │   │   └── socketApi.ts
+│   │   ├── context/
+│   │   │   ├── authContext.tsx
+│   │   │   ├── themeContext.tsx
+│   │   │   ├── toastContext.tsx
+│   │   │   └── socketContext.tsx
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Select.tsx
+│   │   │   │   ├── Textarea.tsx
+│   │   │   │   ├── Checkbox.tsx
+│   │   │   │   ├── Switch.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Drawer.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Tabs.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Dropdown.tsx
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   ├── Spinner.tsx
+│   │   │   │   ├── Skeleton.tsx
+│   │   │   │   ├── Alert.tsx
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   └── ConfirmDialog.tsx
+│   │   │   └── layout/
+│   │   │       ├── Layout.tsx
+│   │   │       ├── Sidebar.tsx
+│   │   │       ├── Header.tsx
+│   │   │       └── MobileNav.tsx
+│   │   ├── pages/
+│   │   │   ├── Home.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Register.tsx
+│   │   │   ├── Search.tsx
+│   │   │   ├── Accommodation.tsx
+│   │   │   ├── Restaurant.tsx
+│   │   │   ├── Transport.tsx
+│   │   │   ├── Booking.tsx
+│   │   │   ├── Order.tsx
+│   │   │   ├── Broadcast.tsx
+│   │   │   ├── Trip.tsx
+│   │   │   ├── Payment.tsx
+│   │   │   ├── Wallet.tsx
+│   │   │   ├── Reviews.tsx
+│   │   │   ├── Notifications.tsx
+│   │   │   ├── Tracking.tsx
+│   │   │   ├── Profile.tsx
+│   │   │   ├── AiConcierge.tsx
+│   │   │   └── NotFound.tsx
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx
+│   │   └── utils/
+│   │       ├── formatCurrency.ts
+│   │       ├── formatDate.ts
+│   │       ├── formatNumber.ts
+│   │       ├── validators.ts
+│   │       ├── constants.ts
+│   │       ├── permissions.ts
+│   │       ├── storage.ts
+│   │       └── helpers.ts
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── postcss.config.js
+│   ├── eslint.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   └── README.md
+│
+├── partner/                                    (Port 3002)
+│   ├── public/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── vite-env.d.ts
+│   │   ├── api/
+│   │   │   ├── axios.ts
+│   │   │   ├── transport/
+│   │   │   │   ├── authApi.ts
+│   │   │   │   ├── profileApi.ts
+│   │   │   │   ├── vehicleApi.ts
+│   │   │   │   ├── jobApi.ts
+│   │   │   │   ├── tripApi.ts
+│   │   │   │   ├── locationApi.ts
+│   │   │   │   ├── ratingApi.ts
+│   │   │   │   ├── walletApi.ts
+│   │   │   │   └── socketApi.ts
+│   │   │   ├── restaurant/
+│   │   │   │   ├── authApi.ts
+│   │   │   │   ├── profileApi.ts
+│   │   │   │   ├── menuApi.ts
+│   │   │   │   ├── menuItemApi.ts
+│   │   │   │   ├── orderApi.ts
+│   │   │   │   ├── bookingApi.ts
+│   │   │   │   ├── broadcastApi.ts
+│   │   │   │   ├── ratingApi.ts
+│   │   │   │   ├── walletApi.ts
+│   │   │   │   └── socketApi.ts
+│   │   │   └── accommodation/
+│   │   │       ├── authApi.ts
+│   │   │       ├── profileApi.ts
+│   │   │       ├── propertyApi.ts
+│   │   │       ├── roomApi.ts
+│   │   │       ├── availabilityApi.ts
+│   │   │       ├── bookingApi.ts
+│   │   │       ├── guestApi.ts
+│   │   │       ├── ratingApi.ts
+│   │   │       ├── walletApi.ts
+│   │   │       └── socketApi.ts
+│   │   ├── apps/
+│   │   │   ├── TransportApp.tsx
+│   │   │   ├── RestaurantApp.tsx
+│   │   │   └── AccommodationApp.tsx
+│   │   ├── context/
+│   │   │   ├── authContext.tsx
+│   │   │   ├── themeContext.tsx
+│   │   │   ├── toastContext.tsx
+│   │   │   └── socketContext.tsx
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Select.tsx
+│   │   │   │   ├── Textarea.tsx
+│   │   │   │   ├── Checkbox.tsx
+│   │   │   │   ├── Switch.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Drawer.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Tabs.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Dropdown.tsx
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   ├── Spinner.tsx
+│   │   │   │   ├── Skeleton.tsx
+│   │   │   │   ├── Alert.tsx
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   └── ConfirmDialog.tsx
+│   │   │   └── layout/
+│   │   │       ├── Layout.tsx
+│   │   │       ├── Sidebar.tsx
+│   │   │       ├── Header.tsx
+│   │   │       └── MobileNav.tsx
+│   │   ├── pages/
+│   │   │   ├── NotFound.tsx
+│   │   │   ├── transport/
+│   │   │   │   ├── Login.tsx
+│   │   │   │   ├── Dashboard.tsx
+│   │   │   │   ├── Profile.tsx
+│   │   │   │   ├── Jobs.tsx
+│   │   │   │   ├── Trips.tsx
+│   │   │   │   ├── Location.tsx
+│   │   │   │   ├── Ratings.tsx
+│   │   │   │   ├── Wallet.tsx
+│   │   │   │   └── Vehicle.tsx
+│   │   │   ├── restaurant/
+│   │   │   │   ├── Login.tsx
+│   │   │   │   ├── Dashboard.tsx
+│   │   │   │   ├── Profile.tsx
+│   │   │   │   ├── Menu.tsx
+│   │   │   │   ├── MenuItems.tsx
+│   │   │   │   ├── Orders.tsx
+│   │   │   │   ├── Bookings.tsx
+│   │   │   │   ├── Broadcasts.tsx
+│   │   │   │   ├── Ratings.tsx
+│   │   │   │   └── Wallet.tsx
+│   │   │   └── accommodation/
+│   │   │       ├── Login.tsx
+│   │   │       ├── Dashboard.tsx
+│   │   │       ├── Profile.tsx
+│   │   │       ├── Property.tsx
+│   │   │       ├── Rooms.tsx
+│   │   │       ├── Availability.tsx
+│   │   │       ├── Bookings.tsx
+│   │   │       ├── Guests.tsx
+│   │   │       ├── Ratings.tsx
+│   │   │       └── Wallet.tsx
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx
+│   │   └── utils/
+│   │       ├── formatCurrency.ts
+│   │       ├── formatDate.ts
+│   │       ├── formatNumber.ts
+│   │       ├── validators.ts
+│   │       ├── constants.ts
+│   │       ├── permissions.ts
+│   │       ├── storage.ts
+│   │       └── helpers.ts
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── postcss.config.js
+│   ├── eslint.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   └── README.md
+│
+├── website/                                    (Port 3003)
+│   ├── public/
+│   ├── src/
+│   │   ├── main.tsx
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   ├── vite-env.d.ts
+│   │   ├── api/
+│   │   │   ├── axios.ts
+│   │   │   ├── registerApi.ts
+│   │   │   ├── searchApi.ts
+│   │   │   ├── uploadApi.ts
+│   │   │   ├── paymentApi.ts
+│   │   │   └── aiConciergeApi.ts
+│   │   ├── context/
+│   │   │   ├── themeContext.tsx
+│   │   │   └── toastContext.tsx
+│   │   ├── components/
+│   │   │   ├── ui/
+│   │   │   │   ├── Button.tsx
+│   │   │   │   ├── Input.tsx
+│   │   │   │   ├── Select.tsx
+│   │   │   │   ├── Textarea.tsx
+│   │   │   │   ├── Checkbox.tsx
+│   │   │   │   ├── Switch.tsx
+│   │   │   │   ├── Modal.tsx
+│   │   │   │   ├── Drawer.tsx
+│   │   │   │   ├── Card.tsx
+│   │   │   │   ├── Table.tsx
+│   │   │   │   ├── Tabs.tsx
+│   │   │   │   ├── Badge.tsx
+│   │   │   │   ├── Avatar.tsx
+│   │   │   │   ├── Dropdown.tsx
+│   │   │   │   ├── Pagination.tsx
+│   │   │   │   ├── Spinner.tsx
+│   │   │   │   ├── Skeleton.tsx
+│   │   │   │   ├── Alert.tsx
+│   │   │   │   ├── EmptyState.tsx
+│   │   │   │   └── ConfirmDialog.tsx
+│   │   │   └── layout/
+│   │   │       ├── Layout.tsx
+│   │   │       ├── Navbar.tsx
+│   │   │       ├── Footer.tsx
+│   │   │       └── MobileNav.tsx
+│   │   ├── pages/
+│   │   │   ├── Home.tsx
+│   │   │   ├── About.tsx
+│   │   │   ├── Services.tsx
+│   │   │   ├── Accommodation.tsx
+│   │   │   ├── Restaurant.tsx
+│   │   │   ├── Transport.tsx
+│   │   │   ├── Partners.tsx
+│   │   │   ├── BecomePartner.tsx
+│   │   │   ├── Contact.tsx
+│   │   │   ├── Faq.tsx
+│   │   │   ├── Legal.tsx
+│   │   │   ├── Privacy.tsx
+│   │   │   ├── Terms.tsx
+│   │   │   ├── Search.tsx
+│   │   │   ├── AiConcierge.tsx
+│   │   │   └── NotFound.tsx
+│   │   ├── routes/
+│   │   │   └── AppRoutes.tsx
+│   │   └── utils/
+│   │       ├── formatCurrency.ts
+│   │       ├── formatDate.ts
+│   │       ├── formatNumber.ts
+│   │       ├── validators.ts
+│   │       ├── constants.ts
+│   │       ├── permissions.ts
+│   │       ├── storage.ts
+│   │       └── helpers.ts
+│   ├── .env
+│   ├── .gitignore
+│   ├── index.html
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── tailwind.config.ts
+│   ├── postcss.config.js
+│   ├── eslint.config.js
+│   ├── tsconfig.json
+│   ├── tsconfig.app.json
+│   ├── tsconfig.node.json
+│   └── README.md
+│
+└── README.md
