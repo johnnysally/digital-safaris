@@ -166,11 +166,13 @@ export interface TransportPartner extends PartnerUser {
 
 export interface AccommodationPartner extends PartnerUser {
   name: string;
+  contactName?: string;
   slug: string;
   logo?: string | null;
   coverImage?: string | null;
   description?: string;
   type: string;
+  location?: ID;
   town: string;
   address: string;
   latitude: number;
@@ -458,6 +460,7 @@ export interface Property {
   slug: string;
   description?: string;
   type: string;
+  location?: ID;
   town: string;
   address: string;
   latitude: number;
@@ -694,3 +697,5 @@ export type StatusVariant =
   | "danger"
   | "info"
   | "neutral";
+
+export type FoodOrder = Order;

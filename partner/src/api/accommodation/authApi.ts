@@ -9,7 +9,25 @@ interface LoginPayload {
   password: string;
 }
 
+interface RegisterPayload {
+  contactName: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  locationId: string;
+  town: string;
+  address: string;
+  latitude?: number;
+  longitude?: number;
+}
+
 const authApi = {
+  async register(payload: RegisterPayload): Promise<{ partnerId: string }> {
+    const res = await axios.post("/accommodation/auth/register", payload);
+    return res.data?.data ?? res.data;
+  },
+
   async login(
     payload: LoginPayload
   ): Promise<LoginResponse<AccommodationPartner>> {

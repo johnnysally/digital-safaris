@@ -106,15 +106,16 @@ axiosInstance.interceptors.response.use(
       isRefreshing = true;
 
       try {
+        const persistentSession = storage.hasPersistentSession(role);
         const { data } = await axios.post<RefreshResponse>(
           `${API_URL}/${role}/auth/refresh`,
           { refreshToken },
           { headers: { "Content-Type": "application/json" } }
         );
 
-        storage.setAccessToken(role, data.accessToken);
+        storage.setAccessToken(role, data.accessToken, persistentSession);
         if (data.refreshToken) {
-          storage.setRefreshToken(role, data.refreshToken);
+          storage.setRefreshToken(role, data.refreshToken, persistentSession);
         }
 
         flushQueue(null, data.accessToken);
@@ -182,6 +183,13 @@ export function unwrapList<T>(
         : 1;
 
   return { data: items, meta: { page, limit, total, totalPages } };
+}
+
+export function getApiErrorMessage(error: unknown, fallback: string): string {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return error.response?.data?.message || error.message || fallback;
+  }
+  return error instanceof Error ? error.message : fallback;
 }
 
 export default axiosInstance;

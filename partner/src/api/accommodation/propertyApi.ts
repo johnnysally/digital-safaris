@@ -1,7 +1,21 @@
 import axios, { unwrap } from "../axios";
 import type { Property, Room } from "../../types";
 
+export interface PropertyLocation {
+  _id: string;
+  name: string;
+  county?: string | null;
+  countryCode: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
 const propertyApi = {
+  async locations(params?: { q?: string }): Promise<PropertyLocation[]> {
+    const res = await axios.get("/public/locations", { params: { ...params, isOperational: true } });
+    return unwrap<PropertyLocation[]>(res.data);
+  },
+
   async list(params?: { status?: string }): Promise<Property[]> {
     const res = await axios.get("/accommodation/properties", { params });
     return unwrap<Property[]>(res.data);
