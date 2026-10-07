@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 700" width="800" height="700">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D2B273"/>
+      <stop offset="50%" stop-color="#C9A063"/>
+      <stop offset="100%" stop-color="#96753F"/>
+    </linearGradient>
+    <linearGradient id="goldGradLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DFC794"/>
+      <stop offset="100%" stop-color="#B8935A"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="800" height="700" fill="#FFFFFF"/>
+
+  <!-- The big D letterform -->
+  <g>
+    <!-- Left vertical stroke -->
+    <path d="M 230 130 L 300 130 L 300 520 L 230 520 Z" fill="#1A1F2E"/>
+    <!-- D bowl (right curve) -->
+    <path d="M 300 130 
+             C 480 130 560 230 560 325 
+             C 560 420 480 520 300 520 
+             L 300 460 
+             C 440 460 500 390 500 325 
+             C 500 260 440 190 300 190 Z" 
+          fill="#1A1F2E"/>
+  </g>
+
+  <!-- Gold sun circle inside D -->
+  <circle cx="410" cy="300" r="85" fill="url(#goldGradLight)"/>
+
+  <!-- Tree silhouette (acacia) -->
+  <g fill="#1A1F2E">
+    <!-- Trunk -->
+    <path d="M 300 400 L 315 400 L 318 340 L 310 340 Z"/>
+    <!-- Left branches -->
+    <path d="M 310 340 L 270 300 L 275 295 L 312 335 Z"/>
+    <path d="M 305 355 L 265 340 L 268 335 L 307 350 Z"/>
+    <!-- Right branches -->
+    <path d="M 315 340 L 355 300 L 350 295 L 313 335 Z"/>
+    <path d="M 318 355 L 355 340 L 352 335 L 316 350 Z"/>
+    <!-- Canopy (flat-top acacia) -->
+    <ellipse cx="310" cy="295" rx="65" ry="18"/>
+    <ellipse cx="280" cy="288" rx="30" ry="12"/>
+    <ellipse cx="340" cy="288" rx="30" ry="12"/>
+  </g>
+
+  <!-- Giraffe silhouette -->
+  <g fill="#1A1F2E">
+    <!-- Body -->
+    <ellipse cx="470" cy="410" rx="30" ry="18"/>
+    <!-- Neck -->
+    <path d="M 480 400 L 495 320 L 505 322 L 495 402 Z"/>
+    <!-- Head -->
+    <ellipse cx="500" cy="318" rx="10" ry="7"/>
+    <!-- Ossicones (horns) -->
+    <circle cx="497" cy="308" r="2.5"/>
+    <circle cx="503" cy="308" r="2.5"/>
+    <!-- Legs -->
+    <rect x="450" y="420" width="5" height="35"/>
+    <rect x="460" y="420" width="5" height="35"/>
+    <rect x="485" y="420" width="5" height="35"/>
+    <rect x="495" y="420" width="5" height="35"/>
+    <!-- Tail -->
+    <path d="M 445 405 Q 435 400 440 390" stroke="#1A1F2E" stroke-width="2" fill="none"/>
+  </g>
+
+  <!-- Rolling hill ground line -->
+  <path d="M 250 440 Q 350 415 420 440 Q 500 465 570 440 L 570 460 L 250 460 Z" fill="#1A1F2E"/>
+
+  <!-- Service bell (cloche) -->
+  <g>
+    <!-- Dome -->
+    <path d="M 370 510 
+             C 370 480 420 470 445 470 
+             C 470 470 520 480 520 510 Z" 
+          fill="url(#goldGrad)"/>
+    <!-- Knob -->
+    <circle cx="445" cy="465" r="7" fill="url(#goldGrad)"/>
+    <!-- Base -->
+    <rect x="360" y="510" width="170" height="12" rx="3" fill="url(#goldGrad)"/>
+    <!-- Base plate -->
+    <rect x="350" y="522" width="190" height="8" rx="3" fill="#1A1F2E"/>
+  </g>
+
+  <!-- Underline swoosh under the bell -->
+  <path d="M 540 510 Q 590 505 620 480" stroke="url(#goldGrad)" stroke-width="6" fill="none" stroke-linecap="round"/>
+
+  <!-- Wordmark "DigitalSafaris" -->
+  <text x="400" y="600" text-anchor="middle" 
+        font-family="Montserrat, Helvetica, Arial, sans-serif" 
+        font-size="58" font-weight="600">
+    <tspan fill="#1A1F2E">Digital</tspan><tspan fill="url(#goldGrad)">Safaris</tspan>
+  </text>
+
+  <!-- Divider with center diamond -->
+  <g>
+    <line x1="280" y1="640" x2="390" y2="640" stroke="url(#goldGrad)" stroke-width="2"/>
+    <line x1="410" y1="640" x2="520" y2="640" stroke="url(#goldGrad)" stroke-width="2"/>
+    <polygon points="400,634 406,640 400,646 394,640" fill="url(#goldGrad)"/>
+  </g>
+
+  <!-- Tagline -->
+  <text x="400" y="670" text-anchor="middle" 
+        font-family="Montserrat, Helvetica, Arial, sans-serif" 
+        font-size="16" font-weight="400" fill="#4B5563">
+    Your concierge, reimagined
+  </text>
+</svg>

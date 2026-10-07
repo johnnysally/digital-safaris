@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="180 100 420 460" width="64" height="64">
+  <defs>
+    <linearGradient id="goldGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#D2B273"/>
+      <stop offset="50%" stop-color="#C9A063"/>
+      <stop offset="100%" stop-color="#96753F"/>
+    </linearGradient>
+    <linearGradient id="goldGradLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#DFC794"/>
+      <stop offset="100%" stop-color="#B8935A"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="180" y="100" width="420" height="460" rx="72" fill="#1A1F2E"/>
+
+  <path d="M 230 130 L 300 130 L 300 520 L 230 520 Z" fill="#FFFFFF"/>
+  <path d="M 300 130 
+           C 480 130 560 230 560 325 
+           C 560 420 480 520 300 520 
+           L 300 460 
+           C 440 460 500 390 500 325 
+           C 500 260 440 190 300 190 Z" 
+        fill="#FFFFFF"/>
+
+  <circle cx="410" cy="300" r="85" fill="url(#goldGradLight)"/>
+
+  <g fill="#1A1F2E">
+    <path d="M 300 400 L 315 400 L 318 340 L 310 340 Z"/>
+    <path d="M 310 340 L 270 300 L 275 295 L 312 335 Z"/>
+    <path d="M 305 355 L 265 340 L 268 335 L 307 350 Z"/>
+    <path d="M 315 340 L 355 300 L 350 295 L 313 335 Z"/>
+    <path d="M 318 355 L 355 340 L 352 335 L 316 350 Z"/>
+    <ellipse cx="310" cy="295" rx="65" ry="18"/>
+    <ellipse cx="280" cy="288" rx="30" ry="12"/>
+    <ellipse cx="340" cy="288" rx="30" ry="12"/>
+  </g>
+
+  <g fill="#1A1F2E">
+    <ellipse cx="470" cy="410" rx="30" ry="18"/>
+    <path d="M 480 400 L 495 320 L 505 322 L 495 402 Z"/>
+    <ellipse cx="500" cy="318" rx="10" ry="7"/>
+    <circle cx="497" cy="308" r="2.5"/>
+    <circle cx="503" cy="308" r="2.5"/>
+    <rect x="450" y="420" width="5" height="35"/>
+    <rect x="460" y="420" width="5" height="35"/>
+    <rect x="485" y="420" width="5" height="35"/>
+    <rect x="495" y="420" width="5" height="35"/>
+    <path d="M 445 405 Q 435 400 440 390" stroke="#1A1F2E" stroke-width="2" fill="none"/>
+  </g>
+
+  <path d="M 250 440 Q 350 415 420 440 Q 500 465 570 440 L 570 460 L 250 460 Z" fill="#1A1F2E"/>
+</svg>
