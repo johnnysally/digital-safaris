@@ -17,6 +17,7 @@ import { useAuth } from "../../context/authContext";
 import { usePartnerSocket } from "../../context/socketContext";
 import { useToast } from "../../context/toastContext";
 import { ApiFeedback, PageHeader, StatusBadge } from "../../components/layout/Layout";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDateTime } from "../../utils/formatDate";
 import { formatAddress, formatLabel } from "../../utils/helpers";
@@ -71,10 +72,8 @@ export function TransportLayout({ children }: { children: ReactNode }) {
 			<aside className="sticky top-0 h-screen w-[180px] flex-[0_0_180px] overflow-hidden bg-[#24160d] text-white max-[760px]:relative max-[760px]:h-auto max-[760px]:w-full max-[760px]:min-w-0 max-[760px]:flex-none">
 				<div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(29,18,10,.94)_0%,rgba(29,18,10,.88)_35%,rgba(29,18,10,.28)_100%),url(https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?auto=format&fit=crop&w=900&q=85)] bg-cover bg-center" />
 				<div className="relative z-[1] flex h-full flex-col px-[11px] pt-[17px] pb-[15px] max-[760px]:h-auto max-[760px]:px-3 max-[760px]:py-2.5">
-					<Link to="/partner" className="flex flex-col items-center border-b border-white/10 px-1 pt-1 pb-[19px] text-white no-underline max-[760px]:flex-row max-[760px]:justify-start max-[760px]:gap-[7px] max-[760px]:border-0 max-[760px]:p-0 max-[760px]:pb-2 [&_strong]:font-[Cormorant_Garamond,Georgia,serif] [&_strong]:text-[1.38rem] [&_strong]:leading-none [&_small]:mt-[5px] [&_small]:text-[.5rem] [&_small]:text-white/75 max-[760px]:[&_small]:m-0 max-[760px]:[&_small]:ml-auto" aria-label="DigitalSafaris partner workspaces">
-						<span className="grid h-[34px] w-[38px] place-items-center text-[#fff7e8] max-[760px]:h-[27px] max-[760px]:w-7"><BusFront size={26} /></span>
-						<strong>DigitalSafaris</strong>
-						<small>Travel · Explore · Experience</small>
+					<Link to="/partner" className="block text-white no-underline" aria-label="DigitalSafaris partner workspaces">
+						<PartnerLogo variant="transport-sidebar" />
 					</Link>
 					<nav className="flex flex-col gap-[3px] py-[13px] max-[760px]:flex-row max-[760px]:gap-1 max-[760px]:overflow-x-auto max-[760px]:py-[5px]" aria-label="Transport navigation">
 						{transportNav.map(({ label, to, icon: Icon }) => <NavLink key={to} to={to} end={label === "Dashboard"} className={({ isActive }) => `flex min-h-[33px] items-center gap-2.5 rounded-md px-[9px] py-[7px] text-[.68rem] text-white/80 no-underline hover:bg-white/10 hover:text-white max-[760px]:min-h-[31px] max-[760px]:flex-none ${isActive ? "bg-[#a85f19] text-white" : ""}`}><Icon size={17} /><span>{label}</span></NavLink>)}

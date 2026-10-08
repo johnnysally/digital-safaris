@@ -4,6 +4,7 @@ import { ArrowRight, Check, ChefHat, CircleHelp, Eye, EyeOff, Globe2, LockKeyhol
 import authApi from "../../api/restaurant/authApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import loginPhoto from "../../../../website/public/Catering.jpg";
 
 const benefits = [
@@ -45,13 +46,8 @@ export function RestaurantLoginPage() {
 		<main className="relative grid min-h-screen w-full grid-cols-[minmax(0,55%)_minmax(0,45%)] overflow-hidden bg-[#f9f7f0] text-[#17251f] [font-family:Inter,Segoe_UI,sans-serif] max-[900px]:grid-cols-[minmax(0,48%)_minmax(0,52%)] max-[680px]:grid-cols-1 max-[680px]:overflow-auto">
 			<section className="relative min-h-screen w-full overflow-hidden bg-cover bg-center bg-[#322819] after:absolute after:inset-0 after:bg-[linear-gradient(90deg,rgba(5,20,15,.62),rgba(9,20,15,.18)_72%,rgba(12,23,17,.1)),linear-gradient(0deg,rgba(9,17,12,.5),transparent_50%)] after:content-[''] max-[680px]:min-h-[320px] max-[380px]:min-h-[300px]" style={{ backgroundImage: `linear-gradient(90deg, rgba(9, 22, 17, .79), rgba(15, 24, 19, .25) 72%, rgba(15, 24, 19, .08)), url("${loginPhoto}")` }}>
 				<div className="absolute inset-[32px_clamp(26px,5.1vw,60px)_28px] z-[1] flex flex-col items-start text-white max-[900px]:right-6 max-[900px]:left-[27px] max-[680px]:inset-[20px_24px]">
-					<Link to="/partner" className="grid w-max max-w-[220px] justify-items-start gap-px text-white no-underline [&>svg]:block [&>svg]:h-[53px] [&>svg]:w-[178px] [&>span]:pl-[7px] [&>span]:text-[9px] [&>span]:tracking-[.15px] [&>span]:text-white/85 [&>span>i]:mx-1 [&>span>i]:mb-[2px] [&>span>i]:inline-block [&>span>i]:size-[2px] [&>span>i]:rounded-full [&>span>i]:bg-[#e3aa40] max-[680px]:[&>svg]:h-[42px] max-[680px]:[&>svg]:w-[142px]">
-						<svg viewBox="0 0 194 47" aria-hidden="true">
-							<path d="M8 22 34 8l12 11 16-15 18 18M24 18l10-6 6 6M48 17l14-13 15 18" fill="none" stroke="#eaa331" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-							<path d="M89 21c-2-9 0-15 2-19m-1 10-8-7m8 7 8-8m-8 8-9 1m9-1 9 2" fill="none" stroke="#fff" strokeWidth="1.7" strokeLinecap="round" />
-							<text x="0" y="42" fill="#fff" fontFamily="Georgia, serif" fontSize="23" fontWeight="bold">Digital<tspan fill="#eaa331">Safaris</tspan></text>
-						</svg>
-						<span>Travel <i /> Explore <i /> Experience</span>
+					<Link to="/partner" className="grid no-underline">
+						<PartnerLogo variant="restaurant-auth" />
 					</Link>
 					<div className="mt-[clamp(24px,4.4vh,42px)] w-full max-[680px]:mt-[17px]">
 						<div className="inline-flex min-h-8 items-center gap-2 rounded-[18px] bg-[rgba(134,131,76,.42)] px-3 text-[10px] font-semibold text-white [&_svg]:text-[#f2a935] max-[380px]:min-h-7 max-[380px]:text-[9px]"><Utensils size={15} /> Restaurant Partner Portal</div>

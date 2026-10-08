@@ -9,6 +9,7 @@ import { useAuth } from "../../context/authContext";
 import { usePartnerSocket } from "../../context/socketContext";
 import { useToast } from "../../context/toastContext";
 import type { RestaurantPartner } from "../../types";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import sidebarPhoto from "../../../../website/public/experience.jpg";
 
 const restaurantNav = [
@@ -85,10 +86,8 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 			<aside className="sticky top-0 z-20 flex h-screen w-[190px] shrink-0 flex-col overflow-y-auto bg-[#272a24] p-0 text-[#f8f4ec] max-[760px]:w-[58px] max-[480px]:w-[48px]">
 				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(18, 17, 14, .96), rgba(18, 17, 14, .86) 62%, rgba(18, 17, 14, .38)), url("${sidebarPhoto}")` }} />
 				<div className="relative z-10 flex min-h-full flex-1 flex-col p-[20px_12px_13px] max-[760px]:items-center max-[760px]:px-[5px] max-[760px]:py-[14px]">
-					<Link to="/partner/restaurant/dashboard" className="relative grid grid-cols-[30px_1fr] gap-x-2 gap-y-0 px-1 pb-[22px] text-white no-underline max-[760px]:flex max-[760px]:px-0 max-[760px]:pb-4 max-[760px]:[&>strong]:hidden max-[760px]:[&>small]:hidden">
-						<span className="grid size-[30px] place-items-center rounded-[10px] bg-[#d8c48d] text-[#30342a] [&_svg]:w-[17px] max-[480px]:size-[27px]"><Utensils size={22} /></span>
-						<strong>Digital<span>Safaris</span></strong>
-						<small>Restaurant Partner Portal</small>
+					<Link to="/partner/restaurant/dashboard" className="grid px-1 pb-[22px] text-white no-underline max-[760px]:px-0 max-[760px]:pb-4 [&_svg]:w-[17px]">
+						<PartnerLogo variant="restaurant-sidebar" />
 					</Link>
 					<nav className="grid w-full gap-[5px]" aria-label="Restaurant partner navigation">
 						{restaurantNav.map(({ label, path, icon: Icon }) => (

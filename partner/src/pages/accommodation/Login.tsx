@@ -1,10 +1,11 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowRight, BedDouble, Check, LockKeyhole, Mail, Mountain, Phone, ShieldCheck, TrendingUp, UserRound, Users } from "lucide-react";
+import { ArrowRight, BedDouble, Check, LockKeyhole, Mail, Phone, ShieldCheck, TrendingUp, UserRound, Users } from "lucide-react";
 import authApi from "../../api/accommodation/authApi";
 import propertyApi, { type PropertyLocation } from "../../api/accommodation/propertyApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 
 const loginBackground = "linear-gradient(90deg, rgba(23, 17, 13, 0.47) 0%, rgba(23, 17, 13, 0.2) 52%, rgba(23, 17, 13, 0.16) 100%), url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=2200&q=90')";
 const loginFieldClass = "flex min-h-11 min-w-0 items-center gap-2.5 rounded-md border border-[#e6e0d9] bg-[rgba(255,255,255,0.55)] px-3 text-[#6d6b68] transition-colors focus-within:border-[#c9821f] focus-within:ring-2 focus-within:ring-[#c9821f]/15 [&_svg]:shrink-0 [&_input]:h-full [&_input]:min-w-0 [&_input]:flex-1 [&_input]:w-full [&_input]:rounded-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-[0.78rem] [&_input]:font-medium [&_input]:text-[#302b26] [&_input]:shadow-none [&_input]:outline-none [&_input]:placeholder:text-[#8d847a]";
@@ -13,10 +14,8 @@ const signupFieldClass = `${loginFieldClass} h-10 min-h-10 px-[11px] [&_input]:t
 function AuthShell({ children }: { children: ReactNode }) {
   return (
     <main className="relative isolate grid min-h-screen min-h-svh grid-cols-[minmax(0,1.12fr)_minmax(370px,0.88fr)] items-center gap-[clamp(32px,5vw,72px)] overflow-hidden bg-cover bg-center px-[clamp(48px,7.6vw,104px)] pb-[116px] pt-[84px] text-white before:absolute before:inset-0 before:-z-[1] before:bg-[linear-gradient(180deg,rgba(22,17,14,0.13),transparent_38%,rgba(20,15,11,0.28)),linear-gradient(90deg,rgba(20,15,12,0.18),transparent_57%,rgba(30,21,14,0.12))] before:content-[''] max-[900px]:grid-cols-[minmax(0,1fr)_minmax(330px,0.92fr)] max-[900px]:gap-7 max-[900px]:px-[38px] max-[700px]:flex max-[700px]:flex-col max-[700px]:items-stretch max-[700px]:gap-[26px] max-[700px]:overflow-auto max-[700px]:bg-[54%_center] max-[700px]:px-[18px] max-[700px]:pb-6 max-[700px]:pt-7" style={{ backgroundImage: loginBackground }}>
-      <div className="absolute left-[clamp(48px,7.6vw,104px)] top-[42px] z-[1] grid grid-cols-[auto_1fr] items-center gap-x-[9px] text-white max-[900px]:left-[38px] max-[700px]:relative max-[700px]:left-auto max-[700px]:top-auto max-[700px]:self-start [&_svg]:row-span-2 [&_svg]:text-[#fff7e8] [&_svg]:max-[700px]:w-9">
-        <Mountain size={46} strokeWidth={1.7} aria-hidden="true" />
-        <span className="self-end font-serif text-[1.9rem] font-bold leading-[0.95]"><span>Digital</span><strong className="font-bold text-[#e4a52f]">Safaris</strong></span>
-        <span className="mt-1 self-start text-[0.57rem] tracking-[0.08em] text-white/75">Travel · Explore · Experience</span>
+      <div className="absolute left-[clamp(48px,7.6vw,104px)] top-[42px] z-[1] max-[900px]:left-[38px] max-[700px]:relative max-[700px]:left-auto max-[700px]:top-auto max-[700px]:self-start [&_svg]:text-[#fff7e8] [&_svg]:max-[700px]:w-9">
+        <PartnerLogo variant="accommodation-auth" />
       </div>
 
       <section className="col-start-1 mt-[30px] max-w-[520px] self-center max-[700px]:mt-2 [&_h1]:m-0 [&_h1]:font-serif [&_h1]:text-[clamp(3rem,5vw,4.3rem)] [&_h1]:font-semibold [&_h1]:leading-[0.92] [&_p]:mt-4 [&_p]:max-w-[430px] [&_p]:text-[0.98rem] [&_p]:leading-[1.55] [&_p]:text-white/95 max-[900px]:[&_h1]:text-5xl max-[700px]:[&_h1]:text-[2.65rem] max-[700px]:[&_p]:mt-[9px] max-[700px]:[&_p]:text-[0.86rem] max-[380px]:[&_h1]:text-[2.15rem]">

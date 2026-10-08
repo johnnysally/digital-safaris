@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
-import { BusFront, Globe2, Mountain, ShieldCheck } from "lucide-react";
+import { BusFront, Globe2, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import transportHero from "../../../../website/public/hero-bg.jpg";
 
 export function TransportAuthLayout({ children }: { children: ReactNode }) {
@@ -11,8 +12,7 @@ export function TransportAuthLayout({ children }: { children: ReactNode }) {
 				<div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.34),transparent_33%,rgba(19,14,9,.76))]" />
 				<div className="absolute inset-0 z-[1] flex flex-col justify-between p-[clamp(30px,5.2vw,66px)_clamp(28px,5.5vw,68px)] max-[820px]:p-[36px] max-[640px]:p-6">
 					<Link className="inline-flex w-fit items-center gap-2.5 text-white no-underline" to="/partner/transport/login" aria-label="DigitalSafaris Transport Partner sign in">
-						<Mountain className="text-[#fff6e7]" size={36} strokeWidth={1.7} />
-						<span className="flex flex-col"><strong className="font-['Cormorant_Garamond',Georgia,serif] text-[1.85rem] leading-[.95]">Digital<span className="text-[#e7a12a]">Safaris</span></strong><small className="mt-1.5 text-[.63rem] tracking-[.025em]">Travel · Explore · Experience</small></span>
+						<PartnerLogo variant="transport-auth" />
 					</Link>
 					<div className="mb-[1.5vh] max-[640px]:hidden">
 						<span className="mb-4 block h-[3px] w-12 bg-[#e39a21]" />

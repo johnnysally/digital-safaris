@@ -1,5 +1,6 @@
-import { BarChart3, BedDouble, Building2, CalendarDays, CreditCard, HelpCircle, House, LogOut, MessageSquareText, Mountain, Settings, Star, Users } from "lucide-react";
+import { BarChart3, BedDouble, Building2, CalendarDays, CreditCard, HelpCircle, House, LogOut, MessageSquareText, Settings, Star, Users } from "lucide-react";
 import { NavLink, useNavigate } from "react-router-dom";
+import { PartnerLogo } from "../brand/PartnerLogo";
 import authApi from "../../api/accommodation/authApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
@@ -40,11 +41,7 @@ export function PartnerSidebar() {
       <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(36,22,13,0.95)_0%,rgba(36,22,13,0.94)_18%,rgba(36,22,13,0.88)_30%,rgba(36,22,13,0.7)_58%,rgba(36,22,13,0.3)_100%),url('https://images.unsplash.com/photo-1544237526-3a4f8953e87e?auto=format&fit=crop&w=1200&q=80')] bg-cover bg-bottom" />
       <div className="relative z-[1] flex min-h-screen flex-col px-4 pb-[18px] pt-5">
         <div className="flex items-center gap-3 border-b border-white/[0.08] px-2 pb-5 pt-1.5">
-          <div className="grid h-10 w-10 place-items-center rounded-xl border border-[rgba(197,138,42,0.4)] bg-[rgba(197,138,42,0.18)] text-[0.8rem] font-extrabold text-[#fefaf4]"><Mountain size={29} strokeWidth={1.7} /></div>
-          <div>
-            <div className="text-[1.08rem] font-bold tracking-[-0.02em]">DigitalSafaris</div>
-            <div className="mt-0.5 text-[0.65rem] text-white/70">Travel · Explore · Experience</div>
-          </div>
+          <PartnerLogo variant="accommodation-sidebar" />
         </div>
 
         <nav className="flex flex-col gap-2 py-5" aria-label="Accommodation navigation">

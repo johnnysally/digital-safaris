@@ -1,5 +1,6 @@
 import { AtSign, BriefcaseBusiness, Camera, Globe2, Play } from "lucide-react";
 import { useEffect, useState, type FormEvent } from "react";
+import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import { getApiErrorMessage } from "../../api/axios";
 import { fetchLandingConfig, subscribeToNewsletter } from "../../api/landingApi";
 import { heroPhoto } from "./data";
@@ -61,8 +62,7 @@ export function LandingFooter({ registrationUrl, websiteUrl }: LandingFooterProp
 			<div className="relative z-[1] mx-auto grid w-[min(1280px,calc(100%_-_64px))] flex-1 grid-cols-[1.2fr_.8fr_1.1fr_1.25fr] content-center gap-9 pt-[42px] pb-8 max-[1023px]:grid-cols-2 max-[1023px]:gap-[42px] max-[767px]:w-[min(calc(100%_-_36px),560px)] max-[767px]:flex-initial max-[767px]:gap-x-[22px] max-[767px]:gap-y-9 max-[767px]:pt-[55px] max-[767px]:pb-[42px]">
 				<div>
 					<a className="inline-flex items-center gap-3" href="#home">
-						<span className="grid h-11 w-11 place-items-center rounded-full border border-amber-300 font-serif text-xl text-amber-200">D</span>
-						<strong className="font-serif text-xl">Digital<span className="text-[#eab657]">Safaris</span></strong>
+						<PartnerLogo variant="landing-footer" />
 					</a>
 					<p className="mt-3 text-[13px] leading-[1.8] text-[#f3eee4]/[.68] max-[767px]:text-xs">Your trusted travel partner in Kenya. Book transport, accommodation, tours, restaurants and more — all in one place.</p>
 					<div className="mt-4 flex gap-[10px]" aria-label="Social media">
