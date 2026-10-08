@@ -14,15 +14,16 @@ import { TransportProfilePage } from "../pages/transport/Profile";
 import { TransportSettingsPage } from "../pages/transport/Profile";
 import { TransportLayout } from "../pages/transport/Dashboard";
 import { PageHeader } from "../components/layout/Layout";
-import storage from "../utils/storage";
+import { useAuth } from "../context/authContext";
 
 function TransportMessagesPage() {
-	return <TransportLayout><div className="transport-page"><PageHeader title="Messages" subtitle="Keep up with customer communications for your transport services." /><section className="transport-panel transport-message-unavailable"><span><MessageSquareText size={21} /></span><h2>Messaging is not connected</h2><p>The current transport API does not expose conversation history or message sending yet. Trip and delivery updates remain available from Bookings and Delivery Jobs.</p></section></div></TransportLayout>;
+	return <TransportLayout><div className="w-full [&_.page-header]:mb-4 [&_.page-header_h1]:text-[2rem] [&_.page-header_p]:text-[.84rem] max-[760px]:[&_.page-header_h1]:text-[1.65rem]"><PageHeader title="Messages" subtitle="Keep up with customer communications for your transport services." /><section className="min-w-0 rounded-md border border-[rgba(130,110,92,.14)] bg-[rgba(255,252,247,.92)] shadow-[0_2px_8px_rgba(36,22,13,.025)] flex min-h-[260px] flex-col items-center justify-center gap-2.5 p-6 text-center [&>span]:grid [&>span]:h-[46px] [&>span]:w-[46px] [&>span]:place-items-center [&>span]:rounded-full [&>span]:bg-[#faecd5] [&>span]:text-[#925719] [&_h2]:m-0 [&_h2]:font-[Cormorant_Garamond,Georgia,serif] [&_h2]:text-[1.3rem] [&_p]:m-0 [&_p]:max-w-[460px] [&_p]:text-[.8rem] [&_p]:leading-[1.55]"><span><MessageSquareText size={21} /></span><h2>Messaging is not connected</h2><p>The current transport API does not expose conversation history or message sending yet. Trip and delivery updates remain available from Bookings and Delivery Jobs.</p></section></div></TransportLayout>;
 }
 
 function TransportProtectedRoute({ children }: { children: JSX.Element }) {
 	const location = useLocation();
-	if (!storage.getAccessToken("transport")) {
+	const { isAuthenticated } = useAuth();
+	if (!isAuthenticated("transport")) {
 		return <Navigate to="/partner/transport/login" replace state={{ from: location.pathname }} />;
 	}
 	return children;

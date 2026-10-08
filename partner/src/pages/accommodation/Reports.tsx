@@ -8,13 +8,9 @@ import availabilityApi from "../../api/accommodation/availabilityApi";
 import { getApiErrorMessage } from "../../api/axios";
 import type { Booking, Room, RoomAvailability, Wallet } from "../../types";
 import { AccommodationPartnerLayout, ApiFeedback, KpiCard, PageHeader } from "../../components/layout/Layout";
+import { formatCurrency as money } from "../../utils/formatCurrency";
 
 const statusColors = { confirmed: "#68845d", pending: "#c58a2a", cancelled: "#a85c52", other: "#8d847a" };
-
-function money(value: number, currency: string) {
-  try { return new Intl.NumberFormat(undefined, { style: "currency", currency }).format(value); }
-  catch { return `${currency} ${value.toLocaleString()}`; }
-}
 
 export function ReportsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -85,27 +81,27 @@ export function ReportsPage() {
 
   return (
     <AccommodationPartnerLayout>
-      <div className="page-shell">
+      <div className="mx-auto w-full max-w-[1440px]">
         <PageHeader
           title="Reports & Analytics"
           subtitle="Insights to help you grow your business."
-          action={<button type="button" className="secondary-button" onClick={() => setReload((current) => current + 1)} disabled={loading}>{rangeStart.toLocaleDateString(undefined, { month: "short", year: "numeric" })} – {new Date().toLocaleDateString(undefined, { month: "short", year: "numeric" })} · Refresh</button>}
+          action={<button type="button" className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-white px-[1.1rem] py-[0.8rem] font-bold text-[var(--text)]" onClick={() => setReload((current) => current + 1)} disabled={loading}>{rangeStart.toLocaleDateString(undefined, { month: "short", year: "numeric" })} – {new Date().toLocaleDateString(undefined, { month: "short", year: "numeric" })} · Refresh</button>}
         />
 
         <ApiFeedback loading={loading} error={error} onRetry={() => setReload((current) => current + 1)} />
 
-        <div className="stats-grid metrics-grid">
+        <div className="mb-[26px] grid grid-cols-4 gap-[18px]">
           <KpiCard label="Total Bookings" value={String(bookings.length)} change="Loaded reservation records" />
           <KpiCard label="Total Earnings" value={money(wallet?.totalEarned ?? 0, currencyCode)} change="Partner lifetime earnings" />
           <KpiCard label="Avg. Stay Duration" value={`${averageStay.toFixed(1)} nights`} change="Across loaded bookings" />
           <KpiCard label="Occupancy Today" value={`${occupancy}%`} change={`${occupied} occupied · ${totalInventory} active units`} />
         </div>
 
-        <div className="analytics-grid">
-          <div className="card analytics-card large-card">
-            <div className="card-header-row">
+        <div className="grid grid-cols-2 gap-5">
+          <div className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-5 shadow-[0_8px_18px_rgba(36,22,13,0.03)] min-h-[300px]">
+            <div className="mb-[18px] flex items-center justify-between gap-3.5">
               <div>
-                <p className="eyebrow">Revenue overview</p>
+                <p className="mb-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-[var(--text-soft)]">Revenue overview</p>
                 <h3>Monthly Booking Earnings</h3>
               </div>
               <TrendingUp size={18} color="#c58a2a" />
@@ -124,16 +120,16 @@ export function ReportsPage() {
             </div>
           </div>
 
-          <div className="card analytics-card">
-            <div className="card-header-row">
+          <div className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-5 shadow-[0_8px_18px_rgba(36,22,13,0.03)]">
+            <div className="mb-[18px] flex items-center justify-between gap-3.5">
               <div>
-                <p className="eyebrow">Reservation mix</p>
+                <p className="mb-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-[var(--text-soft)]">Reservation mix</p>
                 <h3>Booking Status</h3>
               </div>
               <BarChart3 size={18} color="#c58a2a" />
             </div>
 
-            <div className="donut-layout">
+            <div className="relative flex items-center gap-6">
               <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie data={statusData} dataKey="value" nameKey="name" innerRadius={42} outerRadius={68} paddingAngle={4}>
@@ -144,16 +140,16 @@ export function ReportsPage() {
                 </PieChart>
               </ResponsiveContainer>
 
-              <div className="donut-center">
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                 <strong>{bookings.length}</strong>
                 <span>Bookings</span>
               </div>
             </div>
 
-            <div className="legend-list">
+            <div className="flex flex-col gap-3">
               {statusData.map((item) => (
-                <div key={item.name} className="legend-item">
-                  <span className="legend-dot" style={{ background: item.color }} />
+                <div key={item.name} className="flex items-center justify-between gap-3">
+                  <span className="mr-2 inline-block h-[10px] w-[10px] rounded-full" style={{ background: item.color }} />
                   {item.name}
                   <strong>{item.value}%</strong>
                 </div>

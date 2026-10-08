@@ -170,66 +170,66 @@ export function RoomsPage() {
 
 	return (
 		<AccommodationPartnerLayout>
-			<div className="page-shell rooms-page">
+			<div className="mx-auto w-full max-w-[1440px]">
 				<PageHeader
 					title="Rooms & Inventory"
 					subtitle="Manage room types, nightly rates, and availability across your properties."
-					action={<button type="button" className="primary-button" onClick={openNewRoomForm}><Plus size={16} /> Add room type</button>}
+					action={<button type="button" className="inline-flex items-center justify-center gap-2 rounded-[10px] border-0 bg-gradient-to-br from-[var(--gold)] to-[#b9781d] px-[1.1rem] py-[0.8rem] font-bold text-white shadow-[var(--shadow-soft)] hover:brightness-[0.98]" onClick={openNewRoomForm}><Plus size={16} /> Add room type</button>}
 				/>
 
-				<div className="rooms-metrics-grid">
-					<article className="card room-metric-card">
-						<span className="room-metric-icon"><BedDouble size={20} /></span>
+				<div className="mb-6 grid grid-cols-4 gap-4">
+					<article className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] flex items-center gap-4 rounded-[16px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-4 shadow-[0_8px_18px_rgba(36,22,13,0.03)]">
+						<span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[rgba(197,138,42,0.12)] text-[var(--gold)]"><BedDouble size={20} /></span>
 						<div><span>Room types</span><strong>{rooms.length}</strong><small>Across all properties</small></div>
 					</article>
-					<article className="card room-metric-card">
-						<span className="room-metric-icon"><Building2 size={20} /></span>
+					<article className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] flex items-center gap-4 rounded-[16px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-4 shadow-[0_8px_18px_rgba(36,22,13,0.03)]">
+						<span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[rgba(197,138,42,0.12)] text-[var(--gold)]"><Building2 size={20} /></span>
 						<div><span>Active inventory</span><strong>{activeInventory}</strong><small>Bookable rooms</small></div>
 					</article>
-					<article className="card room-metric-card">
-						<span className="room-metric-icon"><Users size={20} /></span>
+					<article className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] flex items-center gap-4 rounded-[16px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-4 shadow-[0_8px_18px_rgba(36,22,13,0.03)]">
+						<span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[rgba(197,138,42,0.12)] text-[var(--gold)]"><Users size={20} /></span>
 						<div><span>Available tonight</span><strong>{availableRooms}</strong><small>{utilization}% occupancy</small></div>
 					</article>
-					<article className="card room-metric-card">
-						<span className="room-metric-icon"><Pause size={20} /></span>
+					<article className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] flex items-center gap-4 rounded-[16px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-4 shadow-[0_8px_18px_rgba(36,22,13,0.03)]">
+						<span className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-[rgba(197,138,42,0.12)] text-[var(--gold)]"><Pause size={20} /></span>
 						<div><span>Paused types</span><strong>{rooms.filter((room) => room.status === "Paused").length}</strong><small>Not currently bookable</small></div>
 					</article>
 				</div>
 				<ApiFeedback loading={loading} error={error} onRetry={() => setReload((current) => current + 1)} />
 
 				{isFormOpen ? (
-					<form className="card form-card rooms-form-card" onSubmit={handleSaveRoom}>
-						<div className="rooms-form-heading">
+					<form className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] p-[22px] mb-5 rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-5 shadow-[0_8px_18px_rgba(36,22,13,0.03)]" onSubmit={handleSaveRoom}>
+						<div className="mb-4 [&_h2]:m-0 [&_p]:mt-1 [&_p]:text-sm [&_p]:text-[var(--text-soft)]">
 							<div>
-								<p className="eyebrow">Room inventory</p>
+								<p className="mb-1.5 text-[0.68rem] font-extrabold uppercase tracking-[0.12em] text-[var(--text-soft)]">Room inventory</p>
 								<h2>{editingId ? "Edit room type" : "Add a room type"}</h2>
 							</div>
-							<button type="button" className="icon-action" aria-label="Close room form" onClick={() => setIsFormOpen(false)}><X size={17} /></button>
+							<button type="button" className="inline-flex h-9 w-9 items-center justify-center gap-2 rounded-[10px] border-0 bg-[rgba(197,138,42,0.08)] text-[var(--gold)]" aria-label="Close room form" onClick={() => setIsFormOpen(false)}><X size={17} /></button>
 						</div>
-						<div className="rooms-form-grid">
-							<label className="field-label">
+						<div className="grid grid-cols-2 gap-4">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Room type name</span>
 								<input required value={draft.name} onChange={(event) => updateDraft("name", event.target.value)} placeholder="e.g. Garden Suite" />
 							</label>
-							<label className="field-label">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Property</span>
 								<select disabled={Boolean(editingId)} value={draft.property} onChange={(event) => updateDraft("property", event.target.value)}>
 									{properties.map((property) => <option key={property._id} value={property._id}>{property.name}</option>)}
 								</select>
 							</label>
-							<label className="field-label">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Total rooms</span>
 								<input required type="number" min="1" value={draft.inventory} onChange={(event) => updateDraft("inventory", event.target.value)} />
 							</label>
-							<label className="field-label">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Occupied tonight</span>
 								<input required type="number" min="0" max={draft.inventory || undefined} value={draft.occupied} onChange={(event) => updateDraft("occupied", event.target.value)} />
 							</label>
-							<label className="field-label">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Nightly rate (USD)</span>
 								<input required type="number" min="1" value={draft.rate} onChange={(event) => updateDraft("rate", event.target.value)} />
 							</label>
-							<label className="field-label">
+							<label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium">
 								<span>Booking status</span>
 								<select value={draft.status} onChange={(event) => updateDraft("status", event.target.value as RoomStatus)}>
 									<option value="Active">Active</option>
@@ -237,17 +237,17 @@ export function RoomsPage() {
 								</select>
 							</label>
 						</div>
-						<div className="form-actions right-align">
-							<button type="button" className="secondary-button" onClick={() => setIsFormOpen(false)}>Cancel</button>
-							<button type="submit" className="primary-button" disabled={saving || properties.length === 0}>{saving ? "Saving..." : editingId ? "Save changes" : "Add room type"}</button>
+						<div className="mt-[18px] flex justify-between gap-3 justify-end">
+							<button type="button" className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-white px-[1.1rem] py-[0.8rem] font-bold text-[var(--text)]" onClick={() => setIsFormOpen(false)}>Cancel</button>
+							<button type="submit" className="inline-flex items-center justify-center gap-2 rounded-[10px] border-0 bg-gradient-to-br from-[var(--gold)] to-[#b9781d] px-[1.1rem] py-[0.8rem] font-bold text-white shadow-[var(--shadow-soft)] hover:brightness-[0.98]" disabled={saving || properties.length === 0}>{saving ? "Saving..." : editingId ? "Save changes" : "Add room type"}</button>
 						</div>
 					</form>
 				) : null}
 
-				<section className="card rooms-table-card" aria-label="Room type inventory">
-					<div className="rooms-toolbar">
-						<div className="rooms-filter-controls">
-							<label className="search-input-inline">
+				<section className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] p-4 shadow-[0_8px_18px_rgba(36,22,13,0.03)]" aria-label="Room type inventory">
+					<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+						<div className="flex flex-wrap items-center gap-3">
+							<label className="flex min-w-[220px] items-center gap-2 rounded-[10px] border border-[var(--border)] bg-[var(--surface-soft)] px-3 [&_input]:border-0 [&_input]:bg-transparent [&_input]:pl-0 [&_input]:shadow-none [&_input]:focus:ring-0">
 								<Search size={15} />
 								<input aria-label="Search room types" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search room or property" />
 							</label>
@@ -261,11 +261,11 @@ export function RoomsPage() {
 								<option>Paused</option>
 							</select>
 						</div>
-						<span className="rooms-result-count">Showing {filteredRooms.length} of {rooms.length} room types</span>
+						<span className="text-sm text-[var(--text-soft)]">Showing {filteredRooms.length} of {rooms.length} room types</span>
 					</div>
 
-					<div className="table-wrap">
-						<table className="rooms-inventory-table">
+					<div className="w-full overflow-x-auto [&_table]:w-full [&_table]:border-collapse [&_th]:border-b [&_th]:border-[var(--border)] [&_th]:px-[0.8rem] [&_th]:py-[0.9rem] [&_th]:text-left [&_th]:text-[0.76rem] [&_th]:font-extrabold [&_th]:uppercase [&_th]:tracking-[0.08em] [&_th]:text-[var(--text-soft)] [&_td]:border-b [&_td]:border-[var(--border)] [&_td]:px-[0.8rem] [&_td]:py-[0.9rem] [&_td]:text-left [&_td]:text-[var(--text)]">
+						<table className="w-full border-collapse [&_th]:border-b [&_th]:border-[var(--border)] [&_th]:px-3 [&_th]:py-3 [&_th]:text-left [&_th]:text-xs [&_th]:font-extrabold [&_th]:uppercase [&_th]:tracking-wider [&_th]:text-[var(--text-soft)] [&_td]:border-b [&_td]:border-[var(--border)] [&_td]:px-3 [&_td]:py-3 [&_td]:text-sm">
 							<thead>
 								<tr>
 									<th>Room type</th>
@@ -274,7 +274,7 @@ export function RoomsPage() {
 									<th>Occupancy</th>
 									<th>Nightly rate</th>
 									<th>Status</th>
-									<th><span className="visually-hidden">Actions</span></th>
+									<th><span className="sr-only">Actions</span></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -282,21 +282,21 @@ export function RoomsPage() {
 									const occupancy = room.inventory ? Math.round((room.occupied / room.inventory) * 100) : 0;
 									return (
 										<tr key={room.id}>
-											<td><span className="room-type-name"><BedDouble size={16} />{room.name}</span></td>
+											<td><span className="font-bold text-[var(--text)]"><BedDouble size={16} />{room.name}</span></td>
 											<td>{room.property}</td>
 											<td>{room.inventory} rooms</td>
 											<td>
-												<div className="room-occupancy-cell">
+												<div className="min-w-[120px]">
 													<span>{room.occupied} of {room.inventory}</span>
-													<span className="room-occupancy-track" role="progressbar" aria-label={`${room.name} occupancy`} aria-valuenow={occupancy} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${occupancy}%` }} /></span>
+													<span className="h-2 overflow-hidden rounded-full bg-[var(--border)] [&>span]:block [&>span]:h-full [&>span]:rounded-full [&>span]:bg-[var(--gold)]" role="progressbar" aria-label={`${room.name} occupancy`} aria-valuenow={occupancy} aria-valuemin={0} aria-valuemax={100}><span style={{ width: `${occupancy}%` }} /></span>
 												</div>
 											</td>
 											<td>${room.rate.toLocaleString()}</td>
 											<td><StatusBadge status={room.status} /></td>
 											<td>
-												<div className="room-row-actions">
-													<button type="button" className="icon-action" aria-label={`Edit ${room.name}`} onClick={() => openEditRoomForm(room)}><Pencil size={15} /></button>
-													<Link to="/partner/accommodation/availability" className="rooms-availability-link">Rates</Link>
+												<div className="flex items-center justify-end gap-2">
+													<button type="button" className="inline-flex h-9 w-9 items-center justify-center gap-2 rounded-[10px] border-0 bg-[rgba(197,138,42,0.08)] text-[var(--gold)]" aria-label={`Edit ${room.name}`} onClick={() => openEditRoomForm(room)}><Pencil size={15} /></button>
+													<Link to="/partner/accommodation/availability" className="font-semibold text-[var(--gold)] underline">Rates</Link>
 												</div>
 											</td>
 										</tr>
@@ -305,11 +305,11 @@ export function RoomsPage() {
 							</tbody>
 						</table>
 						{filteredRooms.length === 0 ? (
-							<div className="rooms-empty-state">
+							<div className="flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-soft)] p-6 text-center text-[var(--text-soft)] [&_strong]:text-[var(--text)]">
 								<BedDouble size={22} />
 								<strong>No room types match these filters</strong>
 								<span>Try another search or clear your filters.</span>
-								<button type="button" className="text-button" onClick={() => { setSearch(""); setPropertyFilter("All properties"); setStatusFilter("All statuses"); }}>Clear filters</button>
+								<button type="button" className="inline-flex items-center justify-center gap-2 border-0 bg-transparent font-bold text-[var(--gold)] underline" onClick={() => { setSearch(""); setPropertyFilter("All properties"); setStatusFilter("All statuses"); }}>Clear filters</button>
 							</div>
 						) : null}
 					</div>

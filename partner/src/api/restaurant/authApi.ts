@@ -6,7 +6,27 @@ interface LoginPayload {
   password: string;
 }
 
+export interface RestaurantRegisterPayload {
+  name: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  password: string;
+  town: string;
+  address: string;
+  latitude: number;
+  longitude: number;
+  locationId: string;
+  description?: string;
+  cuisineTypes: string[];
+}
+
 const authApi = {
+  async register(payload: RestaurantRegisterPayload): Promise<{ partnerId: string }> {
+    const res = await axios.post("/public/register/restaurant", payload);
+    return res.data?.data ?? res.data;
+  },
+
   async login(payload: LoginPayload): Promise<LoginResponse<RestaurantPartner>> {
     const res = await axios.post("/restaurant/auth/login", payload);
     const body = res.data?.data ?? res.data;

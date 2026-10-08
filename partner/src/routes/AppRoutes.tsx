@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
+import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import AccommodationApp from "../apps/AccommodationApp";
 import RestaurantApp from "../apps/RestaurantApp";
 import TransportApp from "../apps/TransportApp";
@@ -25,5 +25,5 @@ function AppRoutesContent() {
 }
 
 export default function AppRoutes() {
-	return <BrowserRouter><AppRoutesContent /></BrowserRouter>;
+	return <AppRoutesContent />;
 }

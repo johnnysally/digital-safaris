@@ -12,12 +12,13 @@ import { ProfilePage } from "../pages/accommodation/Profile";
 import { ReportsPage } from "../pages/accommodation/Reports";
 import { SupportPage } from "../pages/accommodation/Support";
 import { RoomsPage } from "../pages/accommodation/Rooms";
-import storage from "../utils/storage";
+import { useAuth } from "../context/authContext";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const location = useLocation();
+  const { isAuthenticated } = useAuth();
 
-  if (!storage.getAccessToken("accommodation")) {
+  if (!isAuthenticated("accommodation")) {
     return <Navigate to="/partner/accommodation/login" replace state={{ from: location.pathname }} />;
   }
 

@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from "react-router-dom";
 import type { JSX } from "react";
 import { RestaurantDashboardPage } from "../pages/restaurant/Dashboard";
 import { RestaurantLoginPage } from "../pages/restaurant/Login";
+import { RestaurantRegisterPage } from "../pages/restaurant/Register";
 import { RestaurantLayout } from "../pages/restaurant/RestaurantLayout";
 import { RestaurantAnalyticsPage } from "../pages/restaurant/Analytics";
 import { RestaurantBookingsPage } from "../pages/restaurant/Bookings";
@@ -14,11 +15,12 @@ import { RestaurantProfilePage } from "../pages/restaurant/Profile";
 import { RestaurantRatingsPage } from "../pages/restaurant/Ratings";
 import { RestaurantSettingsPage } from "../pages/restaurant/Settings";
 import { RestaurantWalletPage } from "../pages/restaurant/Wallet";
-import storage from "../utils/storage";
+import { useAuth } from "../context/authContext";
 
 function RestaurantProtectedRoute({ children }: { children: JSX.Element }) {
 	const location = useLocation();
-	if (!storage.getAccessToken("restaurant")) {
+	const { isAuthenticated } = useAuth();
+	if (!isAuthenticated("restaurant")) {
 		return <Navigate to="/partner/restaurant/login" replace state={{ from: location.pathname }} />;
 	}
 	return children;
@@ -29,6 +31,7 @@ export default function RestaurantApp() {
 		<Routes>
 			<Route index element={<Navigate to="dashboard" replace />} />
 			<Route path="login" element={<RestaurantLoginPage />} />
+			<Route path="register" element={<RestaurantRegisterPage />} />
 			<Route path="dashboard" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantDashboardPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="orders" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantOrdersPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="menu" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantMenuPage /></RestaurantLayout></RestaurantProtectedRoute>} />
