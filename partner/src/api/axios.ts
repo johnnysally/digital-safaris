@@ -47,7 +47,7 @@ function detectRole(url: string): PartnerRole {
 
 function redirectToLogin(role: PartnerRole): void {
   storage.clearRole(role);
-  const path = `/${role}/login`;
+  const path = `/partner/${role}/login`;
   if (window.location.pathname !== path) {
     window.location.assign(path);
   }
@@ -187,7 +187,7 @@ export function unwrapList<T>(
 
 export function getApiErrorMessage(error: unknown, fallback: string): string {
   if (axios.isAxiosError<{ message?: string }>(error)) {
-    return error.response?.data?.message || error.message || fallback;
+    return error.response?.data?.message || (error.response ? error.message : fallback);
   }
   return error instanceof Error ? error.message : fallback;
 }

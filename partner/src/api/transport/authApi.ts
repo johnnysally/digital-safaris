@@ -1,4 +1,4 @@
-import axios from "../axios";
+import axios, { unwrap } from "../axios";
 import type { LoginResponse, TransportPartner } from "../../types";
 
 interface LoginPayload {
@@ -6,7 +6,28 @@ interface LoginPayload {
   password: string;
 }
 
+export interface TransportRegisterPayload {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  countryCode: string;
+  password: string;
+  idNumber?: string;
+  licenseNumber?: string;
+  licenseExpiry?: string;
+  town: string;
+  address?: string;
+  locationId: string;
+  serviceTypes: string[];
+}
+
 const authApi = {
+  async register(payload: TransportRegisterPayload): Promise<{ partnerId: string }> {
+    const res = await axios.post("/transport/auth/register", payload);
+    return unwrap<{ partnerId: string }>(res.data);
+  },
+
   async login(payload: LoginPayload): Promise<LoginResponse<TransportPartner>> {
     const res = await axios.post("/transport/auth/login", payload);
     const body = res.data?.data ?? res.data;
