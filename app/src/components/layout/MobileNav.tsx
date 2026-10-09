@@ -84,25 +84,31 @@ export default function MobileNav({
 
       <aside
         className={classNames(
-          "absolute left-0 top-0 h-full w-72 bg-secondary-50 shadow-xl transition-transform",
+          "absolute left-0 top-0 h-full w-72 bg-[#261a11] text-white shadow-xl transition-transform",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        style={{
+          backgroundImage:
+            "linear-gradient(180deg,rgba(30,20,13,.97) 0%,rgba(34,22,13,.92) 48%,rgba(31,19,11,.83) 100%),url('/hero-bg.jpg')",
+          backgroundPosition: "center, center bottom",
+          backgroundSize: "cover",
+        }}
       >
-        <div className="flex h-20 items-center justify-between border-b border-secondary-500/20 px-5">
+        <div className="flex h-20 items-center justify-between border-b border-white/10 px-5">
           <div className="flex items-center gap-2.5">
             <img
               src={logoUrl}
               alt={appName}
               className="h-9 w-9 rounded-md object-contain"
             />
-            <span className="text-base font-semibold text-primary-800">
+            <span className="text-base font-semibold text-white">
               {appName}
             </span>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="rounded p-1 text-primary-800/60 hover:bg-secondary-100"
+            className="rounded p-1 text-white/70 hover:bg-white/10"
             aria-label="Close"
           >
             ✕
@@ -113,7 +119,7 @@ export default function MobileNav({
           {groups.map((group) => (
             <div key={group.title}>
               {group.title && (
-                <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-primary-800/50">
+                <p className="mb-2 px-2 text-[11px] font-semibold uppercase tracking-wider text-[#e3c9a2]/65">
                   {group.title}
                 </p>
               )}
@@ -130,8 +136,8 @@ export default function MobileNav({
                           classNames(
                             "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                             isActive
-                              ? "bg-secondary-500 text-white"
-                              : "text-primary-800/80 hover:bg-secondary-100 hover:text-primary-900"
+                              ? "bg-[#a75f1b] text-white"
+                              : "text-white/80 hover:bg-white/10 hover:text-white"
                           )
                         }
                       >

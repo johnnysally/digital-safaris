@@ -82,7 +82,7 @@ export default function Register() {
           <p className="mt-1.5 text-[0.7rem] text-[#77736d]">Join DigitalSafaris and start exploring.</p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-3">
+        <form onSubmit={handleSubmit} className="space-y-3 [&_label]:!font-semibold [&_label]:!text-[#493a29]">
             <div className="grid grid-cols-2 gap-3 max-[420px]:grid-cols-1">
               <Input
                 label="First name"
@@ -90,7 +90,7 @@ export default function Register() {
                 autoComplete="given-name"
                 placeholder="Amina"
                 leftIcon={<User className="h-4 w-4" />}
-                className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+                className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
                 value={form.firstName}
                 onChange={(e) => update("firstName", e.target.value)}
                 error={errors.firstName}
@@ -100,7 +100,7 @@ export default function Register() {
                 name="lastName"
                 autoComplete="family-name"
                 placeholder="Wanjiku"
-                className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+                className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
                 value={form.lastName}
                 onChange={(e) => update("lastName", e.target.value)}
                 error={errors.lastName}
@@ -114,7 +114,7 @@ export default function Register() {
               autoComplete="email"
               placeholder="you@example.com"
               leftIcon={<Mail className="h-4 w-4" />}
-              className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+              className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
               value={form.email}
               onChange={(e) => update("email", e.target.value)}
               error={errors.email}
@@ -127,7 +127,7 @@ export default function Register() {
               autoComplete="tel"
               placeholder="254712345678"
               leftIcon={<Phone className="h-4 w-4" />}
-              className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+              className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
               value={form.phone}
               onChange={(e) => update("phone", e.target.value)}
               error={errors.phone}
@@ -140,7 +140,7 @@ export default function Register() {
               type="password"
               autoComplete="new-password"
               leftIcon={<Lock className="h-4 w-4" />}
-              className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+              className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
               value={form.password}
               onChange={(e) => update("password", e.target.value)}
               error={errors.password}

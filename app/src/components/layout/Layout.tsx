@@ -51,7 +51,7 @@ export default function Layout({ title, children }: LayoutProps) {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="app-shell flex h-screen overflow-hidden bg-background">
       <Sidebar groups={groups} />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">

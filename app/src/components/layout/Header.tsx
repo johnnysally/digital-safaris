@@ -21,12 +21,12 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const logoUrl = branding.logoUrl || branding.logo || "/logo.svg";
 
   return (
-    <header className="sticky top-0 z-40 border-b border-border bg-surface">
+    <header className="sticky top-0 z-40 border-b border-[#e4d7c2] bg-[#fffaf1]/95 backdrop-blur dark:border-[#56432e] dark:bg-[#2f2419]/95">
       <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
         <button
           type="button"
           onClick={onMenuClick}
-          className="rounded-md p-2 text-text-muted hover:bg-surface-alt lg:hidden"
+          className="rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10 lg:hidden"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -46,7 +46,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <input
               type="text"
               placeholder="Search destinations, experiences, or services..."
-              className="w-full rounded-full border border-border bg-surface-alt py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/30"
+              className="w-full rounded-full border border-[#e4d7c2] bg-[#f8f1e5] py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/30 dark:border-[#56432e] dark:bg-[#3b2e20]"
             />
           </div>
         </div>
@@ -57,7 +57,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           <button
             type="button"
             onClick={toggleTheme}
-            className="rounded-md p-2 text-text-muted hover:bg-surface-alt"
+            className="rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10"
             aria-label="Toggle theme"
           >
             {theme === "dark" ? (
@@ -69,7 +69,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
           <Link
             to={ROUTES.NOTIFICATIONS}
-            className="relative rounded-md p-2 text-text-muted hover:bg-surface-alt"
+            className="relative rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10"
             aria-label="Notifications"
           >
             <Bell className="h-5 w-5" />
@@ -79,7 +79,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {customer ? (
             <Link
               to={ROUTES.PROFILE}
-              className="ml-1 flex items-center gap-2 rounded-full pl-1 pr-3 py-1 hover:bg-surface-alt"
+              className="ml-1 flex items-center gap-2 rounded-full py-1 pr-3 pl-1 hover:bg-[#f2e5cf] dark:hover:bg-white/10"
             >
               <Avatar
                 src={customer.avatar ?? undefined}

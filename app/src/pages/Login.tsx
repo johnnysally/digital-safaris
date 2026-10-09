@@ -87,7 +87,7 @@ export default function Login() {
           <p className="mt-1.5 text-[0.72rem] text-[#77736d]">Sign in to your DigitalSafaris account.</p>
         </header>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
+        <form onSubmit={handleSubmit} className="space-y-3.5 [&_label]:!font-semibold [&_label]:!text-[#493a29]">
             <Input
               label="Email"
               name="email"
@@ -95,7 +95,7 @@ export default function Login() {
               autoComplete="email"
               placeholder="you@example.com"
               leftIcon={<Mail className="h-4 w-4" />}
-              className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+              className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               error={errors.email}
@@ -107,7 +107,7 @@ export default function Login() {
               autoComplete="current-password"
               placeholder="••••••••"
               leftIcon={<Lock className="h-4 w-4" />}
-              className="h-10 rounded-md border-[#e7e1d8] bg-white text-xs placeholder:text-[#aaa49a] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
+              className="h-10 rounded-md border-[#e7e1d8] bg-white !text-[#2d251c] caret-[#a96517] text-xs placeholder:!text-[#877866] focus:border-[#bd781f] focus:ring-[#bd781f]/20"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               error={errors.password}
