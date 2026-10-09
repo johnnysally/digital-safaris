@@ -16,7 +16,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo;
+  const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#e4d7c2] bg-[#fffaf1]/95 backdrop-blur dark:border-[#56432e] dark:bg-[#2f2419]/95">
@@ -31,15 +31,11 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <Link to="/" className="lg:hidden">
-          {logoUrl ? (
-            <img
-              src={logoUrl}
-              alt={appName}
-              className="h-8 w-8 rounded-md object-contain"
-            />
-          ) : (
-            <Compass className="h-7 w-7 text-[#a75f1b]" />
-          )}
+          <img
+            src={logoUrl}
+            alt={appName}
+            className="h-8 w-8 rounded-xl border border-[#dda24c]/60 object-cover shadow-sm"
+          />
         </Link>
 
         <div className="hidden flex-1 items-center md:flex">

@@ -65,7 +65,7 @@ export default function MobileNav({
   const { branding } = useBranding();
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/logo.svg";
+  const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
 
   return (
     <div
@@ -98,8 +98,8 @@ export default function MobileNav({
           <div className="flex items-center gap-2.5">
             <img
               src={logoUrl}
-              alt={appName}
-              className="h-9 w-9 rounded-md object-contain"
+              alt=""
+              className="h-10 w-10 rounded-xl border border-[#dda24c]/60 object-cover shadow-sm"
             />
             <span className="text-base font-semibold text-white">
               {appName}

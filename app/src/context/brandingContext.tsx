@@ -31,7 +31,7 @@ interface BrandingContextValue {
 const DEFAULT_BRANDING: Branding = {
   logo: null,
   logoUrl: null,
-  favicon: "/logo.svg",
+  favicon: "/favicon.svg",
   emailHeaderLogo: null,
   primaryColor: "#1A1F2E",
   secondaryColor: "#C9A063",
@@ -75,7 +75,7 @@ const applyBranding = (branding: Branding) => {
   const logo = branding.logoUrl || branding.logo;
   if (logo) root.style.setProperty("--ds-logo", `url("${logo}")`);
 
-  const favicon = branding.favicon || "/logo.svg";
+  const favicon = branding.favicon || "/favicon.svg";
   root.style.setProperty("--ds-favicon", `url("${favicon}")`);
 
   let link = document.querySelector(
