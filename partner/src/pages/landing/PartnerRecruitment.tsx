@@ -1,5 +1,6 @@
 import { ArrowRight } from "lucide-react";
-import { heroPhoto, partnerBenefits } from "./data";
+import { partnerBenefits } from "./data";
+import { partnerImages } from "../../config/partnerImages";
 
 interface PartnerRecruitmentProps {
 	registrationUrl: string;
@@ -8,7 +9,7 @@ interface PartnerRecruitmentProps {
 export function PartnerRecruitment({ registrationUrl }: PartnerRecruitmentProps) {
 	return (
 		<section className="relative flex min-h-[450px] items-center overflow-hidden bg-[#27190f] text-white max-[767px]:min-h-[510px] max-[767px]:items-start" aria-labelledby="partner-banner-title">
-			<img className="absolute inset-0 h-full w-full object-cover" src={heroPhoto} alt="" loading="lazy" />
+			<img className="absolute inset-0 h-full w-full object-cover" src={partnerImages.landing.hero} alt="" loading="lazy" />
 			<div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(28_20_13_/.96)_0%,rgb(32_22_14_/.87)_46%,rgb(30_21_14_/.35)_100%)] max-[767px]:bg-[linear-gradient(90deg,rgb(28_20_13_/.94),rgb(32_22_14_/.74))]" />
 			<div className="relative z-[1] mx-auto w-[min(1280px,calc(100%_-_64px))] py-[72px] max-[767px]:w-[min(calc(100%_-_36px),560px)] max-[767px]:py-[65px]">
 				<p className="mb-3 text-[11px] font-bold tracking-[.2em] text-[#f2c16d]">BUILT FOR LOCAL BUSINESSES</p>

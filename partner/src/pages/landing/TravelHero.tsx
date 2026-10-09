@@ -1,5 +1,5 @@
 import { BadgeCheck, Headphones, ShieldCheck, Tag } from "lucide-react";
-import { heroPhoto } from "./data";
+import { partnerImages } from "../../config/partnerImages";
 
 const trustPoints = [
 	{ icon: BadgeCheck, title: "Trusted Partners", description: "Verified & Reliable" },
@@ -14,7 +14,7 @@ export function TravelHero() {
 			className="relative min-h-[720px] bg-[#4c3823] bg-cover bg-[center_49%] text-white max-[1023px]:min-h-[650px] max-[767px]:min-h-[680px] max-[767px]:bg-[61%_center]"
 			id="home"
 			style={{
-				backgroundImage: `linear-gradient(90deg, rgb(23 23 18 / 68%), rgb(28 25 17 / 19%) 75%), linear-gradient(180deg, rgb(16 20 17 / 28%), transparent 46%, rgb(30 20 13 / 42%)), url('${heroPhoto}')`,
+				backgroundImage: `linear-gradient(90deg, rgb(23 23 18 / 68%), rgb(28 25 17 / 19%) 75%), linear-gradient(180deg, rgb(16 20 17 / 28%), transparent 46%, rgb(30 20 13 / 42%)), url('${partnerImages.landing.hero}')`,
 			}}
 		>
 			<div className="relative z-[1] mx-auto w-[min(1280px,calc(100%-64px))] pt-[173px] pb-[90px] max-[1023px]:pt-[150px] max-[767px]:w-[min(calc(100%-36px),560px)] max-[767px]:pt-[135px] max-[767px]:pb-16">

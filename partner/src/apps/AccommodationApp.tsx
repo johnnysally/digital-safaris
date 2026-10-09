@@ -5,7 +5,7 @@ import { DashboardPage } from "../pages/accommodation/Dashboard";
 import { PropertyPage } from "../pages/accommodation/Property";
 import { BookingsPage } from "../pages/accommodation/Bookings";
 import { AvailabilityPage } from "../pages/accommodation/Availability";
-import { MessagesPage } from "../pages/accommodation/Guests";
+import { NotificationsPage } from "../pages/accommodation/Notifications";
 import { ReviewsPage } from "../pages/accommodation/Ratings";
 import { PaymentsPage } from "../pages/accommodation/Wallet";
 import { ProfilePage } from "../pages/accommodation/Profile";
@@ -38,7 +38,7 @@ export default function AccommodationApp() {
       <Route path="rooms" element={<ProtectedRoute><RoomsPage /></ProtectedRoute>} />
       <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
       <Route path="availability" element={<ProtectedRoute><AvailabilityPage /></ProtectedRoute>} />
-      <Route path="messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
+      <Route path="notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="reviews" element={<ProtectedRoute><ReviewsPage /></ProtectedRoute>} />
       <Route path="payments" element={<ProtectedRoute><PaymentsPage /></ProtectedRoute>} />
       <Route path="reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />

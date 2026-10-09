@@ -11,8 +11,18 @@ export interface PropertyLocation {
 }
 
 const propertyApi = {
+  async uploadImage(file: File): Promise<{ url: string; publicId?: string }> {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("folder", "accommodation/properties");
+    const res = await axios.post("/public/upload/single", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return unwrap<{ url: string; publicId?: string }>(res.data);
+  },
+
   async locations(params?: { q?: string }): Promise<PropertyLocation[]> {
-    const res = await axios.get("/public/locations", { params: { ...params, isOperational: true } });
+    const res = await axios.get("/public/search/locations", { params: { ...params, isOperational: true } });
     return unwrap<PropertyLocation[]>(res.data);
   },
 

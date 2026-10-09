@@ -5,7 +5,7 @@ import authApi from "../../api/restaurant/authApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
-import loginPhoto from "../../../../website/public/Catering.jpg";
+import { partnerImages } from "../../config/partnerImages";
 
 const benefits = [
 	{ icon: ChefHat, title: "Manage Your Menu", detail: "Update offerings and availability" },
@@ -44,7 +44,7 @@ export function RestaurantLoginPage() {
 
 	return (
 		<main className="relative grid min-h-screen w-full grid-cols-[minmax(0,55%)_minmax(0,45%)] overflow-hidden bg-[#f9f7f0] text-[#17251f] [font-family:Inter,Segoe_UI,sans-serif] max-[900px]:grid-cols-[minmax(0,48%)_minmax(0,52%)] max-[680px]:grid-cols-1 max-[680px]:overflow-auto">
-			<section className="relative min-h-screen w-full overflow-hidden bg-cover bg-center bg-[#322819] after:absolute after:inset-0 after:bg-[linear-gradient(90deg,rgba(5,20,15,.62),rgba(9,20,15,.18)_72%,rgba(12,23,17,.1)),linear-gradient(0deg,rgba(9,17,12,.5),transparent_50%)] after:content-[''] max-[680px]:min-h-[320px] max-[380px]:min-h-[300px]" style={{ backgroundImage: `linear-gradient(90deg, rgba(9, 22, 17, .79), rgba(15, 24, 19, .25) 72%, rgba(15, 24, 19, .08)), url("${loginPhoto}")` }}>
+			<section className="relative min-h-screen w-full overflow-hidden bg-cover bg-center bg-[#322819] after:absolute after:inset-0 after:bg-[linear-gradient(90deg,rgba(5,20,15,.62),rgba(9,20,15,.18)_72%,rgba(12,23,17,.1)),linear-gradient(0deg,rgba(9,17,12,.5),transparent_50%)] after:content-[''] max-[680px]:min-h-[320px] max-[380px]:min-h-[300px]" style={{ backgroundImage: `linear-gradient(90deg, rgba(9, 22, 17, .79), rgba(15, 24, 19, .25) 72%, rgba(15, 24, 19, .08)), url("${partnerImages.restaurant.authBackground}")` }}>
 				<div className="absolute inset-[32px_clamp(26px,5.1vw,60px)_28px] z-[1] flex flex-col items-start text-white max-[900px]:right-6 max-[900px]:left-[27px] max-[680px]:inset-[20px_24px]">
 					<Link to="/partner" className="grid no-underline">
 						<PartnerLogo variant="restaurant-auth" />

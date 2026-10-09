@@ -1,13 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import { BedDouble, CarFront, Hotel, Map, Utensils } from "lucide-react";
-import accommodationPhoto from "../../../../website/public/accomodation.jpg";
-import cateringPhoto from "../../../../website/public/Catering.jpg";
-import diningPhoto from "../../../../website/public/food and dinning.jpg";
-import experiencePhoto from "../../../../website/public/experience.jpg";
-import heroPhoto from "../../../../website/public/hero-bg.jpg";
-import transportPhoto from "../../../../website/public/trasportation.jpg";
-
-export { heroPhoto };
+import { partnerImages } from "../../config/partnerImages";
 
 export interface LandingService {
 	name: string;
@@ -26,7 +19,7 @@ export const landingServices: LandingService[] = [
 		label: "GETTING AROUND",
 		description: "Reliable and safe transport for your journeys.",
 		action: "Explore Transport",
-		image: transportPhoto,
+		image: partnerImages.landing.transport,
 		icon: CarFront,
 		to: "/partner/transport/login",
 	},
@@ -35,7 +28,7 @@ export const landingServices: LandingService[] = [
 		label: "STAYS",
 		description: "Comfortable stays from hotels to unique lodges.",
 		action: "Explore Accommodation",
-		image: accommodationPhoto,
+		image: partnerImages.landing.accommodation,
 		icon: BedDouble,
 		to: "/partner/accommodation/login",
 	},
@@ -44,7 +37,7 @@ export const landingServices: LandingService[] = [
 		label: "FOOD & DINING",
 		description: "Local and international cuisine at top-rated venues.",
 		action: "Explore Restaurants",
-		image: diningPhoto,
+		image: partnerImages.landing.dining,
 		icon: Utensils,
 		to: "/partner/restaurant/login",
 	},
@@ -53,7 +46,7 @@ export const landingServices: LandingService[] = [
 		label: "EXPERIENCES",
 		description: "Unforgettable adventures and guided tours.",
 		action: "Explore Tours",
-		image: experiencePhoto,
+		image: partnerImages.landing.experience,
 		icon: Map,
 		to: "/businesses",
 		external: true,
@@ -63,7 +56,7 @@ export const landingServices: LandingService[] = [
 		label: "STAYS & LODGES",
 		description: "Premium and budget-friendly hotels across Kenya.",
 		action: "Explore Hotels",
-		image: accommodationPhoto,
+		image: partnerImages.landing.accommodation,
 		icon: Hotel,
 		to: "/partner/accommodation/rooms",
 	},
@@ -73,32 +66,32 @@ export const destinations = [
 	{
 		name: "Maasai Mara",
 		description: "Wildlife, Nature, Adventure",
-		image: heroPhoto,
+		image: partnerImages.landing.hero,
 	},
 	{
 		name: "Nairobi",
 		description: "City Life, Culture, Dining",
-		image: diningPhoto,
+		image: partnerImages.landing.dining,
 	},
 	{
 		name: "Diani Beach",
 		description: "Beaches, Relaxation, Water Sports",
-		image: accommodationPhoto,
+		image: partnerImages.landing.accommodation,
 	},
 	{
 		name: "Mount Kenya",
 		description: "Hiking, Nature, Adventure",
-		image: experiencePhoto,
+		image: partnerImages.landing.experience,
 	},
 	{
 		name: "Lake Naivasha",
 		description: "Nature, Wildlife, Boat Rides",
-		image: cateringPhoto,
+		image: partnerImages.landing.catering,
 	},
 	{
 		name: "Amboseli",
 		description: "Wildlife, Kilimanjaro Views",
-		image: transportPhoto,
+		image: partnerImages.landing.transport,
 	},
 ];
 

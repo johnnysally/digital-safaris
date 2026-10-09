@@ -16,6 +16,7 @@ const accommodationPartnerSchema = new mongoose.Schema(
     phone: { type: String, required: true, unique: true, trim: true },
     countryCode: { type: String, default: "+254", trim: true },
     password: { type: String, required: true, select: false },
+    avatar: { type: String, default: null },
     logo: { type: String, default: null },
     coverImage: { type: String, default: null },
     description: { type: String, default: "" },

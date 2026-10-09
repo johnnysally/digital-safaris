@@ -2,7 +2,7 @@ import { useState, type FormEvent } from "react";
 import { ArrowRight, CheckCircle2, Headphones, Mail, MapPin } from "lucide-react";
 import axios, { getApiErrorMessage } from "../../api/axios";
 import { isNonEmpty, isValidEmail, isValidPhoneNumber } from "../../utils/validators";
-import { heroPhoto } from "./data";
+import { partnerImages } from "../../config/partnerImages";
 
 const initialForm = { name: "", email: "", phone: "", subject: "general", message: "" };
 const fieldClass = "my-0 min-h-[47px] w-full rounded-lg border border-[#e5dfd4] bg-white px-[13px] py-[11px] text-[13px] font-normal text-[#302d27] shadow-none placeholder:text-[#a39c91]";
@@ -50,7 +50,7 @@ export function LandingContact() {
 		<section className="scroll-mt-6 bg-[radial-gradient(ellipse_at_15%_0%,rgb(226_177_99_/.23),transparent_40%),linear-gradient(135deg,#f3e2c1,#fbf2df_48%,#ead5ae)] py-24 max-[767px]:py-[58px]" id="contact" aria-labelledby="landing-contact-heading">
 			<div className="mx-auto grid w-[min(1280px,calc(100%_-_64px))] grid-cols-[.9fr_1.1fr] items-stretch gap-[34px] max-[1023px]:grid-cols-[.85fr_1.15fr] max-[1023px]:gap-5 max-[767px]:w-[min(calc(100%_-_36px),560px)] max-[767px]:grid-cols-1 max-[767px]:gap-4">
 				<div className="relative flex min-h-[590px] items-end overflow-hidden rounded-[18px] bg-[#2a2118] text-white shadow-[0_22px_54px_rgb(43_34_22_/.12)] max-[1023px]:min-h-[560px] max-[767px]:min-h-[480px]">
-					<img className="absolute inset-0 h-full w-full object-cover object-[60%_center]" src={heroPhoto} alt="" loading="lazy" />
+					<img className="absolute inset-0 h-full w-full object-cover object-[60%_center]" src={partnerImages.landing.hero} alt="" loading="lazy" />
 					<div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(25_18_12_/.1)_0%,rgb(27_20_14_/.46)_42%,rgb(25_18_12_/.93)_100%)]" aria-hidden="true" />
 					<div className="relative z-[1] p-[42px] max-[1023px]:p-7 max-[767px]:px-[21px] max-[767px]:py-[25px]">
 						<p className="text-[11px] font-bold tracking-[.2em] text-[#f0c16f]">WE’RE HERE TO HELP</p>

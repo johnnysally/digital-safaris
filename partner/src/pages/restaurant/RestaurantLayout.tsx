@@ -10,7 +10,7 @@ import { usePartnerSocket } from "../../context/socketContext";
 import { useToast } from "../../context/toastContext";
 import type { RestaurantPartner } from "../../types";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
-import sidebarPhoto from "../../../../website/public/experience.jpg";
+import { partnerImages } from "../../config/partnerImages";
 
 const restaurantNav = [
 	{ label: "Dashboard", path: "dashboard", icon: LayoutDashboard },
@@ -84,7 +84,7 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 	return (
 		<div className="min-h-screen flex text-[#282b25] bg-[#f6f6f2] [font-family:Inter,Segoe_UI,sans-serif]">
 			<aside className="sticky top-0 z-20 flex h-screen w-[190px] shrink-0 flex-col overflow-y-auto bg-[#272a24] p-0 text-[#f8f4ec] max-[760px]:w-[58px] max-[480px]:w-[48px]">
-				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(18, 17, 14, .96), rgba(18, 17, 14, .86) 62%, rgba(18, 17, 14, .38)), url("${sidebarPhoto}")` }} />
+				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(18, 17, 14, .96), rgba(18, 17, 14, .86) 62%, rgba(18, 17, 14, .38)), url("${partnerImages.shared.sidebarBackground}")` }} />
 				<div className="relative z-10 flex min-h-full flex-1 flex-col p-[20px_12px_13px] max-[760px]:items-center max-[760px]:px-[5px] max-[760px]:py-[14px]">
 					<Link to="/partner/restaurant/dashboard" className="grid px-1 pb-[22px] text-white no-underline max-[760px]:px-0 max-[760px]:pb-4 [&_svg]:w-[17px]">
 						<PartnerLogo variant="restaurant-sidebar" />

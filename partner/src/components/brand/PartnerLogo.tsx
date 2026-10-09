@@ -47,14 +47,16 @@ export function PartnerLogo({ variant }: { variant: PartnerLogoVariant }) {
       );
     case "accommodation-sidebar":
       return (
-        <span className="flex items-center gap-3">
-          <span className="grid h-10 w-10 place-items-center rounded-xl border border-[rgba(197,138,42,0.4)] bg-[rgba(197,138,42,0.18)] text-[#fefaf4]">
-            <Mountain size={29} strokeWidth={1.7} aria-hidden="true" />
-          </span>
-          <span className="text-white [&_strong>span]:text-white">
-            <strong className="block text-[1.08rem] font-bold tracking-[-0.02em]">{brandName}</strong>
-            <small className="mt-0.5 block text-[0.65rem] text-white/70">{tagline}</small>
-          </span>
+        <span className="flex flex-col items-center text-center text-white">
+          <svg className="mb-1 h-[42px] w-[88px]" viewBox="0 0 120 52" fill="none" aria-hidden="true">
+            <path d="m5 40 24-23 12 12 15-19 23 25 10-12 26 17H5Z" stroke="#f5f0e8" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="m17 29 12-12 7 7m20-11 14 16m18-4 10-12 13 13" stroke="#e5a63a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M91 37V23m0 5c-4-2-6-5-6-8 4 0 6 2 6 5 0-5 3-8 7-9 0 4-2 7-7 9m-1 12h3" stroke="#e5a63a" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <strong className="block font-serif text-[21px] font-semibold leading-[1.05] tracking-[-0.04em]">
+            Digital<span className="text-[#e7a12a]">Safaris</span>
+          </strong>
+          <small className="mt-1 block text-[8px] tracking-[0.06em] text-white/80">{tagline}</small>
         </span>
       );
     case "restaurant-auth":

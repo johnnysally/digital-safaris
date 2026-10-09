@@ -17,6 +17,17 @@ const profileApi = {
     return unwrap<AccommodationPartner>(res.data);
   },
 
+  async uploadAvatar(
+    file: File
+  ): Promise<{ avatar: string; publicId?: string }> {
+    const form = new FormData();
+    form.append("file", file);
+    const res = await axios.post("/accommodation/profile/avatar", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return unwrap<{ avatar: string; publicId?: string }>(res.data);
+  },
+
   async uploadLogo(
     file: File
   ): Promise<{ logo: string; publicId?: string }> {

@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import menuItemApi from "../../api/restaurant/menuItemApi";
 import { getApiErrorMessage } from "../../api/axios";
 import type { MenuItem } from "../../types";
-import foodImage from "../../../../website/public/food and dinning.jpg";
+import { partnerImages } from "../../config/partnerImages";
 import { formatCurrency as money } from "../../utils/formatCurrency";
 
 export function RestaurantMenuItemsPage() {
@@ -40,7 +40,7 @@ export function RestaurantMenuItemsPage() {
 		{loading ? <div className="min-w-0 rounded-lg border border-[#eaeae5] bg-white shadow-[0_1px_3px_rgba(34,37,29,.025)] p-3 text-center text-[9px] text-[#7f8178]" role="status">Loading menu items…</div> : <section className="min-w-0 rounded-lg border border-[#eaeae5] bg-white shadow-[0_1px_3px_rgba(34,37,29,.025)] p-[15px]">
 			<div className="mb-[11px] flex items-center justify-between gap-[10px] [&_h2]:m-0 [&_h2]:text-[11px] [&_h2]:font-bold [&_h2]:text-[#30322d] [&>div]:grid [&>div]:gap-1 [&>div>span]:text-[9px] [&>div>span]:text-[#8a8c83] [&>span]:text-[9px] [&>span]:text-[#8a8c83]"><h2>All menu items</h2><span>{items.length} items</span></div>
 			<div className="grid">{items.map((item) => <article className="flex min-w-0 items-center gap-3 border-b border-[#f0f0ed] py-[10px] px-[2px] last:border-0 max-[480px]:gap-2 max-[480px]:[&_button]:p-[5px] max-[480px]:[&_button]:text-[8px] [&>button]:rounded-[5px] [&>button]:border [&>button]:border-[#e8eadf] [&>button]:bg-[#fafbf7] [&>button]:px-2 [&>button]:py-1.5 [&>button]:text-[9px] [&>button]:font-semibold [&>button]:text-[#657246] [&>button]:disabled:opacity-50 [&>button]:disabled:cursor-wait [&>b]:text-[10px] [&>b]:text-[#464b39]" key={item._id}>
-				<img className="h-11 w-12 shrink-0 rounded-md bg-[#eeece4] object-cover max-[480px]:size-[38px]" src={item.image || foodImage} alt="" />
+				<img className="h-11 w-12 shrink-0 rounded-md bg-[#eeece4] object-cover max-[480px]:size-[38px]" src={item.image || partnerImages.restaurant.menuItemFallback} alt="" />
 				<div className="grid min-w-0 flex-1 gap-1 [&_strong]:truncate [&_strong]:text-[10px] [&_strong]:text-[#393c34] [&>span]:truncate [&>span]:text-[9px] [&>span]:text-[#85877f] [&_small]:truncate [&_small]:text-[9px] [&_small]:text-[#85877f]"><strong>{item.name}</strong><span>{item.description || "Menu item"}</span><small>{item.isFeatured ? "Featured · " : ""}{item.isAvailable ? "Available to order" : "Currently unavailable"}</small></div>
 				<b>{money(item.price, item.currency)}</b>
 				<button type="button" disabled={busyId === item._id} onClick={() => void toggle(item)}>{busyId === item._id ? "Updating…" : item.isAvailable ? "Pause item" : "Make available"}</button>

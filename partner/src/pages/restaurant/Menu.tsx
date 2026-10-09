@@ -4,7 +4,7 @@ import menuApi from "../../api/restaurant/menuApi";
 import menuItemApi from "../../api/restaurant/menuItemApi";
 import { getApiErrorMessage } from "../../api/axios";
 import type { Menu, MenuItem } from "../../types";
-import foodImage from "../../../../website/public/food and dinning.jpg";
+import { partnerImages } from "../../config/partnerImages";
 import { formatCurrency as money } from "../../utils/formatCurrency";
 
 export function RestaurantMenuPage() {
@@ -110,7 +110,7 @@ export function RestaurantMenuPage() {
 				<div className="flex flex-wrap items-center gap-[7px] [&_button]:inline-flex [&_button]:items-center [&_button]:justify-center [&_button]:rounded-[5px] [&_button]:border [&_button]:border-[#e8e9e3] [&_button]:bg-white [&_button]:px-2 [&_button]:py-[6px] [&_button]:text-[9px] [&_button]:text-[#657246]"><button className="justify-self-start rounded-[5px] bg-[#707e48] px-[13px] py-[9px] text-[10px] font-semibold text-white disabled:opacity-60" type="submit" disabled={busy === "item"}>{busy === "item" ? "Saving…" : "Save item"}</button><button type="button" onClick={() => { setFormOpen(false); setEditing(null); }}>Cancel</button></div>
 			</form>}
 			<div className="grid">{items.map((item) => <article className="flex min-w-0 items-center gap-3 border-b border-[#f0f0ed] py-[10px] px-[2px] last:border-0 max-[480px]:gap-2 max-[480px]:[&_button]:p-[5px] max-[480px]:[&_button]:text-[8px] [&>button]:rounded-[5px] [&>button]:border [&>button]:border-[#e8eadf] [&>button]:bg-[#fafbf7] [&>button]:px-2 [&>button]:py-1.5 [&>button]:text-[9px] [&>button]:font-semibold [&>button]:text-[#657246] [&>button]:disabled:opacity-50 [&>button]:disabled:cursor-wait [&>b]:text-[10px] [&>b]:text-[#464b39]" key={item._id}>
-				<img className="h-11 w-12 shrink-0 rounded-md bg-[#eeece4] object-cover max-[480px]:size-[38px]" src={item.image || foodImage} alt="" />
+				<img className="h-11 w-12 shrink-0 rounded-md bg-[#eeece4] object-cover max-[480px]:size-[38px]" src={item.image || partnerImages.restaurant.menuItemFallback} alt="" />
 				<div className="grid min-w-0 flex-1 gap-1 [&_strong]:truncate [&_strong]:text-[10px] [&_strong]:text-[#393c34] [&>span]:truncate [&>span]:text-[9px] [&>span]:text-[#85877f] [&_small]:truncate [&_small]:text-[9px] [&_small]:text-[#85877f]"><strong>{item.name}</strong><span>{item.description || "Menu item"}</span><small>{menus.find((menu) => menu._id === item.menu)?.name ?? "Menu"} · {item.isAvailable ? "Available" : "Unavailable"}</small></div>
 				<b>{money(item.price, item.currency)}</b>
 				<button type="button" disabled={busy === item._id} onClick={() => void toggleAvailability(item)}>{item.isAvailable ? "Pause item" : "Make available"}</button>

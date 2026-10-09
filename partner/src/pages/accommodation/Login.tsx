@@ -6,8 +6,9 @@ import propertyApi, { type PropertyLocation } from "../../api/accommodation/prop
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
+import { partnerImages } from "../../config/partnerImages";
 
-const loginBackground = "linear-gradient(90deg, rgba(23, 17, 13, 0.47) 0%, rgba(23, 17, 13, 0.2) 52%, rgba(23, 17, 13, 0.16) 100%), url('https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=2200&q=90')";
+const loginBackground = `linear-gradient(90deg, rgba(23, 17, 13, 0.47) 0%, rgba(23, 17, 13, 0.2) 52%, rgba(23, 17, 13, 0.16) 100%), url('${partnerImages.accommodation.authBackground}')`;
 const loginFieldClass = "flex min-h-11 min-w-0 items-center gap-2.5 rounded-md border border-[#e6e0d9] bg-[rgba(255,255,255,0.55)] px-3 text-[#6d6b68] transition-colors focus-within:border-[#c9821f] focus-within:ring-2 focus-within:ring-[#c9821f]/15 [&_svg]:shrink-0 [&_input]:h-full [&_input]:min-w-0 [&_input]:flex-1 [&_input]:w-full [&_input]:rounded-none [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:text-[0.78rem] [&_input]:font-medium [&_input]:text-[#302b26] [&_input]:shadow-none [&_input]:outline-none [&_input]:placeholder:text-[#8d847a]";
 const signupFieldClass = `${loginFieldClass} h-10 min-h-10 px-[11px] [&_input]:text-[0.72rem]`;
 

@@ -2,13 +2,13 @@ import type { ReactNode } from "react";
 import { BusFront, Globe2, ShieldCheck } from "lucide-react";
 import { Link } from "react-router-dom";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
-import transportHero from "../../../../website/public/hero-bg.jpg";
+import { partnerImages } from "../../config/partnerImages";
 
 export function TransportAuthLayout({ children }: { children: ReactNode }) {
 	return (
 		<main className="grid min-h-screen min-h-[100svh] grid-cols-[minmax(0,50.5%)_minmax(0,49.5%)] bg-[#faf7f0] font-['DM_Sans','Segoe_UI',sans-serif] text-[#292622] max-[820px]:grid-cols-[minmax(0,43%)_minmax(0,57%)] max-[640px]:flex max-[640px]:flex-col">
 			<section className="relative min-h-screen min-h-[100svh] overflow-hidden bg-[#382617] text-white max-[640px]:min-h-[240px] max-[640px]:h-[240px]" aria-label="DigitalSafaris Transport Partner">
-				<img className="absolute inset-0 h-full w-full object-cover object-[82%_50%]" src={transportHero} alt="" />
+				<img className="absolute inset-0 h-full w-full object-cover object-[82%_50%]" src={partnerImages.transport.authBackground} alt="" />
 				<div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,15,12,.34),transparent_33%,rgba(19,14,9,.76))]" />
 				<div className="absolute inset-0 z-[1] flex flex-col justify-between p-[clamp(30px,5.2vw,66px)_clamp(28px,5.5vw,68px)] max-[820px]:p-[36px] max-[640px]:p-6">
 					<Link className="inline-flex w-fit items-center gap-2.5 text-white no-underline" to="/partner/transport/login" aria-label="DigitalSafaris Transport Partner sign in">

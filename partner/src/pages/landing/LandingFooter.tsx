@@ -3,7 +3,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import { getApiErrorMessage } from "../../api/axios";
 import { fetchLandingConfig, subscribeToNewsletter } from "../../api/landingApi";
-import { heroPhoto } from "./data";
+import { partnerImages } from "../../config/partnerImages";
 
 interface LandingFooterProps {
 	registrationUrl: string;
@@ -57,7 +57,7 @@ export function LandingFooter({ registrationUrl, websiteUrl }: LandingFooterProp
 
 	return (
 		<footer className="relative flex min-h-[420px] flex-col bg-[#17130f] text-[#f3eee4] max-[767px]:block max-[767px]:min-h-0">
-			<img className="absolute inset-0 h-full w-full object-cover object-[center_56%]" src={heroPhoto} alt="" aria-hidden="true" />
+			<img className="absolute inset-0 h-full w-full object-cover object-[center_56%]" src={partnerImages.landing.hero} alt="" aria-hidden="true" />
 			<div className="absolute inset-0 bg-[linear-gradient(180deg,rgb(27_19_12_/.26)_0%,rgb(26_19_13_/.52)_40%,rgb(18_15_12_/.84)_100%),linear-gradient(90deg,rgb(20_17_13_/.44),rgb(39_27_17_/.24)_50%,rgb(20_17_13_/.48))]" aria-hidden="true" />
 			<div className="relative z-[1] mx-auto grid w-[min(1280px,calc(100%_-_64px))] flex-1 grid-cols-[1.2fr_.8fr_1.1fr_1.25fr] content-center gap-9 pt-[42px] pb-8 max-[1023px]:grid-cols-2 max-[1023px]:gap-[42px] max-[767px]:w-[min(calc(100%_-_36px),560px)] max-[767px]:flex-initial max-[767px]:gap-x-[22px] max-[767px]:gap-y-9 max-[767px]:pt-[55px] max-[767px]:pb-[42px]">
 				<div>

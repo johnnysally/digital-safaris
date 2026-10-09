@@ -1,23 +1,82 @@
 import type { ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
-import { PartnerSidebar } from "./Sidebar";
+import { AccommodationSidebar } from "./AccommodationSidebar";
 import { PartnerHeader } from "./Header";
 import { usePartnerSocket } from "../../context/socketContext";
 
 interface AccommodationPartnerLayoutProps {
   children: ReactNode;
   className?: string;
+  partner?: {
+    name?: string;
+    avatar?: string | null;
+    logo?: string | null;
+  };
 }
 
-export function AccommodationPartnerLayout({ children, className = "" }: AccommodationPartnerLayoutProps) {
+export function AccommodationPartnerLayout({ children, className = "", partner }: AccommodationPartnerLayoutProps) {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      return window.localStorage.getItem("digitalsafaris_accommodation_sidebar_collapsed") === "true";
+    } catch {
+      return false;
+    }
+  });
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
+  const toggleSidebar = useCallback(() => {
+    setSidebarCollapsed((current) => {
+      const next = !current;
+      try {
+        window.localStorage.setItem("digitalsafaris_accommodation_sidebar_collapsed", String(next));
+      } catch {
+        // Keep the layout usable when browser storage is unavailable.
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!mobileMenuOpen || !window.matchMedia("(max-width: 760px)").matches) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileMenuOpen]);
+
   usePartnerSocket("accommodation");
   return (
-    <div className={`flex min-h-screen bg-[var(--bg)] ${className}`.trim()}>
-      <PartnerSidebar />
-      <div className="flex min-w-0 flex-1 flex-col bg-[rgba(243,235,223,0.96)]">
-        <PartnerHeader />
+    <div className={`min-h-screen overflow-x-hidden bg-[var(--bg)] ${className}`.trim()}>
+      <AccommodationSidebar
+        mobileOpen={mobileMenuOpen}
+        onClose={closeMobileMenu}
+        closeButtonRef={closeButtonRef}
+        menuButtonRef={menuButtonRef}
+        collapsed={sidebarCollapsed}
+        onToggleCollapsed={toggleSidebar}
+      />
+      {mobileMenuOpen ? (
+        <button
+          type="button"
+          aria-label="Close navigation menu"
+          tabIndex={-1}
+          onClick={closeMobileMenu}
+          className="fixed inset-0 z-40 hidden border-0 bg-black/55 p-0 max-[760px]:block"
+        />
+      ) : null}
+      <div className={`${sidebarCollapsed ? "ml-[76px]" : "ml-[255px]"} flex min-h-screen min-w-0 flex-col bg-[rgba(243,235,223,0.96)] transition-[margin] duration-200 motion-reduce:transition-none max-[1024px]:ml-[220px] max-[760px]:ml-0`}>
+        <PartnerHeader
+          partner={partner}
+          onMenuClick={() => setMobileMenuOpen((open) => !open)}
+          menuButtonRef={menuButtonRef}
+          menuOpen={mobileMenuOpen}
+        />
         <main className="flex-1 overflow-auto">
-          <div className="mx-auto w-full max-w-[1460px] px-6 pb-[42px] pt-[26px]">{children}</div>
+          <div className="w-full px-5 pb-8 pt-4 max-[760px]:px-3">{children}</div>
         </main>
       </div>
     </div>

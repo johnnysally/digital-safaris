@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, MapPin, Star } from "lucide-react";
 import { useEffect, useState } from "react";
 import { fetchLandingReviews, type LandingReview } from "../../api/landingApi";
-import { heroPhoto } from "./data";
+import { partnerImages } from "../../config/partnerImages";
 
 export function TravelStories() {
 	const [activeReview, setActiveReview] = useState(0);
@@ -30,7 +30,7 @@ export function TravelStories() {
 
 	return (
 		<section className="relative min-h-[490px] overflow-hidden bg-[#26170e] text-white max-[767px]:min-h-[640px]" aria-labelledby="travel-stories-heading">
-			<img className="absolute inset-0 h-full w-full object-cover object-[center_56%] opacity-[.82]" src={heroPhoto} alt="" loading="lazy" />
+			<img className="absolute inset-0 h-full w-full object-cover object-[center_56%] opacity-[.82]" src={partnerImages.landing.hero} alt="" loading="lazy" />
 			<div className="absolute inset-0 bg-[linear-gradient(90deg,rgb(31_22_15_/.52)_0%,rgb(35_25_17_/.35)_52%,rgb(25_20_15_/.48)_100%)]" aria-hidden="true" />
 			<div className="relative z-10 mx-auto w-[min(1280px,calc(100%_-_64px))] py-[76px] pb-[70px] max-[767px]:w-[min(calc(100%_-_36px),560px)] max-[767px]:py-[62px]">
 				<div className="mb-8 text-center">

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronLeft, ChevronRight, CircleDollarSign, LockKeyhole, UnlockKeyhole } from "lucide-react";
 import availabilityApi from "../../api/accommodation/availabilityApi";
 import roomApi from "../../api/accommodation/roomApi";
 import { getApiErrorMessage } from "../../api/axios";
@@ -27,10 +27,25 @@ export function AvailabilityPage() {
 
   const monthStart = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1));
   const monthEnd = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0));
-  const dates = useMemo(() => Array.from({ length: monthEnd.getUTCDate() }, (_, index) => new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), index + 1))), [monthEnd.getUTCDate(), month.getUTCFullYear(), month.getUTCMonth()]);
+  const dates = useMemo(
+    () => Array.from({ length: monthEnd.getUTCDate() }, (_, index) => new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), index + 1))),
+    [monthEnd, month],
+  );
+  const selectedRoomDetails = rooms.find((room) => room._id === selectedRoom);
+  const monthLabel = month.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
+  const availabilityByRoomAndDate = useMemo(
+    () => new Map(availability.map((record) => [`${record.room}:${record.date.slice(0, 10)}`, record])),
+    [availability],
+  );
+  const selectedDateRecords = dates.map((date) => availabilityByRoomAndDate.get(`${selectedRoom}:${dateKey(date)}`));
+  const blockedDates = selectedDateRecords.filter((record) => record?.isBlocked).length;
+  const availableDates = selectedRoom
+    ? selectedDateRecords.filter((record) => !record?.isBlocked && (!record || record.availableUnits > 0)).length
+    : 0;
 
   useEffect(() => {
     let cancelled = false;
+
     async function loadAvailability() {
       setLoading(true);
       setError("");
@@ -39,23 +54,26 @@ export function AvailabilityPage() {
           roomApi.list(),
           availabilityApi.list({ from: dateKey(monthStart), to: dateKey(monthEnd) }),
         ]);
-        if (!cancelled) {
-          setRooms(roomData);
-          setAvailability(availabilityData);
-          setSelectedRoom((current) => current || roomData[0]?._id || "");
-          if (!from) setFrom(dateKey(monthStart));
-          if (!to) setTo(dateKey(monthEnd));
-          if (!price && roomData[0]) setPrice(String(roomData[0].basePrice));
-          if (!totalUnits && roomData[0]) setTotalUnits(String(roomData[0].totalUnits));
-        }
+        if (cancelled) return;
+
+        setRooms(roomData);
+        setAvailability(availabilityData);
+        setSelectedRoom((current) => current || roomData[0]?._id || "");
+        setFrom((current) => current || dateKey(monthStart));
+        setTo((current) => current || dateKey(monthEnd));
+        if (!price && roomData[0]) setPrice(String(roomData[0].basePrice));
+        if (!totalUnits && roomData[0]) setTotalUnits(String(roomData[0].totalUnits));
       } catch (requestError) {
         if (!cancelled) setError(getApiErrorMessage(requestError, "Could not load room availability."));
       } finally {
         if (!cancelled) setLoading(false);
       }
     }
+
     void loadAvailability();
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [month, reload]);
 
   async function saveAvailability(event: FormEvent<HTMLFormElement>) {
@@ -92,55 +110,167 @@ export function AvailabilityPage() {
 
   return (
     <AccommodationPartnerLayout>
-      <div className="mx-auto w-full max-w-[1440px]">
-        <PageHeader title="Availability Calendar" subtitle="Manage room availability and pricing." action={<div className="flex items-center gap-2.5"><button type="button" className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-white px-[1.1rem] py-[0.8rem] font-bold text-[var(--text)] px-[0.9rem] py-[0.7rem] text-[0.82rem]" aria-label="Previous month" onClick={() => setMonth(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() - 1, 1)))}><ChevronLeft size={14} /> Previous</button><strong>{month.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" })}</strong><button type="button" className="inline-flex items-center justify-center gap-2 rounded-[10px] border border-[var(--border)] bg-white px-[1.1rem] py-[0.8rem] font-bold text-[var(--text)] px-[0.9rem] py-[0.7rem] text-[0.82rem]" aria-label="Next month" onClick={() => setMonth(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1)))}>Next <ChevronRight size={14} /></button></div>} />
+      <div className="w-full">
+        <PageHeader title="Availability" subtitle="Manage room inventory, nightly rates, and blocked dates." />
+        <ApiFeedback loading={loading} error={error} onRetry={() => setReload((current) => current + 1)} />
 
-        <div className="rounded-[18px] border border-[rgba(130,110,92,0.18)] bg-[rgba(255,252,247,0.94)] shadow-[0_8px_18px_rgba(36,22,13,0.03)] p-[18px_20px_10px] p-[18px_20px_14px]">
-          <ApiFeedback loading={loading} error={error} onRetry={() => setReload((current) => current + 1)} />
+        <section className="mb-5 grid gap-3 sm:grid-cols-3" aria-label="Availability summary">
+          <SummaryCard icon={CalendarDays} label="Days this month" value={String(dates.length)} detail={monthLabel} />
+          <SummaryCard icon={UnlockKeyhole} label="Available dates" value={String(availableDates)} detail={selectedRoomDetails?.name ?? "Select a room"} />
+          <SummaryCard icon={LockKeyhole} label="Blocked dates" value={String(blockedDates)} detail="For selected room" />
+        </section>
 
-          <form className="grid grid-cols-3 gap-4" onSubmit={saveAvailability}>
-            <label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium"><span>Room type</span><select required value={selectedRoom} onChange={(event) => chooseRoom(event.target.value)}><option value="">Select a room</option>{rooms.map((room) => <option key={room._id} value={room._id}>{room.name}</option>)}</select></label>
-            <label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium"><span>From</span><input required type="date" value={from} onChange={(event) => setFrom(event.target.value)} /></label>
-            <label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium"><span>To</span><input required type="date" min={from} value={to} onChange={(event) => setTo(event.target.value)} /></label>
-            <label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium"><span>Nightly rate</span><input required type="number" min="0" value={price} onChange={(event) => setPrice(event.target.value)} /></label>
-            <label className="flex flex-col gap-2 text-[0.82rem] font-bold text-[var(--text-soft)] [&_input]:font-medium [&_select]:font-medium [&_textarea]:font-medium"><span>Total units</span><input required type="number" min="0" value={totalUnits} onChange={(event) => setTotalUnits(event.target.value)} /></label>
-            <label className="flex items-center gap-2"><input type="checkbox" checked={blocked} onChange={(event) => setBlocked(event.target.checked)} /><span>Block selected dates</span></label>
-            <button type="submit" className="inline-flex items-center justify-center gap-2 rounded-[10px] border-0 bg-gradient-to-br from-[var(--gold)] to-[#b9781d] px-[1.1rem] py-[0.8rem] font-bold text-white shadow-[var(--shadow-soft)] hover:brightness-[0.98]" disabled={saving || loading || rooms.length === 0}>{saving ? "Saving..." : "Update range"}</button>
-          </form>
+        <div className="grid items-start gap-5 xl:grid-cols-[minmax(280px,340px)_minmax(0,1fr)]">
+          <section className="rounded-xl border border-[#e9dfd1] bg-[rgba(255,252,247,.9)] p-4 shadow-[0_3px_12px_rgba(54,37,20,.035)] sm:p-5">
+            <div className="mb-4">
+              <h2 className="font-serif text-lg font-semibold text-[#29231e]">Update availability</h2>
+              <p className="mt-1 text-xs leading-relaxed text-[#70675e]">Set rates, room capacity, or block a date range for a room.</p>
+            </div>
 
-          <div className="mt-[18px] overflow-x-auto">
-            <table className="w-full border-collapse [&_th]:border-b [&_th]:border-[var(--border)] [&_th]:px-[0.8rem] [&_th]:py-[0.9rem] [&_th]:text-left [&_th]:text-[0.76rem] [&_th]:font-extrabold [&_th]:uppercase [&_th]:tracking-[0.08em] [&_th]:text-[var(--text-soft)] [&_td]:border-b [&_td]:border-[var(--border)] [&_td]:px-[0.8rem] [&_td]:py-[0.9rem] [&_td]:text-left [&_td]:text-[var(--text)]">
-              <thead>
-                <tr>
-                  <th>Room</th>
-                  {dates.map((date) => (
-                    <th key={dateKey(date)}>{date.toLocaleDateString(undefined, { weekday: "short", day: "numeric", timeZone: "UTC" })}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {rooms.map((room) => (
-                  <tr key={room._id}>
-                    <td className="min-w-[150px] font-bold">{room.name}</td>
-                    {dates.map((date) => {
-                      const record = availability.find((item) => item.room === room._id && item.date.slice(0, 10) === dateKey(date));
-                      const content = record?.isBlocked ? "Blocked" : record ? `${record.availableUnits} left · ${record.currency} ${record.price}` : `${room.currency} ${room.basePrice}`;
-                      return <td key={`${room._id}-${dateKey(date)}`} className="min-w-[94px] text-center" title={record?.blockReason ?? content}><span className="inline-flex min-h-[54px] w-full items-center justify-center rounded-xl bg-[rgba(197,138,42,0.08)] font-bold text-[var(--text)]">{content}</span></td>;
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!loading && rooms.length === 0 ? <div className="flex min-h-[150px] flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-soft)] p-6 text-center text-[var(--text-soft)] [&_strong]:text-[var(--text)]"><strong>No room inventory found</strong><span>Add room types before setting availability.</span></div> : null}
-          </div>
+            <form className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-1" onSubmit={saveAvailability}>
+              <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-[#554c43]">
+                <span>Room type</span>
+                <select className="min-h-10 min-w-0 rounded-lg border border-[#ded4c6] bg-white px-3 py-2 text-sm font-normal text-[#322a23] focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20" required value={selectedRoom} onChange={(event) => chooseRoom(event.target.value)}>
+                  <option value="">Select a room</option>
+                  {rooms.map((room) => <option key={room._id} value={room._id}>{room.name}</option>)}
+                </select>
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-[#554c43]">
+                  <span>From</span>
+                  <input className="min-h-10 min-w-0 rounded-lg border border-[#ded4c6] bg-white px-2.5 py-2 text-sm font-normal text-[#322a23] focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20" required type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+                </label>
+                <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-[#554c43]">
+                  <span>To</span>
+                  <input className="min-h-10 min-w-0 rounded-lg border border-[#ded4c6] bg-white px-2.5 py-2 text-sm font-normal text-[#322a23] focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20" required type="date" min={from} value={to} onChange={(event) => setTo(event.target.value)} />
+                </label>
+              </div>
+              <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-[#554c43]">
+                <span>Nightly rate</span>
+                <span className="relative">
+                  <CircleDollarSign className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#988a78]" size={16} />
+                  <input className="min-h-10 w-full rounded-lg border border-[#ded4c6] bg-white py-2 pl-9 pr-3 text-sm font-normal text-[#322a23] focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20" required type="number" min="0" step="0.01" value={price} onChange={(event) => setPrice(event.target.value)} />
+                </span>
+                {selectedRoomDetails ? <span className="text-[10px] font-normal text-[#81766a]">Default rate: {selectedRoomDetails.currency} {selectedRoomDetails.basePrice}</span> : null}
+              </label>
+              <label className="flex min-w-0 flex-col gap-1.5 text-xs font-semibold text-[#554c43]">
+                <span>Total units</span>
+                <input className="min-h-10 rounded-lg border border-[#ded4c6] bg-white px-3 py-2 text-sm font-normal text-[#322a23] focus:border-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-600/20" required type="number" min="0" step="1" value={totalUnits} onChange={(event) => setTotalUnits(event.target.value)} />
+              </label>
+              <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-[#eee5d9] bg-[#fbf7f0] px-3 py-3 text-xs font-medium text-[#554c43] sm:col-span-2 xl:col-span-1">
+                <input className="h-4 w-4 accent-[#b9781d]" type="checkbox" checked={blocked} onChange={(event) => setBlocked(event.target.checked)} />
+                <span>Block these dates from booking</span>
+              </label>
+              <button className="inline-flex min-h-11 items-center justify-center rounded-lg border-0 bg-gradient-to-br from-[var(--gold)] to-[#b9781d] px-4 py-2 text-sm font-semibold text-white shadow-[var(--shadow-soft)] transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:col-span-2 xl:col-span-1" type="submit" disabled={saving || loading || rooms.length === 0 || !selectedRoom}>
+                {saving ? "Saving changes..." : "Save date range"}
+              </button>
+            </form>
+            {!loading && rooms.length === 0 ? (
+              <div className="mt-4 rounded-lg border border-dashed border-[#ded4c6] bg-[#fbf7f0] p-4 text-center text-xs text-[#70675e]">
+                <strong className="block text-[#332b24]">No room inventory yet</strong>
+                <span className="mt-1 block">Add a room before setting availability.</span>
+              </div>
+            ) : null}
+          </section>
 
-          <div className="mt-4 flex flex-wrap items-center gap-[18px] text-[0.82rem] text-[var(--text-soft)]">
-            <span><i className="mr-2 inline-block h-[10px] w-[10px] rounded-full bg-[var(--gold)]" /> Available or base rate</span>
-            <span><i className="mr-2 inline-block h-[10px] w-[10px] rounded-full bg-[var(--text)]" /> Fully booked</span>
-            <span><i className="mr-2 inline-block h-[10px] w-[10px] rounded-full bg-[var(--border)]" /> Blocked</span>
-          </div>
+          <section className="min-w-0 overflow-hidden rounded-xl border border-[#e9dfd1] bg-[rgba(255,252,247,.9)] shadow-[0_3px_12px_rgba(54,37,20,.035)]">
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#eee5d9] px-4 py-3 sm:px-5">
+              <div>
+                <h2 className="font-serif text-lg font-semibold text-[#29231e]">Room calendar</h2>
+                <p className="mt-0.5 text-xs text-[#70675e]">{selectedRoomDetails?.name ?? "All rooms"} · daily rate and availability</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <button className="grid h-9 w-9 place-items-center rounded-lg border border-[#ded4c6] bg-white text-[#554c43] transition hover:bg-[#fbf3e7]" type="button" aria-label="Previous month" onClick={() => setMonth(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() - 1, 1)))}>
+                  <ChevronLeft size={17} />
+                </button>
+                <strong className="min-w-[116px] text-center text-sm text-[#332b24]">{monthLabel}</strong>
+                <button className="grid h-9 w-9 place-items-center rounded-lg border border-[#ded4c6] bg-white text-[#554c43] transition hover:bg-[#fbf3e7]" type="button" aria-label="Next month" onClick={() => setMonth(new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 1)))}>
+                  <ChevronRight size={17} />
+                </button>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-[#eee5d9] px-4 py-3 text-[10px] text-[#70675e] sm:px-5">
+              <Legend color="bg-[#f2f7ef]" label="Available" />
+              <Legend color="bg-[#f7e7c9]" label="Fully booked" />
+              <Legend color="bg-[#f2deda]" label="Blocked" />
+              <span className="ml-auto">{selectedRoomDetails ? `${selectedRoomDetails.currency} ${selectedRoomDetails.basePrice} base rate` : ""}</span>
+            </div>
+
+            <div className="max-h-[620px] overflow-auto">
+              {rooms.length > 0 ? (
+                <table className="w-full min-w-max border-collapse text-left text-[11px]">
+                  <thead className="sticky top-0 z-20 bg-[#f8f2e8] text-[#49433d]">
+                    <tr>
+                      <th className="sticky left-0 z-30 min-w-[160px] border-b border-[#e9dfd1] bg-[#f8f2e8] px-4 py-3 font-semibold">Room</th>
+                      {dates.map((date) => (
+                        <th className="min-w-[88px] border-b border-[#e9dfd1] px-2 py-3 text-center font-medium" key={dateKey(date)}>
+                          <span className="block text-[9px] font-normal uppercase tracking-wide text-[#877b6e]">{date.toLocaleDateString(undefined, { weekday: "short", timeZone: "UTC" })}</span>
+                          <span className="mt-0.5 block text-xs">{date.toLocaleDateString(undefined, { day: "numeric", timeZone: "UTC" })}</span>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rooms.map((room) => (
+                      <tr className="border-b border-[#eee7dd] last:border-0" key={room._id}>
+                        <th className="sticky left-0 z-10 border-r border-[#eee7dd] bg-[#fffcf7] px-4 py-3 text-left font-semibold text-[#332b24]">
+                          <span className="block max-w-[145px] truncate">{room.name}</span>
+                          <span className="mt-0.5 block text-[9px] font-normal text-[#81766a]">{room.totalUnits} units · {room.currency} {room.basePrice}</span>
+                        </th>
+                        {dates.map((date) => {
+                          const record = availabilityByRoomAndDate.get(`${room._id}:${dateKey(date)}`);
+                          const isFull = Boolean(record && !record.isBlocked && record.availableUnits === 0);
+                          const cellClass = record?.isBlocked
+                            ? "bg-[#f2deda] text-[#963f35]"
+                            : isFull
+                              ? "bg-[#f7e7c9] text-[#815312]"
+                              : "bg-[#f2f7ef] text-[#42643c]";
+                          const label = record?.isBlocked
+                            ? "Blocked"
+                            : `${record?.availableUnits ?? room.totalUnits} available`;
+                          const cellPrice = record?.price ?? room.basePrice;
+                          return (
+                            <td className="border-l border-[#f0e9df] px-1.5 py-2 text-center" key={`${room._id}-${dateKey(date)}`} title={record?.blockReason ?? `${label} · ${room.currency} ${cellPrice}`}>
+                              <span className={`mx-auto flex min-h-[46px] min-w-[76px] flex-col items-center justify-center rounded-md px-1.5 py-1 ${cellClass}`}>
+                                <strong className="text-[10px] font-semibold">{record?.isBlocked ? "Blocked" : `${record?.availableUnits ?? room.totalUnits} left`}</strong>
+                                <small className="mt-0.5 text-[9px] opacity-80">{room.currency} {cellPrice}</small>
+                              </span>
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              ) : (
+                <div className="flex min-h-[180px] flex-col items-center justify-center gap-2 p-6 text-center text-sm text-[#70675e]">
+                  <CalendarDays className="text-[#b9781d]" size={24} />
+                  <strong className="text-[#332b24]">Calendar is ready when you are</strong>
+                  <span>Add room inventory to see daily availability here.</span>
+                </div>
+              )}
+            </div>
+          </section>
         </div>
       </div>
     </AccommodationPartnerLayout>
   );
+}
+
+function SummaryCard({ icon: Icon, label, value, detail }: { icon: typeof CalendarDays; label: string; value: string; detail: string }) {
+  return (
+    <div className="flex min-h-[88px] items-center gap-3 rounded-xl border border-[#e9dfd1] bg-[rgba(255,252,247,.9)] px-4 py-3 shadow-[0_3px_12px_rgba(54,37,20,.035)]">
+      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-[#f5ead8] text-[#8b4e16]"><Icon size={19} /></span>
+      <div className="min-w-0">
+        <span className="block text-[11px] text-[#70675e]">{label}</span>
+        <strong className="block text-xl leading-tight text-[#29231e]">{value}</strong>
+        <small className="block truncate text-[10px] text-[#877b6e]">{detail}</small>
+      </div>
+    </div>
+  );
+}
+
+function Legend({ color, label }: { color: string; label: string }) {
+  return <span className="inline-flex items-center gap-1.5"><i className={`h-2.5 w-2.5 rounded-sm ${color}`} />{label}</span>;
 }
