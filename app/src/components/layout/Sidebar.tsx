@@ -59,11 +59,11 @@ export default function Sidebar({ groups }: SidebarProps) {
   const { branding } = useBranding();
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/logo.svg";
+  const logoUrl = branding.logoUrl || branding.logo;
 
   return (
     <aside
-      className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col border-r border-white/10 bg-[#21170f] text-white lg:flex"
+      className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col border-r border-white/10 bg-[#21170f] text-white lg:flex"
       style={{
         backgroundImage:
           "linear-gradient(180deg,rgba(30,20,13,.97) 0%,rgba(34,22,13,.91) 42%,rgba(31,19,11,.72) 100%),url('/hero-bg.jpg')",
@@ -73,13 +73,24 @@ export default function Sidebar({ groups }: SidebarProps) {
     >
       <div className="flex h-20 shrink-0 items-center border-b border-white/10 px-5">
         <Link to="/" className="flex items-center gap-2.5">
-          <img
-            src={logoUrl}
-            alt={appName}
-            className="h-9 w-9 rounded-md object-contain"
-          />
-          <span className="text-base font-semibold text-white">
-            {appName}
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={appName}
+              className="h-9 w-9 rounded-md object-contain"
+            />
+          ) : (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#a75f1b] text-white">
+              <Compass className="h-5 w-5" />
+            </span>
+          )}
+          <span className="min-w-0">
+            <span className="block text-base font-semibold leading-tight text-white">
+              {appName}
+            </span>
+            <span className="mt-1 block text-[8px] tracking-wide text-white/65">
+              Travel · Explore · Experience
+            </span>
           </span>
         </Link>
       </div>

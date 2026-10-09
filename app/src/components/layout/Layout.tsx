@@ -56,8 +56,8 @@ export default function Layout({ title, children }: LayoutProps) {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header title={title} onMenuClick={() => setMobileOpen(true)} />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
-          <div className="mx-auto w-full max-w-5xl space-y-6">
+        <main className="min-h-0 flex-1 overflow-y-auto p-2 sm:p-3">
+          <div className="w-full space-y-6">
             {children ?? <Outlet />}
           </div>
         </main>

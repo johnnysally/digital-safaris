@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
-import { Menu, Search, Bell, Sun, Moon } from "lucide-react";
+import { Menu, Search, Bell, Compass } from "lucide-react";
 import { useAuth } from "../../context/authContext";
-import { useTheme } from "../../context/themeContext";
 import { useBranding } from "../../context/brandingContext";
 import { ROUTES } from "../../utils/constants";
 import Avatar from "../ui/Avatar";
@@ -13,16 +12,15 @@ interface HeaderProps {
 
 export default function Header({ onMenuClick }: HeaderProps) {
   const { customer } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const { branding } = useBranding();
 
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/logo.svg";
+  const logoUrl = branding.logoUrl || branding.logo;
 
   return (
     <header className="sticky top-0 z-40 border-b border-[#e4d7c2] bg-[#fffaf1]/95 backdrop-blur dark:border-[#56432e] dark:bg-[#2f2419]/95">
-      <div className="flex h-16 items-center gap-3 px-4 sm:px-6">
+      <div className="flex h-14 items-center gap-3 px-3 sm:px-4">
         <button
           type="button"
           onClick={onMenuClick}
@@ -33,11 +31,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <Link to="/" className="lg:hidden">
-          <img
-            src={logoUrl}
-            alt={appName}
-            className="h-8 w-8 rounded-md object-contain"
-          />
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={appName}
+              className="h-8 w-8 rounded-md object-contain"
+            />
+          ) : (
+            <Compass className="h-7 w-7 text-[#a75f1b]" />
+          )}
         </Link>
 
         <div className="hidden flex-1 items-center md:flex">
@@ -54,19 +56,6 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <div className="flex-1 md:hidden" />
 
         <div className="flex items-center gap-1.5 sm:gap-2">
-          <button
-            type="button"
-            onClick={toggleTheme}
-            className="rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10"
-            aria-label="Toggle theme"
-          >
-            {theme === "dark" ? (
-              <Sun className="h-5 w-5" />
-            ) : (
-              <Moon className="h-5 w-5" />
-            )}
-          </button>
-
           <Link
             to={ROUTES.NOTIFICATIONS}
             className="relative rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10"

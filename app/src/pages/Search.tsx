@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import { Search as SearchIcon, MapPin, Star, Bed, Utensils } from "lucide-react";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -31,10 +31,11 @@ const TABS = [
 
 export default function Search() {
   const { error: toastError } = useToast();
+  const [searchParams] = useSearchParams();
 
   const [tab, setTab] = useState("all");
-  const [q, setQ] = useState("");
-  const [town, setTown] = useState("");
+  const [q, setQ] = useState(() => searchParams.get("q") ?? "");
+  const [town, setTown] = useState(() => searchParams.get("town") ?? "");
   const [cuisine, setCuisine] = useState("");
   const [locations, setLocations] = useState<Location[]>([]);
 
@@ -54,16 +55,20 @@ export default function Search() {
       });
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (filters?: {
+    q: string;
+    town: string;
+    cuisine: string;
+  }) => {
     setLoading(true);
     setError(null);
     try {
       const params = {
         page: 1,
         limit: DEFAULT_PAGE_SIZE,
-        search: q || undefined,
-        town: town || undefined,
-        cuisine: cuisine || undefined,
+        q: (filters?.q ?? q) || undefined,
+        town: (filters?.town ?? town) || undefined,
+        cuisine: (filters?.cuisine ?? cuisine) || undefined,
       };
 
       const tasks: Array<Promise<void>> = [];
@@ -176,7 +181,7 @@ export default function Search() {
                 setQ("");
                 setTown("");
                 setCuisine("");
-                setTimeout(fetchData, 0);
+                void fetchData({ q: "", town: "", cuisine: "" });
               }}
             >
               Reset
