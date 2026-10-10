@@ -72,6 +72,7 @@ export default function Partners() {
   const [status, setStatus] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const [rejectTarget, setRejectTarget] = useState<Partner | null>(null);
   const [rejectReason, setRejectReason] = useState("");
@@ -156,12 +157,31 @@ export default function Partners() {
     }
   };
 
+  const refetchSilent = async () => {
+    try {
+      const res = await partnerApi.list(tab, {
+        page,
+        limit: DEFAULT_PAGE_SIZE,
+        search: search || undefined,
+        status: status || undefined,
+      });
+      setRows(res.data ?? []);
+      setMeta(res.meta ?? null);
+    } catch {
+      setError("Could not load partners.");
+    }
+  };
+
   const handleApprove = async (target: Partner) => {
+    if (busyId) return;
+    setBusyId(target._id);
     try {
       await partnerApi.approve(target.type, target._id);
-      refetch();
+      await refetchSilent();
     } catch {
       /* interceptor surfaces toast */
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -173,7 +193,7 @@ export default function Partners() {
       await partnerApi.reject(rejectTarget.type, rejectTarget._id, rejectReason.trim());
       setRejectTarget(null);
       setRejectReason("");
-      refetch();
+      await refetchSilent();
     } catch {
       /* interceptor */
     } finally {
@@ -189,7 +209,7 @@ export default function Partners() {
       await partnerApi.suspend(suspendTarget.type, suspendTarget._id, suspendReason.trim());
       setSuspendTarget(null);
       setSuspendReason("");
-      refetch();
+      await refetchSilent();
     } catch {
       /* interceptor */
     } finally {
@@ -198,11 +218,15 @@ export default function Partners() {
   };
 
   const handleReactivate = async (target: Partner) => {
+    if (busyId) return;
+    setBusyId(target._id);
     try {
       await partnerApi.reactivate(target.type, target._id);
-      refetch();
+      await refetchSilent();
     } catch {
       /* interceptor */
+    } finally {
+      setBusyId(null);
     }
   };
 
@@ -212,7 +236,7 @@ export default function Partners() {
     try {
       await partnerApi.hardDelete(deleteTarget.type, deleteTarget._id);
       setDeleteTarget(null);
-      refetch();
+      await refetchSilent();
     } catch {
       /* interceptor */
     } finally {
@@ -228,7 +252,9 @@ export default function Partners() {
         render: (row) => (
           <button
             type="button"
-            onClick={() => navigate(`/partners/${row.type}/${row._id}`)}
+            onClick={() =>
+              navigate(`/partners/${row.category ?? row.type}/${row._id}`)
+            }
             className="flex items-center gap-3 text-left"
           >
             <Avatar src={row.logo ?? undefined} fallback={row.name} size="sm" />
@@ -294,68 +320,77 @@ export default function Partners() {
         key: "actions",
         header: "",
         className: "w-12 text-right",
-        render: (row) => (
-          <div className="flex justify-end">
-            <Dropdown
-              trigger={
-                <span className="rounded-md px-2 py-1 text-text-muted hover:bg-surface-alt">
-                  ⋯
-                </span>
-              }
-              items={[
-                {
-                  key: "view",
-                  label: "View",
-                  onClick: () => navigate(`/partners/${row.type}/${row._id}`),
-                },
-                ...(row.status === "pending"
-                  ? [
-                      {
-                        key: "approve",
-                        label: "Approve",
-                        onClick: () => handleApprove(row),
-                      },
-                      {
-                        key: "reject",
-                        label: "Reject",
-                        danger: true,
-                        onClick: () => setRejectTarget(row),
-                      },
-                    ]
-                  : []),
-                ...(row.status === "approved" || row.status === "active"
-                  ? [
-                      {
-                        key: "suspend",
-                        label: "Suspend",
-                        danger: true,
-                        onClick: () => setSuspendTarget(row),
-                      },
-                    ]
-                  : []),
-                ...(row.status === "suspended" || row.status === "rejected"
-                  ? [
-                      {
-                        key: "reactivate",
-                        label: "Reactivate",
-                        onClick: () => handleReactivate(row),
-                      },
-                    ]
-                  : []),
-                {
-                  key: "delete",
-                  label: "Delete permanently",
-                  danger: true,
-                  onClick: () => setDeleteTarget(row),
-                },
-              ]}
-            />
-          </div>
-        ),
+        render: (row) => {
+          const isBusy = busyId === row._id;
+          return (
+            <div className="flex items-center justify-end gap-2">
+              {isBusy && <Spinner size="sm" />}
+              <Dropdown
+                trigger={
+                  <span
+                    className={`rounded-md px-2 py-1 text-text-muted hover:bg-surface-alt ${
+                      isBusy ? "pointer-events-none opacity-50" : ""
+                    }`}
+                  >
+                    ⋯
+                  </span>
+                }
+                items={[
+                  {
+                    key: "view",
+                    label: "View",
+                    onClick: () =>
+                      navigate(`/partners/${row.category ?? row.type}/${row._id}`),
+                  },
+                  ...(row.status === "pending"
+                    ? [
+                        {
+                          key: "approve",
+                          label: "Approve",
+                          onClick: () => handleApprove(row),
+                        },
+                        {
+                          key: "reject",
+                          label: "Reject",
+                          danger: true,
+                          onClick: () => setRejectTarget(row),
+                        },
+                      ]
+                    : []),
+                  ...(row.status === "approved" || row.status === "active"
+                    ? [
+                        {
+                          key: "suspend",
+                          label: "Suspend",
+                          danger: true,
+                          onClick: () => setSuspendTarget(row),
+                        },
+                      ]
+                    : []),
+                  ...(row.status === "suspended" || row.status === "rejected"
+                    ? [
+                        {
+                          key: "reactivate",
+                          label: "Reactivate",
+                          onClick: () => handleReactivate(row),
+                        },
+                      ]
+                    : []),
+                  {
+                    key: "delete",
+                    label: "Delete permanently",
+                    danger: true,
+                    onClick: () => setDeleteTarget(row),
+                  },
+                ]}
+              />
+            </div>
+          );
+        },
       },
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [busyId]
   );
 
   if (detailOpen && type && id) {

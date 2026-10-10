@@ -84,6 +84,10 @@ accommodationPartnerSchema.index({ location: 1, town: 1 });
 accommodationPartnerSchema.index({ latitude: 1, longitude: 1 });
 accommodationPartnerSchema.index({ name: "text", description: "text" });
 
+accommodationPartnerSchema.virtual("category").get(() => "accommodation");
+accommodationPartnerSchema.set("toJSON", { virtuals: true });
+accommodationPartnerSchema.set("toObject", { virtuals: true });
+
 const AccommodationPartner = mongoose.model("AccommodationPartner", accommodationPartnerSchema);
 
 export default AccommodationPartner;

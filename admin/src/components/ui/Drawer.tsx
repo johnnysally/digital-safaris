@@ -1,26 +1,27 @@
 import { useEffect, type ReactNode } from "react";
-import { classNames } from "../../utils/helpers";
 
 interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  side?: "left" | "right";
   title?: string;
-  children: ReactNode;
+  side?: "left" | "right";
   width?: string;
+  children: ReactNode;
 }
 
 export default function Drawer({
   isOpen,
   onClose,
-  side = "right",
   title,
+  side = "right",
+  width = "w-full max-w-md",
   children,
-  width = "w-80",
 }: DrawerProps) {
   useEffect(() => {
     if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", onKey);
     document.body.style.overflow = "hidden";
     return () => {
@@ -32,34 +33,35 @@ export default function Drawer({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-[1000]">
       <div
-        className="absolute inset-0 bg-primary-900/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
         onClick={onClose}
-        aria-hidden
       />
-      <aside
-        className={classNames(
-          "absolute top-0 flex h-full flex-col border-border bg-surface shadow-lg",
-          width,
-          side === "right" ? "right-0 border-l" : "left-0 border-r"
-        )}
+
+      <div
+        className={`absolute top-0 ${side}-0 flex h-full ${width} flex-col border-l border-border bg-surface shadow-xl`}
       >
         {title && (
-          <div className="flex items-center justify-between border-b border-border px-4 py-3">
-            <h2 className="text-sm font-medium text-text-primary">{title}</h2>
+          <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3">
+            <h3 className="text-base font-semibold text-text-primary">
+              {title}
+            </h3>
             <button
               type="button"
               onClick={onClose}
-              className="text-text-muted hover:text-text-primary"
+              className="rounded p-1 text-text-muted hover:bg-surface-alt"
               aria-label="Close"
             >
               ✕
             </button>
           </div>
         )}
-        <div className="flex-1 overflow-y-auto p-4">{children}</div>
-      </aside>
+
+        <div className="min-h-0 flex-1 overflow-y-auto p-5 scrollbar-thin">
+          {children}
+        </div>
+      </div>
     </div>
   );
 }

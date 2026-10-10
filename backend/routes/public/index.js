@@ -9,8 +9,6 @@ import uploadRoutes from "./uploadRoutes.js";
 import webhookRoutes from "./webhookRoutes.js";
 import paymentRoutes from "./paymentRoutes.js";
 import aiConciergeRoutes from "./aiConciergeRoutes.js";
-import newsletterRoutes from "./newsletterRoutes.js";
-import reviewRoutes from "./reviewRoutes.js";
 
 const router = Router();
 
@@ -24,7 +22,5 @@ router.use("/upload", uploadRoutes);
 router.use("/webhook", webhookRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/ai-concierge", aiConciergeRoutes);
-router.use("/newsletter", newsletterRoutes);
-router.use("/reviews", reviewRoutes);
 
 export default router;

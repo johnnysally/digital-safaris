@@ -7,7 +7,14 @@ export type AccountStatus = "active" | "suspended" | "pending" | "rejected";
 
 export type PartnerType = "accommodation" | "restaurant" | "transport";
 
-export type PartnerStatus = "pending" | "approved" | "rejected" | "suspended";
+export type PartnerStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "suspended"
+  | "active"
+  | "closed"
+  | "offline";
 
 export type AdminRole =
   | "super_admin"
@@ -95,6 +102,17 @@ export type BackupFrequency = "daily" | "weekly" | "monthly";
 export type BackupStatus = "ready" | "processing" | "failed";
 
 export type LegalType = "terms" | "privacy" | "cookies";
+
+export type LocationType = "country" | "county" | "town" | "city" | "area";
+
+export type DownloadPlatform =
+  | "windows"
+  | "macos"
+  | "linux"
+  | "android"
+  | "ios"
+  | "web"
+  | "other";
 
 export interface PaginationMeta {
   page: number;
@@ -226,6 +244,7 @@ export interface CustomerDetails extends Customer {
 export interface Partner {
   _id: ID;
   type: PartnerType;
+  category?: PartnerType;
   name: string;
   email: string;
   phone?: string;
@@ -560,6 +579,41 @@ export interface Branding {
   updatedAt?: ISODate;
 }
 
+export interface Location {
+  _id: ID;
+  name: string;
+  slug: string;
+  type: LocationType;
+  parent?: ID | null;
+  countryCode: string;
+  county?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  radiusKm: number;
+  timezone: string;
+  currency: string;
+  isOperational: boolean;
+  isDefault: boolean;
+  createdAt: ISODate;
+  updatedAt: ISODate;
+}
+
+export interface DownloadItem {
+  _id?: ID;
+  name: string;
+  platform: DownloadPlatform;
+  architecture: string;
+  version: string;
+  size: string;
+  url: string;
+  minimumOs?: string | null;
+  checksum?: string | null;
+  releaseNotes?: string | null;
+  available: boolean;
+  createdAt?: ISODate;
+  updatedAt?: ISODate;
+}
+
 export interface Backup {
   filename: string;
   size: number;
@@ -725,24 +779,3 @@ export type StatusVariant =
   | "danger"
   | "info"
   | "neutral";
-
-  export type LocationType = "country" | "county" | "town" | "city" | "area";
-
-export interface Location {
-  _id: ID;
-  name: string;
-  slug: string;
-  type: LocationType;
-  parent?: ID | null;
-  countryCode: string;
-  county?: string | null;
-  latitude?: number | null;
-  longitude?: number | null;
-  radiusKm: number;
-  timezone: string;
-  currency: string;
-  isOperational: boolean;
-  isDefault: boolean;
-  createdAt: ISODate;
-  updatedAt: ISODate;
-}
