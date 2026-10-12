@@ -60,6 +60,7 @@ export default function Sidebar({ groups }: SidebarProps) {
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
   const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
+  const logoAppearance = branding.logoAppearance;
   const appNameParts = appName.split(/\s+/);
 
   return (
@@ -83,6 +84,13 @@ export default function Sidebar({ groups }: SidebarProps) {
                 src={logoUrl}
                 alt=""
                 className="h-full w-full object-cover"
+                style={logoAppearance ? {
+                  maxWidth: `${logoAppearance.maxWidth}px`,
+                  maxHeight: `${logoAppearance.maxHeight}px`,
+                  objectFit: logoAppearance.fit,
+                  padding: `${logoAppearance.padding}px`,
+                  borderRadius: `${logoAppearance.borderRadius}px`,
+                } : undefined}
               />
             </span>
             <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-[#21170f] bg-[#75a66a]" />

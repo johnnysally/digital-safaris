@@ -41,7 +41,6 @@ export const DEFAULT_PAGE_SIZE = 20;
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: "ds_customer_access_token",
   REFRESH_TOKEN: "ds_customer_refresh_token",
-  THEME: "ds_customer_theme",
 } as const;
 
 export const STATUS_COLORS: Record<string, StatusVariant> = {

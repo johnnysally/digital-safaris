@@ -36,9 +36,6 @@ const storage = {
   getRefreshToken: () => get(STORAGE_KEYS.REFRESH_TOKEN),
   setRefreshToken: (t: string) => set(STORAGE_KEYS.REFRESH_TOKEN, t),
 
-  getTheme: () => get(STORAGE_KEYS.THEME),
-  setTheme: (t: string) => set(STORAGE_KEYS.THEME, t),
-
   clearSession: () => {
     remove(STORAGE_KEYS.ACCESS_TOKEN);
     remove(STORAGE_KEYS.REFRESH_TOKEN);

@@ -26,6 +26,7 @@ export default function Logo({
 
   const primary = branding.logoUrl || branding.logo;
   const src = errored || !primary ? "/favicon.svg" : primary;
+  const appearance = branding.logoAppearance;
 
   return (
     <span
@@ -36,6 +37,14 @@ export default function Logo({
         src={src}
         alt={branding.metaTitle || "Digital Safaris"}
         className={classNames("w-auto object-contain", SIZES[size])}
+        style={appearance ? {
+          maxWidth: `${appearance.maxWidth}px`,
+          maxHeight: `${appearance.maxHeight}px`,
+          height: `${Math.min(appearance.maxHeight, size === "sm" ? 24 : size === "md" ? 32 : 48)}px`,
+          objectFit: appearance.fit,
+          padding: `${appearance.padding}px`,
+          borderRadius: `${appearance.borderRadius}px`,
+        } : undefined}
         onError={() => setErrored(true)}
       />
       {showText && (

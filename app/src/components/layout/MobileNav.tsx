@@ -66,6 +66,7 @@ export default function MobileNav({
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
   const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
+  const logoAppearance = branding.logoAppearance;
 
   return (
     <div
@@ -100,6 +101,15 @@ export default function MobileNav({
               src={logoUrl}
               alt=""
               className="h-10 w-10 rounded-xl border border-[#dda24c]/60 object-cover shadow-sm"
+              style={logoAppearance ? {
+                maxWidth: `${logoAppearance.maxWidth}px`,
+                maxHeight: `${logoAppearance.maxHeight}px`,
+                width: `${Math.min(40, logoAppearance.maxWidth)}px`,
+                height: `${Math.min(40, logoAppearance.maxHeight)}px`,
+                objectFit: logoAppearance.fit,
+                padding: `${logoAppearance.padding}px`,
+                borderRadius: `${logoAppearance.borderRadius}px`,
+              } : undefined}
             />
             <span className="text-base font-semibold text-white">
               {appName}

@@ -20,6 +20,7 @@ import Settings from "../pages/Settings";
 import Backup from "../pages/Backup";
 import Branding from "../pages/Branding";
 import Health from "../pages/Health";
+import Profile from "../pages/Profile";
 import NotFound from "../pages/NotFound";
 
 function FullPageLoader() {
@@ -100,6 +101,7 @@ export default function AppRoutes() {
         <Route path="/contacts" element={<Contacts />} />
 
         <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/backup" element={<Backup />} />
         <Route path="/branding" element={<Branding />} />
         <Route path="/health" element={<Health />} />

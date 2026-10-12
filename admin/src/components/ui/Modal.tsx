@@ -48,12 +48,12 @@ export default function Modal({
 
       <div
         className={classNames(
-          "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-lg border border-border bg-surface shadow-xl",
+          "relative z-10 flex max-h-[90vh] w-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-[0_24px_80px_rgba(0,0,0,.24)]",
           SIZES[size]
         )}
       >
         {title && (
-          <div className="flex shrink-0 items-center justify-between border-b border-border px-5 py-3">
+          <div className="flex min-h-16 shrink-0 items-center justify-between border-b border-border bg-surface-alt/45 px-5 py-4">
             <h3 className="text-base font-semibold text-text-primary">
               {title}
             </h3>

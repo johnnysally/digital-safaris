@@ -1,4 +1,4 @@
-import axios from "./axios";
+import axios, { unwrap } from "./axios";
 import type {
   Admin,
   ChangePasswordPayload,
@@ -128,6 +128,28 @@ const authApi = {
   async me(): Promise<{ admin: Admin }> {
     const res = await axios.get("/admin/auth/me");
     return normalizeMe(res.data);
+  },
+
+  async updateProfile(payload: {
+    firstName: string;
+    lastName: string;
+    phone: string;
+    avatar?: string | null;
+  }): Promise<Admin> {
+    const res = await axios.patch("/admin/auth/me", payload);
+    return unwrap<Admin>(res.data);
+  },
+
+  async uploadAvatar(file: File): Promise<string> {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("folder", "admin/avatars");
+    const res = await axios.post("/public/upload/single", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const uploaded = unwrap<{ url?: string }>(res.data);
+    if (!uploaded.url) throw new Error("Upload response did not include an image URL");
+    return uploaded.url;
   },
 
   async changePassword(payload: ChangePasswordPayload): Promise<void> {

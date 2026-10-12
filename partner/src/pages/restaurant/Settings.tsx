@@ -1,10 +1,17 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { CreditCard, Store } from "lucide-react";
+import { ArrowRight, CheckCircle2, CreditCard, MapPin, RefreshCw, Store } from "lucide-react";
 import profileApi from "../../api/restaurant/profileApi";
 import walletApi from "../../api/restaurant/walletApi";
 import { getApiErrorMessage } from "../../api/axios";
 import type { RestaurantPartner, Wallet } from "../../types";
+
+const payoutFrequencyLabels: Record<Wallet["payoutFrequency"], string> = {
+	daily: "Daily",
+	weekly: "Weekly",
+	biweekly: "Every two weeks",
+	monthly: "Monthly",
+};
 
 export function RestaurantSettingsPage() {
 	const [profile, setProfile] = useState<RestaurantPartner | null>(null);
@@ -30,12 +37,121 @@ export function RestaurantSettingsPage() {
 		return () => { cancelled = true; };
 	}, [reload]);
 
-	return <div className="grid gap-[11px]">
-		<header className="mb-[2px] flex items-center justify-between gap-3 max-[480px]:items-start [&>div>p]:mb-1 [&>div>p]:text-[8px] [&>div>p]:font-semibold [&>div>p]:uppercase [&>div>p]:tracking-[.7px] [&>div>p]:text-[#8a8c82] [&_h1]:m-0 [&_h1]:text-[22px] [&_h1]:tracking-[-.55px] [&>div>span]:mt-1 [&>div>span]:block [&>div>span]:text-[10px] [&>div>span]:text-[#85877e]"><div><p>Restaurant Partner</p><h1>Settings</h1><span>Manage restaurant details and payout preferences.</span></div><button className="inline-flex items-center gap-[5px] rounded-[5px] bg-[#707e48] px-[10px] py-2 text-[9px] font-semibold text-white no-underline disabled:opacity-60" type="button" disabled={loading} onClick={() => setReload((value) => value + 1)}>Refresh</button></header>
-		{error && <div className="mb-[10px] flex items-center justify-between gap-[10px] rounded-md border border-[#f0d9d4] bg-[#fff8f7] px-[11px] py-[9px] text-[9px] text-[#994c43] [&_button]:rounded-[5px] [&_button]:border [&_button]:border-[#eed3cf] [&_button]:bg-white [&_button]:px-2 [&_button]:py-[5px] [&_button]:text-[8px] [&_button]:text-[#914940]" role="alert">{error}<button type="button" onClick={() => setReload((value) => value + 1)}>Retry</button></div>}
-		{loading ? <div className="min-w-0 rounded-lg border border-[#eaeae5] bg-white shadow-[0_1px_3px_rgba(34,37,29,.025)] p-3 text-center text-[9px] text-[#7f8178]" role="status">Loading settings…</div> : <>
-			<section className="min-w-0 rounded-lg border border-[#eaeae5] bg-white shadow-[0_1px_3px_rgba(34,37,29,.025)] grid justify-items-center gap-3 p-6 text-center [&>svg]:text-[#718044] [&_h2]:m-0 [&_h2]:text-base [&_p]:m-0 [&_p]:max-w-2xl [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-[#85877e] [&>div]:flex [&>div]:flex-wrap [&>div]:justify-center [&>div]:gap-2 [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1.5 [&_a]:rounded [&_a]:bg-[#707e48] [&_a]:px-3 [&_a]:py-2 [&_a]:text-sm [&_a]:text-white [&_a]:no-underline"><Store size={25} /><h2>{profile?.name ?? "Restaurant workspace"}</h2><p>{profile ? `Account status: ${profile.status}. Restaurant is ${profile.isOpen ? "open" : "closed"} and ${profile.isAcceptingOrders ? "accepting" : "not accepting"} orders.` : "Restaurant profile is unavailable."}<br />Update your business details and availability from the restaurant profile.</p><div><Link to="/partner/restaurant/profile"><Store size={14} /> Restaurant profile</Link></div></section>
-			<section className="min-w-0 rounded-lg border border-[#eaeae5] bg-white shadow-[0_1px_3px_rgba(34,37,29,.025)] grid justify-items-center gap-3 p-6 text-center [&>svg]:text-[#718044] [&_h2]:m-0 [&_h2]:text-base [&_p]:m-0 [&_p]:max-w-2xl [&_p]:text-sm [&_p]:leading-relaxed [&_p]:text-[#85877e] [&>div]:flex [&>div]:flex-wrap [&>div]:justify-center [&>div]:gap-2 [&_a]:inline-flex [&_a]:items-center [&_a]:gap-1.5 [&_a]:rounded [&_a]:bg-[#707e48] [&_a]:px-3 [&_a]:py-2 [&_a]:text-sm [&_a]:text-white [&_a]:no-underline"><CreditCard size={25} /><h2>Payout preferences</h2><p>{wallet ? `${wallet.payoutMethod === "mpesa" ? "M-Pesa" : "Bank transfer"} · ${wallet.payoutFrequency} payouts · minimum ${wallet.currency} ${wallet.minimumPayout.toLocaleString()}` : "Payout details are unavailable."}<br />Change your payout method and schedule from wallet settings.</p><div><Link to="/partner/restaurant/wallet"><CreditCard size={14} /> Payout settings</Link></div></section>
-		</>}
-	</div>;
+	return (
+		<div className="grid gap-6">
+			<header className="flex flex-wrap items-end justify-between gap-4">
+				<div>
+					<p className="mb-2 text-xs font-semibold uppercase tracking-[.12em] text-[#777c67]">Restaurant partner</p>
+					<h1 className="m-0 text-3xl font-semibold tracking-[-.04em] text-[#282b25]">Settings</h1>
+					<p className="mb-0 mt-2 text-sm text-[#74776e]">Manage your restaurant profile and payout preferences.</p>
+				</div>
+				<button
+					className="inline-flex min-h-10 items-center gap-2 rounded-lg border border-[#dedfd6] bg-white px-4 text-sm font-semibold text-[#43483b] transition-colors hover:bg-[#f8f8f4] disabled:cursor-not-allowed disabled:opacity-60"
+					type="button"
+					disabled={loading}
+					onClick={() => setReload((value) => value + 1)}
+				>
+					<RefreshCw size={16} aria-hidden="true" />
+					Refresh
+				</button>
+			</header>
+
+			{error && (
+				<div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-[#f0d9d4] bg-[#fff8f7] px-4 py-3 text-sm text-[#994c43]" role="alert">
+					<span>{error}</span>
+					<button className="rounded-md border border-[#eed3cf] bg-white px-3 py-2 text-sm font-semibold text-[#914940]" type="button" onClick={() => setReload((value) => value + 1)}>Try again</button>
+				</div>
+			)}
+
+			{loading ? (
+				<div className="rounded-2xl border border-[#e8e9e2] bg-white px-5 py-12 text-center text-sm text-[#74776e]" role="status">
+					Loading your settings…
+				</div>
+			) : (
+				<div className="grid items-start gap-5 xl:grid-cols-2">
+					<section className="min-w-0 rounded-2xl border border-[#e8e9e2] bg-white p-6 shadow-[0_2px_8px_rgba(34,37,29,.035)] max-[480px]:p-5" aria-labelledby="restaurant-profile-heading">
+						<div className="mb-6 flex items-start gap-4">
+							<div className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f0f2e8] text-[#687746]">
+								<Store size={23} aria-hidden="true" />
+							</div>
+							<div className="min-w-0">
+								<h2 className="m-0 text-lg font-semibold text-[#303329]" id="restaurant-profile-heading">Restaurant profile</h2>
+								<p className="mb-0 mt-1 text-sm leading-relaxed text-[#777a70]">Your business details and order availability.</p>
+							</div>
+						</div>
+
+						<div className="mb-5">
+							<p className="mb-3 break-words text-2xl font-semibold tracking-[-.03em] text-[#303329]">{profile?.name ?? "Restaurant workspace"}</p>
+							<div className="flex flex-wrap gap-2">
+								<span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${profile ? "bg-[#f0f2e8] text-[#687746]" : "bg-[#f4f4f1] text-[#777a70]"}`}>
+									<CheckCircle2 size={14} aria-hidden="true" />
+									{profile ? `Account ${profile.status}` : "Profile unavailable"}
+								</span>
+								{profile && (
+									<>
+										<span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${profile.isOpen ? "bg-[#edf5e9] text-[#4f7b4c]" : "bg-[#f7f0e7] text-[#916b38]"}`}>
+											{profile.isOpen ? "Open" : "Closed"}
+										</span>
+										<span className={`rounded-full px-3 py-1.5 text-xs font-semibold ${profile.isAcceptingOrders ? "bg-[#edf5e9] text-[#4f7b4c]" : "bg-[#f4f4f1] text-[#777a70]"}`}>
+											{profile.isAcceptingOrders ? "Accepting orders" : "Not accepting orders"}
+										</span>
+									</>
+								)}
+							</div>
+						</div>
+
+						<div className="mb-6 flex items-start gap-3 border-t border-[#eff0ea] pt-4 text-sm text-[#6f7368]">
+							<MapPin className="mt-0.5 shrink-0 text-[#828875]" size={17} aria-hidden="true" />
+							<p className="m-0 leading-relaxed">{profile ? [profile.address, profile.town].filter(Boolean).join(", ") : "Restaurant location is unavailable."}</p>
+						</div>
+
+						<Link className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-[#707e48] px-4 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#5e6b3b]" to="/partner/restaurant/profile">
+							<span className="inline-flex items-center gap-2"><Store size={17} aria-hidden="true" /> Manage restaurant profile</span>
+							<ArrowRight size={17} aria-hidden="true" />
+						</Link>
+					</section>
+
+					<section className="min-w-0 rounded-2xl border border-[#e8e9e2] bg-white p-6 shadow-[0_2px_8px_rgba(34,37,29,.035)] max-[480px]:p-5" aria-labelledby="payout-preferences-heading">
+						<div className="mb-6 flex items-start gap-4">
+							<div className="grid size-12 shrink-0 place-items-center rounded-xl bg-[#f0f2e8] text-[#687746]">
+								<CreditCard size={23} aria-hidden="true" />
+							</div>
+							<div className="min-w-0">
+								<h2 className="m-0 text-lg font-semibold text-[#303329]" id="payout-preferences-heading">Payout preferences</h2>
+								<p className="mb-0 mt-1 text-sm leading-relaxed text-[#777a70]">How and when your earnings are paid out.</p>
+							</div>
+						</div>
+
+						{wallet ? (
+							<dl className="mb-6 divide-y divide-[#eff0ea] border-y border-[#eff0ea]">
+								<div className="flex items-center justify-between gap-4 py-4">
+									<dt className="text-sm text-[#777a70]">Payout method</dt>
+									<dd className="m-0 text-right text-sm font-semibold text-[#303329]">{wallet.payoutMethod === "mpesa" ? "M-Pesa" : "Bank transfer"}</dd>
+								</div>
+								<div className="flex items-center justify-between gap-4 py-4">
+									<dt className="text-sm text-[#777a70]">Payout schedule</dt>
+									<dd className="m-0 text-right text-sm font-semibold text-[#303329]">{payoutFrequencyLabels[wallet.payoutFrequency]}</dd>
+								</div>
+								<div className="flex items-center justify-between gap-4 py-4">
+									<dt className="text-sm text-[#777a70]">Minimum payout</dt>
+									<dd className="m-0 text-right text-sm font-semibold text-[#303329]">{wallet.currency} {wallet.minimumPayout.toLocaleString()}</dd>
+								</div>
+								<div className="flex items-center justify-between gap-4 py-4">
+									<dt className="text-sm text-[#777a70]">Wallet status</dt>
+									<dd className={`m-0 rounded-full px-3 py-1 text-xs font-semibold ${wallet.status === "active" ? "bg-[#edf5e9] text-[#4f7b4c]" : "bg-[#f9edeb] text-[#a3574d]"}`}>{wallet.status === "active" ? "Active" : "Frozen"}</dd>
+								</div>
+							</dl>
+						) : (
+							<p className="mb-6 border-y border-[#eff0ea] py-5 text-sm leading-relaxed text-[#777a70]">Payout details are unavailable. Try refreshing, or visit wallet settings to review your account.</p>
+						)}
+
+						<Link className="inline-flex min-h-11 w-full items-center justify-between rounded-lg bg-[#707e48] px-4 text-sm font-semibold text-white no-underline transition-colors hover:bg-[#5e6b3b]" to="/partner/restaurant/wallet">
+							<span className="inline-flex items-center gap-2"><CreditCard size={17} aria-hidden="true" /> Manage payout settings</span>
+							<ArrowRight size={17} aria-hidden="true" />
+						</Link>
+					</section>
+				</div>
+			)}
+		</div>
+	);
 }

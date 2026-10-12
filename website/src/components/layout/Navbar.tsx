@@ -25,9 +25,16 @@ export const Navbar: React.FC = () => {
 
           <Link to="/" className="flex items-center gap-2 group py-1">
             <img
-              src="/logo.png"
+              src={config.site_logo || "/logo.png"}
               alt="DigitalSafaris Logo"
               className="h-14 sm:h-16 w-auto object-contain group-hover:scale-105 transition-transform"
+              style={config.site_logo_appearance ? {
+                height: `${Math.min(64, config.site_logo_appearance.maxHeight)}px`,
+                maxWidth: `${config.site_logo_appearance.maxWidth}px`,
+                objectFit: config.site_logo_appearance.fit,
+                padding: `${config.site_logo_appearance.padding}px`,
+                borderRadius: `${config.site_logo_appearance.borderRadius}px`,
+              } : undefined}
             />
           </Link>
 

@@ -1,8 +1,6 @@
 export type ID = string;
 export type ISODate = string;
 export type Hex = `#${string}`;
-export type Theme = "light" | "dark";
-
 export type AccountStatus = "active" | "suspended" | "pending" | "rejected";
 
 export type PartnerType = "accommodation" | "restaurant" | "transport";
@@ -570,9 +568,19 @@ export interface Branding {
   logo?: string;
   logoUrl?: string;
   favicon?: string;
+  logoAppearance?: {
+    maxWidth: number;
+    maxHeight: number;
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
+  faviconAppearance?: {
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
   emailHeaderLogo?: string;
-  primaryColor: Hex;
-  secondaryColor: Hex;
   fontFamily: string;
   metaTitle: string;
   metaDescription: string;

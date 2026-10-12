@@ -14,11 +14,11 @@ interface LogoProps {
   onClick?: () => void;
 }
 
-const SIZES: Record<Size, { box: string; img: string; text: string }> = {
-  sm: { box: "h-8 w-8 text-xs", img: "h-10", text: "text-sm" },
-  md: { box: "h-10 w-10 text-sm", img: "h-14", text: "text-base" },
-  lg: { box: "h-12 w-12 text-base", img: "h-20", text: "text-lg" },
-  xl: { box: "h-16 w-16 text-lg", img: "h-28", text: "text-xl" },
+const SIZES: Record<Size, { box: string; img: string; imageHeight: number; text: string }> = {
+  sm: { box: "h-8 w-8 text-xs", img: "h-10", imageHeight: 40, text: "text-sm" },
+  md: { box: "h-10 w-10 text-sm", img: "h-14", imageHeight: 56, text: "text-base" },
+  lg: { box: "h-12 w-12 text-base", img: "h-20", imageHeight: 80, text: "text-lg" },
+  xl: { box: "h-16 w-16 text-lg", img: "h-28", imageHeight: 112, text: "text-xl" },
 };
 
 function initialsOf(value: string): string {
@@ -41,6 +41,7 @@ export default function Logo({
   const s = SIZES[size];
 
   const logoSrc = branding?.logoUrl || branding?.logo;
+  const appearance = branding?.logoAppearance;
   const label = text ?? branding?.metaTitle ?? fallbackText;
   const badge = initialsOf(fallbackText);
 
@@ -74,6 +75,14 @@ export default function Logo({
             src={logoSrc}
             alt={fallbackText}
             className={classNames("w-auto object-contain", s.img)}
+            style={appearance ? {
+              maxWidth: `${appearance.maxWidth}px`,
+              maxHeight: `${appearance.maxHeight}px`,
+              height: `${Math.min(appearance.maxHeight, s.imageHeight)}px`,
+              objectFit: appearance.fit,
+              padding: `${appearance.padding}px`,
+              borderRadius: `${appearance.borderRadius}px`,
+            } : undefined}
           />
         </span>
       ) : (

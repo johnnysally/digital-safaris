@@ -1,5 +1,4 @@
 import { BrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "./context/themeContext";
 import { ToastProvider } from "./context/toastContext";
 import { AuthProvider } from "./context/authContext";
 import { BrandingProvider } from "./context/brandingContext";
@@ -14,17 +13,15 @@ export default function App() {
         v7_relativeSplatPath: true,
       }}
     >
-      <ThemeProvider>
-        <ToastProvider>
-          <AuthProvider>
-            <BrandingProvider>
-              <SocketProvider>
-                <AppRoutes />
-              </SocketProvider>
-            </BrandingProvider>
-          </AuthProvider>
-        </ToastProvider>
-      </ThemeProvider>
+      <ToastProvider>
+        <AuthProvider>
+          <BrandingProvider>
+            <SocketProvider>
+              <AppRoutes />
+            </SocketProvider>
+          </BrandingProvider>
+        </AuthProvider>
+      </ToastProvider>
     </BrowserRouter>
   );
 }

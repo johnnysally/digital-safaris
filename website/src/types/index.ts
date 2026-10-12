@@ -60,6 +60,19 @@ export interface SiteConfig {
   social_links: SocialLinks;
   ai_chat: AiChatConfig;
   site_logo: string | null;
+  site_logo_appearance?: {
+    maxWidth: number;
+    maxHeight: number;
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
+  favicon?: string;
+  favicon_appearance?: {
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
   payment_methods: PaymentMethodPublic[];
   locations: Location[];
 }
@@ -69,8 +82,6 @@ export interface Branding {
   logoUrl?: string;
   favicon?: string;
   emailHeaderLogo?: string;
-  primaryColor: Hex;
-  secondaryColor: Hex;
   fontFamily: string;
   metaTitle: string;
   metaDescription: string;

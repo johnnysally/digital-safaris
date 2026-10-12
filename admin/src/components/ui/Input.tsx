@@ -34,14 +34,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           ref={ref}
           id={inputId}
           className={classNames(
-            "w-full rounded-md border bg-surface px-3 py-2 text-sm text-text-primary",
+            "w-full rounded-lg border bg-surface px-3 py-2.5 text-sm text-text-primary shadow-[0_1px_2px_rgba(32,25,17,.025)] transition-shadow",
             "placeholder:text-text-muted",
             "focus:outline-none focus:ring-2",
             error
               ? "border-danger focus:border-danger focus:ring-danger/30"
-              : "border-border focus:border-secondary-500 focus:ring-secondary-500/40",
-            leftIcon && "pl-9",
-            rightIcon && "pr-9",
+              : "border-border hover:border-secondary-500/45 focus:border-secondary-500 focus:ring-secondary-500/25",
+            Boolean(leftIcon) && "pl-9",
+            Boolean(rightIcon) && "pr-9",
             "disabled:cursor-not-allowed disabled:bg-surface-alt",
             className
           )}

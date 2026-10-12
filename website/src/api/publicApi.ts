@@ -42,6 +42,9 @@ export const getSiteConfig = async (): Promise<SiteConfig> => {
       color: "#c47c2b",
     },
     site_logo: branding.logoUrl || branding.logo || "/logo.png",
+    site_logo_appearance: branding.logoAppearance,
+    favicon: branding.favicon,
+    favicon_appearance: branding.faviconAppearance,
     payment_methods: paymentMethods,
     locations,
   };

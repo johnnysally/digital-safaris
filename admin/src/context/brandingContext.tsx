@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import brandingApi from "../api/brandingApi";
-import type { Branding, Hex } from "../types";
+import type { Branding } from "../types";
 
 interface BrandingContextValue {
   branding: Branding | null;
@@ -27,34 +27,50 @@ const DEFAULT_BRANDING: Branding = {
   logoUrl: "/logo.svg",
   favicon: "/favicon.svg",
   emailHeaderLogo: "/logo.svg",
-  primaryColor: "#1A1F2E" as Hex,
-  secondaryColor: "#C9A063" as Hex,
   fontFamily: "Montserrat",
   metaTitle: "Digital Safaris — Admin",
   metaDescription: "Internal control center for the Digital Safaris platform",
 };
 
-function hexToRgbTriplet(hex: string): string | null {
-  const cleaned = String(hex).replace("#", "").trim();
-  const expanded =
-    cleaned.length === 3
-      ? cleaned.split("").map((c) => c + c).join("")
-      : cleaned;
-  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) return null;
-  const r = parseInt(expanded.slice(0, 2), 16);
-  const g = parseInt(expanded.slice(2, 4), 16);
-  const b = parseInt(expanded.slice(4, 6), 16);
-  return `${r} ${g} ${b}`;
+let faviconRevision = 0;
+
+async function createStyledFavicon(
+  src: string,
+  appearance: Branding["faviconAppearance"]
+): Promise<string> {
+  if (!appearance) return src;
+  const image = new Image();
+  if (/^https?:\/\//i.test(src)) image.crossOrigin = "anonymous";
+  image.src = src;
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("Favicon image could not be loaded"));
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable for favicon styling");
+
+  const radius = Math.max(0, Math.min(32, appearance.borderRadius));
+  context.beginPath();
+  context.roundRect(0, 0, 64, 64, radius);
+  context.clip();
+  const padding = Math.max(0, Math.min(24, appearance.padding));
+  const available = 64 - padding * 2;
+  const scale = appearance.fit === "cover"
+    ? Math.max(available / image.naturalWidth, available / image.naturalHeight)
+    : Math.min(available / image.naturalWidth, available / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  context.drawImage(image, (64 - width) / 2, (64 - height) / 2, width, height);
+  return canvas.toDataURL("image/png");
 }
 
 function applyBranding(branding: Branding) {
   const root = document.documentElement;
 
-  const primary = hexToRgbTriplet(branding.primaryColor);
-  const secondary = hexToRgbTriplet(branding.secondaryColor);
-
-  if (primary) root.style.setProperty("--ds-primary", primary);
-  if (secondary) root.style.setProperty("--ds-secondary", secondary);
   if (branding.fontFamily)
     root.style.setProperty("--ds-font", branding.fontFamily);
 
@@ -72,7 +88,15 @@ function applyBranding(branding: Branding) {
       link.rel = "icon";
       document.head.appendChild(link);
     }
-    link.href = branding.favicon;
+    const revision = ++faviconRevision;
+    void createStyledFavicon(branding.favicon, branding.faviconAppearance)
+      .then((styledUrl) => {
+        if (revision === faviconRevision) link.href = styledUrl;
+      })
+      .catch((error: unknown) => {
+        console.error("Could not apply favicon appearance settings", error);
+        if (revision === faviconRevision) link.href = branding.favicon ?? "";
+      });
   }
 
   if (branding.metaTitle) document.title = branding.metaTitle;

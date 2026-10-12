@@ -13,9 +13,19 @@ interface Branding {
   logo?: string | null;
   logoUrl?: string | null;
   favicon?: string | null;
+  logoAppearance?: {
+    maxWidth: number;
+    maxHeight: number;
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
+  faviconAppearance?: {
+    fit: "contain" | "cover";
+    padding: number;
+    borderRadius: number;
+  };
   emailHeaderLogo?: string | null;
-  primaryColor?: string;
-  secondaryColor?: string;
   fontFamily?: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -33,42 +43,51 @@ const DEFAULT_BRANDING: Branding = {
   logoUrl: null,
   favicon: "/favicon.svg",
   emailHeaderLogo: null,
-  primaryColor: "#1A1F2E",
-  secondaryColor: "#C9A063",
   fontFamily: "Montserrat",
   metaTitle: "Digital Safaris",
   metaDescription: "Your concierge, reimagined.",
 };
 
+let faviconRevision = 0;
+
+async function styledFaviconUrl(src: string, appearance?: Branding["faviconAppearance"]) {
+  if (!appearance) return src;
+  const image = new Image();
+  if (/^https?:\/\//i.test(src)) image.crossOrigin = "anonymous";
+  image.src = src;
+  await new Promise<void>((resolve, reject) => {
+    image.onload = () => resolve();
+    image.onerror = () => reject(new Error("Favicon image could not be loaded"));
+  });
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 64;
+  canvas.height = 64;
+  const context = canvas.getContext("2d");
+  if (!context) throw new Error("Canvas is unavailable for favicon styling");
+
+  const radius = Math.max(0, Math.min(32, appearance.borderRadius));
+  context.beginPath();
+  context.roundRect(0, 0, 64, 64, radius);
+  context.clip();
+  const padding = Math.max(0, Math.min(24, appearance.padding));
+  const available = 64 - padding * 2;
+  const scale = appearance.fit === "cover"
+    ? Math.max(available / image.naturalWidth, available / image.naturalHeight)
+    : Math.min(available / image.naturalWidth, available / image.naturalHeight);
+  const width = image.naturalWidth * scale;
+  const height = image.naturalHeight * scale;
+  context.drawImage(image, (64 - width) / 2, (64 - height) / 2, width, height);
+  return canvas.toDataURL("image/png");
+}
+
 const BrandingContext = createContext<BrandingContextValue | undefined>(
   undefined
 );
 
-const hexToRgbTriplet = (hex: string): string | null => {
-  const cleaned = String(hex).replace("#", "").trim();
-  const expanded =
-    cleaned.length === 3
-      ? cleaned.split("").map((c) => c + c).join("")
-      : cleaned;
-  if (!/^[0-9a-fA-F]{6}$/.test(expanded)) return null;
-  const r = parseInt(expanded.slice(0, 2), 16);
-  const g = parseInt(expanded.slice(2, 4), 16);
-  const b = parseInt(expanded.slice(4, 6), 16);
-  return `${r} ${g} ${b}`;
-};
-
 const applyBranding = (branding: Branding) => {
   const root = document.documentElement;
 
-  const primary = branding.primaryColor
-    ? hexToRgbTriplet(branding.primaryColor)
-    : null;
-  const secondary = branding.secondaryColor
-    ? hexToRgbTriplet(branding.secondaryColor)
-    : null;
-
-  if (primary) root.style.setProperty("--ds-primary", primary);
-  if (secondary) root.style.setProperty("--ds-secondary", secondary);
   if (branding.fontFamily)
     root.style.setProperty("--ds-font", branding.fontFamily);
 
@@ -86,7 +105,15 @@ const applyBranding = (branding: Branding) => {
     link.rel = "icon";
     document.head.appendChild(link);
   }
-  link.href = favicon;
+  const revision = ++faviconRevision;
+  void styledFaviconUrl(favicon, branding.faviconAppearance)
+    .then((styledUrl) => {
+      if (revision === faviconRevision) link.href = styledUrl;
+    })
+    .catch((error: unknown) => {
+      console.error("Could not apply favicon appearance settings", error);
+      if (revision === faviconRevision) link.href = favicon;
+    });
 
   if (branding.metaTitle) document.title = branding.metaTitle;
 

@@ -509,34 +509,38 @@ export default function Home() {
               <Link
                 key={title}
                 to={to}
-                className="group overflow-hidden rounded-lg border border-[#eadfce] bg-white/70 transition hover:-translate-y-0.5 hover:shadow-md"
+                className="group relative flex min-h-[228px] flex-col overflow-hidden rounded-2xl border border-[#e9ddcc] bg-white shadow-[0_5px_18px_rgba(69,48,28,.05)] transition duration-200 hover:-translate-y-1 hover:border-[#d9bb91] hover:shadow-[0_14px_30px_rgba(69,48,28,.13)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a66b2b]"
               >
-                <div className="relative h-[112px] overflow-hidden bg-[#f2e9dc] sm:h-[132px]">
+                <div className="relative h-[126px] shrink-0 overflow-hidden bg-gradient-to-br from-[#f4e7d4] via-[#f5eee3] to-[#e5cfad] sm:h-[142px]">
                   {image ? (
                     <img
                       src={image}
                       alt=""
                       loading="lazy"
-                      className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
                     />
                   ) : (
-                    <div className="flex h-full items-center justify-center text-[#a66b2b]">
-                      <Icon className="h-8 w-8" />
+                    <div className="relative flex h-full items-center justify-center overflow-hidden text-[#a66b2b]">
+                      <span className="absolute -right-5 -top-12 h-36 w-36 rounded-full border border-white/50" />
+                      <span className="absolute -bottom-20 -left-8 h-40 w-40 rounded-full border border-white/50" />
+                      <Icon className="relative h-12 w-12 opacity-80 transition duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]" />
                     </div>
                   )}
-                  <span className="absolute -bottom-3 left-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-white text-[#3a3730] shadow-sm">
-                    <Icon className="h-4 w-4" />
+                  <span className="absolute inset-0 bg-gradient-to-t from-[#24170e]/35 via-transparent to-[#24170e]/10" />
+                  <span className="absolute right-3 top-3 grid size-9 place-items-center rounded-xl border border-white/50 bg-white/90 text-[#87531d] shadow-sm backdrop-blur-sm transition-transform group-hover:scale-105">
+                    <Icon className="h-[18px] w-[18px]" />
                   </span>
                 </div>
-                <div className="min-h-[92px] px-3 pb-3 pt-5">
-                  <p className="truncate text-xs font-semibold text-text-primary sm:text-sm">
+                <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
+                  <p className="m-0 truncate text-sm font-semibold tracking-[-.01em] text-text-primary sm:text-base">
                     {title}
                   </p>
-                  <p className="mt-1 min-h-[28px] text-[11px] leading-4 text-text-muted">
-                    {loading ? "Loading live data..." : serviceCounts[title]}
+                  <p className="mb-3 mt-1.5 min-h-[18px] text-xs leading-relaxed text-text-muted">
+                    {loading ? "Finding what’s available..." : serviceCounts[title]}
                   </p>
-                  <span className="mt-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#f0ece7] text-[#50483e] transition group-hover:bg-[#fbe2c7]">
-                    <ChevronRight className="h-4 w-4" />
+                  <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#a45f19]">
+                    Explore service
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
               </Link>

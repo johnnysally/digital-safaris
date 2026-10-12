@@ -575,8 +575,6 @@ export interface Branding {
   logoUrl?: string;
   favicon?: string;
   emailHeaderLogo?: string;
-  primaryColor: Hex;
-  secondaryColor: Hex;
   fontFamily: string;
   metaTitle: string;
   metaDescription: string;

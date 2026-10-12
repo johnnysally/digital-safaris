@@ -33,6 +33,7 @@ export const ROUTES = {
   CONTACTS: "/contacts",
 
   SETTINGS: "/settings",
+  PROFILE: "/profile",
   BACKUP: "/backup",
   BRANDING: "/branding",
   HEALTH: "/health",
@@ -44,7 +45,6 @@ export const DEFAULT_PAGE_SIZE = 25;
 export const STORAGE_KEYS = {
   ACCESS_TOKEN: "ds_admin_access_token",
   REFRESH_TOKEN: "ds_admin_refresh_token",
-  THEME: "ds_admin_theme",
   SIDEBAR_COLLAPSED: "ds_admin_sidebar_collapsed",
 } as const;
 

@@ -47,3 +47,90 @@
 		min-height: 100vh;
 	}
 }
+
+@layer components {
+	.restaurant-portal {
+		background-color: #f7f0e7;
+		color: #33251f;
+	}
+
+	.restaurant-portal main {
+		background-image: radial-gradient(ellipse at top right, rgba(223, 151, 91, 0.11), transparent 36rem);
+	}
+
+	.restaurant-portal [class*="bg-[#707e48]"] {
+		background-color: #b85e3f !important;
+	}
+
+	.restaurant-portal [class~="hover:bg-[#5e6b3b]"]:hover {
+		background-color: #98472f !important;
+	}
+
+	.restaurant-portal [class*="text-[#687746]"],
+	.restaurant-portal [class*="text-[#687348]"],
+	.restaurant-portal [class*="text-[#657246]"],
+	.restaurant-portal [class*="text-[#6f7c43]"],
+	.restaurant-portal [class*="text-[#76814d]"],
+	.restaurant-portal [class*="text-[#718044]"],
+	.restaurant-portal [class*="text-[#24362e]"],
+	.restaurant-portal [class*="text-[#34453d]"],
+	.restaurant-portal [class*="text-[#263b33]"],
+	.restaurant-portal [class*="text-[#62716a]"] {
+		color: #985039 !important;
+	}
+
+	.restaurant-portal [class*="bg-[#f0f2e8]"],
+	.restaurant-portal [class*="bg-[#f0f2e9]"] {
+		background-color: #f8e5d6 !important;
+	}
+
+	.restaurant-portal [class*="bg-[#edf5e9]"],
+	.restaurant-portal [class*="bg-[#f5f7f0]"],
+	.restaurant-portal [class*="bg-[#fafbf7]"],
+	.restaurant-portal [class*="bg-[#dfe7d3]"] {
+		background-color: #f8eee1 !important;
+	}
+
+	.restaurant-portal [class*="bg-[#24362e]"],
+	.restaurant-portal [class*="bg-[#34453d]"],
+	.restaurant-portal [class*="bg-[#263b33]"] {
+		background-color: #6b3930 !important;
+	}
+
+	.restaurant-portal [class*="text-[#4f7b4c]"],
+	.restaurant-portal [class*="text-[#64753e]"] {
+		color: #865338 !important;
+	}
+
+	.restaurant-portal [class~="text-[8px]"] {
+		font-size: 11px !important;
+	}
+
+	.restaurant-portal [class~="text-[9px]"] {
+		font-size: 12px !important;
+	}
+
+	.restaurant-portal [class~="text-[10px]"] {
+		font-size: 13px !important;
+	}
+
+	.restaurant-portal [class~="text-[11px]"] {
+		font-size: 14px !important;
+	}
+
+	.restaurant-portal [class~="text-[12px]"] {
+		font-size: 15px !important;
+	}
+
+	.restaurant-portal [class~="text-[13px]"] {
+		font-size: 15px !important;
+	}
+
+	.restaurant-portal [class~="text-[14px]"] {
+		font-size: 16px !important;
+	}
+
+	.restaurant-portal [class~="text-xs"] {
+		font-size: 14px !important;
+	}
+}

@@ -49,12 +49,12 @@ export default function Table<T extends Record<string, unknown>>({
     <div className="overflow-x-auto">
       <table className="w-full border-collapse text-sm">
         <thead>
-          <tr className="bg-surface-alt text-left text-xs uppercase tracking-wide text-text-muted">
+          <tr className="bg-surface-alt/75 text-left text-[10px] font-semibold uppercase tracking-[.12em] text-text-muted">
             {columns.map((col) => (
               <th
                 key={col.key}
                 className={classNames(
-                  "border-b border-border px-4 py-3 font-medium",
+                  "border-b border-border px-4 py-3.5 font-semibold",
                   col.className
                 )}
               >
@@ -69,14 +69,14 @@ export default function Table<T extends Record<string, unknown>>({
               key={rowKey ? rowKey(row) : idx}
               onClick={onRowClick ? () => onRowClick(row) : undefined}
               className={classNames(
-                "border-b border-border last:border-0 hover:bg-surface-alt",
+                "border-b border-border/75 transition-colors last:border-0 even:bg-surface-alt/20 hover:bg-surface-alt/70",
                 onRowClick && "cursor-pointer"
               )}
             >
               {columns.map((col) => (
                 <td
                   key={col.key}
-                  className={classNames("px-4 py-3 align-middle", col.className)}
+                  className={classNames("px-4 py-3.5 align-middle", col.className)}
                 >
                   {col.render ? col.render(row) : (row[col.key] as ReactNode)}
                 </td>

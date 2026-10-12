@@ -9,11 +9,12 @@ import { RestaurantBookingsPage } from "../pages/restaurant/Bookings";
 import { RestaurantBroadcastsPage } from "../pages/restaurant/Broadcasts";
 import { RestaurantMenuItemsPage } from "../pages/restaurant/MenuItems";
 import { RestaurantMenuPage } from "../pages/restaurant/Menu";
-import { RestaurantMessagesPage } from "../pages/restaurant/Messages";
 import { RestaurantOrdersPage } from "../pages/restaurant/Orders";
 import { RestaurantProfilePage } from "../pages/restaurant/Profile";
 import { RestaurantRatingsPage } from "../pages/restaurant/Ratings";
 import { RestaurantSettingsPage } from "../pages/restaurant/Settings";
+import { RestaurantNotificationsPage } from "../pages/restaurant/Notifications";
+import { RestaurantReportsPage } from "../pages/restaurant/Reports";
 import { RestaurantWalletPage } from "../pages/restaurant/Wallet";
 import { useAuth } from "../context/authContext";
 
@@ -43,7 +44,8 @@ export default function RestaurantApp() {
 			<Route path="reviews" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantRatingsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="ratings" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantRatingsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="analytics" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantAnalyticsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
-			<Route path="messages" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantMessagesPage /></RestaurantLayout></RestaurantProtectedRoute>} />
+			<Route path="reports" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantReportsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
+			<Route path="notifications" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantNotificationsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="settings" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantSettingsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="*" element={<Navigate to="/partner/restaurant/dashboard" replace />} />
 		</Routes>

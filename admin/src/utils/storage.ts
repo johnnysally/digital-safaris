@@ -1,5 +1,4 @@
 import { STORAGE_KEYS } from "./constants";
-import type { Theme } from "../types";
 
 function safeGet(key: string): string | null {
   try {
@@ -44,17 +43,6 @@ const storage = {
   },
   removeRefreshToken(): void {
     safeRemove(STORAGE_KEYS.REFRESH_TOKEN);
-  },
-
-  getTheme(): Theme | null {
-    const v = safeGet(STORAGE_KEYS.THEME);
-    return v === "light" || v === "dark" ? v : null;
-  },
-  setTheme(theme: Theme): void {
-    safeSet(STORAGE_KEYS.THEME, theme);
-  },
-  removeTheme(): void {
-    safeRemove(STORAGE_KEYS.THEME);
   },
 
   getSidebarCollapsed(): boolean {

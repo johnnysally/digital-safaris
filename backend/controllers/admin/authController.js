@@ -72,6 +72,53 @@ const me = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, safe, "Profile fetched"));
 });
 
+const updateMe = asyncHandler(async (req, res) => {
+  const { firstName, lastName, phone, avatar } = req.body;
+  const updates = {};
+
+  if (firstName !== undefined) {
+    if (typeof firstName !== "string" || !firstName.trim()) {
+      throw new ApiError(400, "First name is required");
+    }
+    updates.firstName = firstName.trim();
+  }
+  if (lastName !== undefined) {
+    if (typeof lastName !== "string" || !lastName.trim()) {
+      throw new ApiError(400, "Last name is required");
+    }
+    updates.lastName = lastName.trim();
+  }
+  if (phone !== undefined) {
+    if (typeof phone !== "string" || !phone.trim()) {
+      throw new ApiError(400, "Phone number is required");
+    }
+    const existingPhone = await Admin.findOne({
+      phone: phone.trim(),
+      _id: { $ne: req.admin._id },
+      isDeleted: false,
+    });
+    if (existingPhone) throw new ApiError(409, "Phone number is already in use");
+    updates.phone = phone.trim();
+  }
+  if (avatar !== undefined) {
+    if (avatar !== null && typeof avatar !== "string") {
+      throw new ApiError(400, "Avatar must be an image URL");
+    }
+    updates.avatar = avatar;
+  }
+
+  const admin = await Admin.findByIdAndUpdate(req.admin._id, updates, {
+    new: true,
+    runValidators: true,
+  }).populate("role");
+  if (!admin) throw new ApiError(404, "Admin not found");
+
+  const safe = admin.toObject();
+  delete safe.password;
+  delete safe.refreshToken;
+  res.status(200).json(new ApiResponse(200, safe, "Profile updated"));
+});
+
 const changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
@@ -124,4 +171,4 @@ const resetPassword = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, null, "Password reset"));
 });
 
-export { login, refresh, logout, me, changePassword, forgotPassword, resetPassword };
+export { login, refresh, logout, me, updateMe, changePassword, forgotPassword, resetPassword };

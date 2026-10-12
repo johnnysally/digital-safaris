@@ -1,7 +1,7 @@
 import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router-dom";
+import { Menu, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useAuth } from "../../context/authContext";
-import { useTheme } from "../../context/themeContext";
 import Avatar from "../ui/Avatar";
 import Dropdown from "../ui/Dropdown";
 import { classNames, fullName } from "../../utils/helpers";
@@ -27,7 +27,6 @@ export default function Header({
   notifications,
 }: HeaderProps) {
   const { admin, logout } = useAuth();
-  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -42,15 +41,15 @@ export default function Header({
   };
 
   return (
-    <header className="flex h-16 shrink-0 items-center gap-3 border-b border-border bg-surface px-4">
+    <header className="sticky top-0 z-20 flex h-[4.5rem] shrink-0 items-center gap-3 border-b border-[#e9e2d8] bg-white/90 px-4 shadow-[0_3px_14px_rgba(45,35,24,.035)] backdrop-blur-xl sm:px-6">
       {onMenuClick && (
         <button
           type="button"
           onClick={onMenuClick}
-          className="rounded-md p-2 text-text-secondary hover:bg-surface-alt lg:hidden"
+          className="grid size-9 place-items-center rounded-xl border border-[#eee7dd] bg-[#fcfaf7] text-[#665744] transition hover:bg-[#f4ead9] lg:hidden"
           aria-label="Open menu"
         >
-          ☰
+          <Menu className="size-[18px]" />
         </button>
       )}
 
@@ -58,23 +57,23 @@ export default function Header({
         <button
           type="button"
           onClick={onToggleSidebar}
-          className="hidden rounded-md p-2 text-text-secondary hover:bg-surface-alt lg:inline-flex"
+          className="hidden size-9 items-center justify-center rounded-xl border border-[#eee7dd] bg-[#fcfaf7] text-[#665744] transition hover:bg-[#f4ead9] lg:inline-flex"
           aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {sidebarCollapsed ? "»" : "«"}
+          {sidebarCollapsed ? <PanelLeftOpen className="size-[17px]" /> : <PanelLeftClose className="size-[17px]" />}
         </button>
       )}
 
       <div className="flex min-w-0 flex-1 flex-col">
         {breadcrumb && breadcrumb.length > 0 && (
-          <nav className="flex items-center gap-1 text-xs text-text-muted">
+          <nav className="mb-0.5 flex items-center gap-1 text-[10px] font-medium text-[#938777]">
             {breadcrumb.map((crumb, i) => (
               <span key={i} className="flex items-center gap-1">
                 {i > 0 && <span>/</span>}
                 <span
                   className={classNames(
-                    crumb.to ? "cursor-pointer hover:text-text-primary" : ""
+                    crumb.to ? "cursor-pointer transition-colors hover:text-[#8f632d]" : "text-[#5b4b38]"
                   )}
                   onClick={() => crumb.to && navigate(crumb.to)}
                 >
@@ -85,7 +84,7 @@ export default function Header({
           </nav>
         )}
         {title && (
-          <h1 className="truncate text-base font-semibold text-text-primary">
+          <h1 className="truncate text-[15px] font-semibold tracking-[-.01em] text-[#30281f]">
             {title}
           </h1>
         )}
@@ -93,22 +92,12 @@ export default function Header({
 
       {search && <div className="hidden md:block">{search}</div>}
 
-      <button
-        type="button"
-        onClick={toggleTheme}
-        className="rounded-md p-2 text-text-secondary hover:bg-surface-alt"
-        aria-label="Toggle theme"
-        title={theme === "dark" ? "Switch to light" : "Switch to dark"}
-      >
-        {theme === "dark" ? "☀" : "☾"}
-      </button>
-
       {notifications}
 
       <Dropdown
         align="right"
         trigger={
-          <span className="flex items-center gap-2 rounded-md p-1 hover:bg-surface-alt">
+          <span className="flex items-center gap-2 rounded-xl border border-transparent p-1.5 transition hover:border-[#eee7dd] hover:bg-[#fcfaf7]">
             <Avatar
               src={admin?.avatar ?? undefined}
               fallback={fullName(admin?.firstName, admin?.lastName)}
@@ -120,7 +109,7 @@ export default function Header({
           {
             key: "profile",
             label: "Profile",
-            onClick: () => navigate(ROUTES.SETTINGS),
+            onClick: () => navigate(ROUTES.PROFILE),
           },
           {
             key: "settings",

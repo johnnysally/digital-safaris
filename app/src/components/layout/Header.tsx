@@ -17,14 +17,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
   const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
+  const logoAppearance = branding.logoAppearance;
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[#e4d7c2] bg-[#fffaf1]/95 backdrop-blur dark:border-[#56432e] dark:bg-[#2f2419]/95">
+    <header className="sticky top-0 z-40 border-b border-[#e4d7c2] bg-[#fffaf1]/95 backdrop-blur">
       <div className="flex h-14 items-center gap-3 px-3 sm:px-4">
         <button
           type="button"
           onClick={onMenuClick}
-          className="rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10 lg:hidden"
+          className="rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] lg:hidden"
           aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
@@ -35,6 +36,15 @@ export default function Header({ onMenuClick }: HeaderProps) {
             src={logoUrl}
             alt={appName}
             className="h-8 w-8 rounded-xl border border-[#dda24c]/60 object-cover shadow-sm"
+            style={logoAppearance ? {
+              maxWidth: `${logoAppearance.maxWidth}px`,
+              maxHeight: `${logoAppearance.maxHeight}px`,
+              width: `${Math.min(32, logoAppearance.maxWidth)}px`,
+              height: `${Math.min(32, logoAppearance.maxHeight)}px`,
+              objectFit: logoAppearance.fit,
+              padding: `${logoAppearance.padding}px`,
+              borderRadius: `${logoAppearance.borderRadius}px`,
+            } : undefined}
           />
         </Link>
 
@@ -44,7 +54,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
             <input
               type="text"
               placeholder="Search destinations, experiences, or services..."
-              className="w-full rounded-full border border-[#e4d7c2] bg-[#f8f1e5] py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/30 dark:border-[#56432e] dark:bg-[#3b2e20]"
+              className="w-full rounded-full border border-[#e4d7c2] bg-[#f8f1e5] py-2.5 pl-10 pr-4 text-sm text-text-primary placeholder:text-text-muted focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/30"
             />
           </div>
         </div>
@@ -54,7 +64,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
         <div className="flex items-center gap-1.5 sm:gap-2">
           <Link
             to={ROUTES.NOTIFICATIONS}
-            className="relative rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf] dark:text-[#ddc49e] dark:hover:bg-white/10"
+            className="relative rounded-md p-2 text-[#765a39] hover:bg-[#f2e5cf]"
             aria-label="Notifications"
           >
             <Bell className="h-5 w-5" />
@@ -64,7 +74,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
           {customer ? (
             <Link
               to={ROUTES.PROFILE}
-              className="ml-1 flex items-center gap-2 rounded-full py-1 pr-3 pl-1 hover:bg-[#f2e5cf] dark:hover:bg-white/10"
+              className="ml-1 flex items-center gap-2 rounded-full py-1 pr-3 pl-1 hover:bg-[#f2e5cf]"
             >
               <Avatar
                 src={customer.avatar ?? undefined}

@@ -1,4 +1,4 @@
-import axios from "./axios";
+import axios, { unwrap } from "./axios";
 import type { Branding } from "../types";
 
 type AnyRecord = Record<string, unknown>;
@@ -35,22 +35,18 @@ function normalizeBranding(raw: unknown): Branding {
     pickString(generalSrc, ["logoUrl", "logo"]) ??
     "/logo.svg";
 
-  const primary =
-    pickString(brandSrc, ["primaryColor", "primary_color", "primary"]) ??
-    "#1A1F2E";
-
-  const secondary =
-    pickString(brandSrc, ["secondaryColor", "secondary_color", "secondary"]) ??
-    "#C9A063";
-
   return {
     logo: pickString(brandSrc, ["logo", "logoUrl"]) ?? logo,
     logoUrl: logo,
     favicon: pickString(brandSrc, ["favicon"]) ?? "/favicon.svg",
+    logoAppearance: isObject(brandSrc.logoAppearance)
+      ? (brandSrc.logoAppearance as Branding["logoAppearance"])
+      : undefined,
+    faviconAppearance: isObject(brandSrc.faviconAppearance)
+      ? (brandSrc.faviconAppearance as Branding["faviconAppearance"])
+      : undefined,
     emailHeaderLogo:
       pickString(brandSrc, ["emailHeaderLogo", "emailLogo"]) ?? logo,
-    primaryColor: primary as Branding["primaryColor"],
-    secondaryColor: secondary as Branding["secondaryColor"],
     fontFamily: pickString(brandSrc, ["fontFamily", "font"]) ?? "Montserrat",
     metaTitle:
       pickString(brandSrc, ["metaTitle", "title"]) ??
@@ -78,6 +74,18 @@ const brandingApi = {
   async update(payload: Partial<Branding>): Promise<Branding> {
     const res = await axios.post("/admin/branding", payload);
     return normalizeBranding(res.data);
+  },
+
+  async uploadAsset(file: File): Promise<string> {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("folder", "branding");
+    const res = await axios.post("/public/upload/single", form, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    const uploaded = unwrap<{ url?: string }>(res.data);
+    if (!uploaded.url) throw new Error("Upload response did not include an asset URL");
+    return uploaded.url;
   },
 };
 

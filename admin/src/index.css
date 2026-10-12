@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  color-scheme: light;
   --ds-background: 245 245 245;
   --ds-surface: 255 255 255;
   --ds-surface-alt: 253 252 248;
@@ -18,18 +19,6 @@
   --ds-font: Montserrat;
   --ds-logo: "";
   --ds-favicon: "";
-}
-
-.dark {
-  --ds-background: 15 20 32;
-  --ds-surface: 26 31 46;
-  --ds-surface-alt: 31 40 66;
-  --ds-border: 47 56 85;
-  --ds-divider: 31 40 66;
-  --ds-text-primary: 245 246 248;
-  --ds-text-secondary: 197 201 210;
-  --ds-text-muted: 154 161 178;
-  --ds-text-inverse: 15 20 32;
 }
 
 @layer base {
