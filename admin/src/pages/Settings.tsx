@@ -4,6 +4,7 @@ import Tabs from "../components/ui/Tabs";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
+import Textarea from "../components/ui/Textarea";
 import Switch from "../components/ui/Switch";
 import Badge from "../components/ui/Badge";
 import Table, { type Column } from "../components/ui/Table";
@@ -12,7 +13,8 @@ import ConfirmDialog from "../components/ui/ConfirmDialog";
 import Dropdown from "../components/ui/Dropdown";
 import Spinner from "../components/ui/Spinner";
 import Alert from "../components/ui/Alert";
-import { settingApi, locationApi } from "../api";
+import EmptyState from "../components/ui/EmptyState";
+import { settingApi, locationApi, downloadApi } from "../api";
 import { useToast } from "../context/toastContext";
 import { isUrl } from "../utils/validators";
 import { formatDate } from "../utils/formatDate";
@@ -25,6 +27,8 @@ import type {
   LegalDocument,
   Location,
   LocationType,
+  DownloadItem,
+  DownloadPlatform,
 } from "../types";
 
 const TABS = [
@@ -33,6 +37,7 @@ const TABS = [
   { key: "commission", label: "Commission" },
   { key: "legal", label: "Legal" },
   { key: "locations", label: "Locations" },
+  { key: "downloads", label: "Downloads" },
 ];
 
 const EMPTY_GENERAL: GeneralSettings = {
@@ -67,7 +72,22 @@ const EMPTY_COMMISSION: CommissionSettings = {
 };
 
 const LEGAL_TYPES: LegalType[] = ["terms", "privacy", "cookies"];
-const LOCATION_TYPES: LocationType[] = ["country", "county", "town", "city", "area"];
+const LOCATION_TYPES: LocationType[] = [
+  "country",
+  "county",
+  "town",
+  "city",
+  "area",
+];
+const DOWNLOAD_PLATFORMS: DownloadPlatform[] = [
+  "windows",
+  "macos",
+  "linux",
+  "android",
+  "ios",
+  "web",
+  "other",
+];
 
 interface LocationForm {
   name: string;
@@ -95,6 +115,32 @@ const EMPTY_LOCATION_FORM: LocationForm = {
   currency: "KES",
   isOperational: true,
   isDefault: false,
+};
+
+interface DownloadForm {
+  name: string;
+  platform: DownloadPlatform;
+  architecture: string;
+  version: string;
+  size: string;
+  url: string;
+  minimumOs: string;
+  checksum: string;
+  releaseNotes: string;
+  available: boolean;
+}
+
+const EMPTY_DOWNLOAD_FORM: DownloadForm = {
+  name: "",
+  platform: "windows",
+  architecture: "x64",
+  version: "",
+  size: "",
+  url: "",
+  minimumOs: "",
+  checksum: "",
+  releaseNotes: "",
+  available: true,
 };
 
 export default function Settings() {
@@ -134,10 +180,25 @@ export default function Settings() {
     EMPTY_LOCATION_FORM
   );
   const [locationFormSaving, setLocationFormSaving] = useState(false);
-  const [locationDeleteTarget, setLocationDeleteTarget] = useState<Location | null>(
+  const [locationDeleteTarget, setLocationDeleteTarget] =
+    useState<Location | null>(null);
+  const [locationDeleteLoading, setLocationDeleteLoading] = useState(false);
+
+  const [downloads, setDownloads] = useState<DownloadItem[]>([]);
+  const [downloadsLoading, setDownloadsLoading] = useState(false);
+  const [downloadsError, setDownloadsError] = useState<string | null>(null);
+  const [downloadPlatformFilter, setDownloadPlatformFilter] = useState("");
+  const [downloadFormOpen, setDownloadFormOpen] = useState(false);
+  const [downloadEditing, setDownloadEditing] = useState<DownloadItem | null>(
     null
   );
-  const [locationDeleteLoading, setLocationDeleteLoading] = useState(false);
+  const [downloadForm, setDownloadForm] = useState<DownloadForm>(
+    EMPTY_DOWNLOAD_FORM
+  );
+  const [downloadSaving, setDownloadSaving] = useState(false);
+  const [downloadDeleteTarget, setDownloadDeleteTarget] =
+    useState<DownloadItem | null>(null);
+  const [downloadDeleteLoading, setDownloadDeleteLoading] = useState(false);
 
   useEffect(() => {
     const load = async () => {
@@ -206,6 +267,28 @@ export default function Settings() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, locationTypeFilter]);
 
+  const fetchDownloads = async () => {
+    setDownloadsLoading(true);
+    setDownloadsError(null);
+    try {
+      const items = await downloadApi.list({
+        platform: downloadPlatformFilter || undefined,
+      });
+      setDownloads(items);
+    } catch {
+      setDownloadsError("Could not load downloads.");
+    } finally {
+      setDownloadsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (tab === "downloads") {
+      fetchDownloads();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, downloadPlatformFilter]);
+
   const saveGeneral = async () => {
     const urls: Array<[string, string | undefined]> = [
       ["API URL", general.apiUrl],
@@ -218,7 +301,10 @@ export default function Settings() {
 
     for (const [label, value] of urls) {
       if (value && !isUrl(value)) {
-        toastError(`Invalid ${label}`, "Must be a valid URL including protocol.");
+        toastError(
+          `Invalid ${label}`,
+          "Must be a valid URL including protocol."
+        );
         return;
       }
     }
@@ -437,6 +523,122 @@ export default function Settings() {
     }
   };
 
+  const openDownloadCreate = () => {
+    setDownloadEditing(null);
+    setDownloadForm(EMPTY_DOWNLOAD_FORM);
+    setDownloadFormOpen(true);
+  };
+
+  const openDownloadEdit = (item: DownloadItem) => {
+    setDownloadEditing(item);
+    setDownloadForm({
+      name: item.name,
+      platform: item.platform,
+      architecture: item.architecture,
+      version: item.version,
+      size: item.size,
+      url: item.url,
+      minimumOs: item.minimumOs ?? "",
+      checksum: item.checksum ?? "",
+      releaseNotes: item.releaseNotes ?? "",
+      available: item.available,
+    });
+    setDownloadFormOpen(true);
+  };
+
+  const closeDownloadForm = () => {
+    setDownloadFormOpen(false);
+    setDownloadEditing(null);
+    setDownloadForm(EMPTY_DOWNLOAD_FORM);
+  };
+
+  const saveDownload = async () => {
+    if (!downloadForm.name.trim()) {
+      toastError("Name is required");
+      return;
+    }
+    if (!downloadForm.version.trim()) {
+      toastError("Version is required");
+      return;
+    }
+    if (!downloadForm.size.trim()) {
+      toastError("Size is required");
+      return;
+    }
+    if (!downloadForm.url.trim() || !isUrl(downloadForm.url)) {
+      toastError("Valid URL is required");
+      return;
+    }
+
+    const payload = {
+      name: downloadForm.name.trim(),
+      platform: downloadForm.platform,
+      architecture: downloadForm.architecture.trim() || "x64",
+      version: downloadForm.version.trim(),
+      size: downloadForm.size.trim(),
+      url: downloadForm.url.trim(),
+      minimumOs: downloadForm.minimumOs.trim() || null,
+      checksum: downloadForm.checksum.trim() || null,
+      releaseNotes: downloadForm.releaseNotes.trim() || null,
+      available: downloadForm.available,
+    };
+
+    setDownloadSaving(true);
+    try {
+      if (downloadEditing?._id) {
+        const updated = await downloadApi.update(
+          downloadEditing._id,
+          payload
+        );
+        setDownloads((prev) =>
+          prev.map((d) => (d._id === updated._id ? updated : d))
+        );
+        success("Download updated");
+      } else {
+        const created = await downloadApi.create(payload);
+        setDownloads((prev) => [created, ...prev]);
+        success("Download added");
+      }
+      closeDownloadForm();
+    } catch {
+      toastError("Could not save download");
+    } finally {
+      setDownloadSaving(false);
+    }
+  };
+
+  const toggleDownload = async (item: DownloadItem) => {
+    if (!item._id) return;
+    try {
+      const res = await downloadApi.toggleAvailable(item._id);
+      setDownloads((prev) =>
+        prev.map((d) =>
+          d._id === item._id ? { ...d, available: res.available } : d
+        )
+      );
+      success(res.available ? "Download enabled" : "Download disabled");
+    } catch {
+      toastError("Could not update download");
+    }
+  };
+
+  const deleteDownload = async () => {
+    if (!downloadDeleteTarget?._id) return;
+    setDownloadDeleteLoading(true);
+    try {
+      await downloadApi.remove(downloadDeleteTarget._id);
+      setDownloads((prev) =>
+        prev.filter((d) => d._id !== downloadDeleteTarget._id)
+      );
+      setDownloadDeleteTarget(null);
+      success("Download deleted");
+    } catch {
+      toastError("Could not delete download");
+    } finally {
+      setDownloadDeleteLoading(false);
+    }
+  };
+
   const locationColumns = useMemo<Column<Location>[]>(
     () => [
       {
@@ -445,7 +647,7 @@ export default function Settings() {
         render: (row) => (
           <div>
             <p className="text-sm font-medium text-text-primary">{row.name}</p>
-            <p className="text-xs text-text-muted font-mono">{row.slug}</p>
+            <p className="font-mono text-xs text-text-muted">{row.slug}</p>
           </div>
         ),
       },
@@ -467,7 +669,9 @@ export default function Settings() {
         key: "county",
         header: "County",
         render: (row) => (
-          <span className="text-sm text-text-secondary">{row.county ?? "—"}</span>
+          <span className="text-sm text-text-secondary">
+            {row.county ?? "—"}
+          </span>
         ),
       },
       {
@@ -536,489 +740,685 @@ export default function Settings() {
     []
   );
 
+  const downloadColumns = useMemo<Column<DownloadItem>[]>(
+    () => [
+      {
+        key: "name",
+        header: "Name",
+        render: (row) => (
+          <div>
+            <p className="text-sm font-medium text-text-primary">{row.name}</p>
+            <p className="text-xs text-text-muted">v{row.version}</p>
+          </div>
+        ),
+      },
+      {
+        key: "platform",
+        header: "Platform",
+        render: (row) => (
+          <Badge variant="neutral">{capitalize(row.platform)}</Badge>
+        ),
+      },
+      {
+        key: "architecture",
+        header: "Arch",
+        render: (row) => (
+          <span className="text-sm text-text-secondary">
+            {row.architecture}
+          </span>
+        ),
+      },
+      {
+        key: "size",
+        header: "Size",
+        render: (row) => (
+          <span className="text-sm text-text-secondary">{row.size}</span>
+        ),
+      },
+      {
+        key: "available",
+        header: "Available",
+        render: (row) => (
+          <Badge variant={row.available ? "success" : "neutral"}>
+            {row.available ? "Yes" : "No"}
+          </Badge>
+        ),
+      },
+      {
+        key: "createdAt",
+        header: "Created",
+        render: (row) => (
+          <span className="text-xs text-text-muted">
+            {row.createdAt ? formatDate(row.createdAt) : "—"}
+          </span>
+        ),
+      },
+      {
+        key: "actions",
+        header: "",
+        className: "w-12 text-right",
+        render: (row) => (
+          <div className="flex justify-end">
+            <Dropdown
+              trigger={
+                <span className="rounded-md px-2 py-1 text-text-muted hover:bg-surface-alt">
+                  ⋯
+                </span>
+              }
+              items={[
+                {
+                  key: "edit",
+                  label: "Edit",
+                  onClick: () => openDownloadEdit(row),
+                },
+                {
+                  key: "toggle",
+                  label: row.available ? "Disable" : "Enable",
+                  onClick: () => toggleDownload(row),
+                },
+                {
+                  key: "open",
+                  label: "Open URL",
+                  onClick: () => window.open(row.url, "_blank"),
+                },
+                {
+                  key: "delete",
+                  label: "Delete",
+                  danger: true,
+                  onClick: () => setDownloadDeleteTarget(row),
+                },
+              ]}
+            />
+          </div>
+        ),
+      },
+    ],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-text-primary">Settings</h1>
-        <p className="mt-1 text-sm text-text-muted">
-          Runtime configuration of the platform
-        </p>
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="shrink-0 space-y-6">
+        <div>
+          <h1 className="text-2xl font-semibold text-text-primary">Settings</h1>
+          <p className="mt-1 text-sm text-text-muted">
+            Runtime configuration of the platform.
+          </p>
+        </div>
+
+        <Tabs tabs={TABS} activeKey={tab} onChange={setTab} />
       </div>
 
-      <Tabs tabs={TABS} activeKey={tab} onChange={setTab} />
-
-      {tab === "general" && (
-        <Card
-          title="General"
-          actions={
-            <Button size="sm" loading={generalSaving} onClick={saveGeneral}>
-              Save
-            </Button>
-          }
-        >
-          {generalLoading ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="space-y-6">
-              <div>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
-                  Platform
-                </p>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <Input
-                    label="App name"
-                    value={general.appName}
-                    onChange={(e) =>
-                      setGeneral({ ...general, appName: e.target.value })
-                    }
-                  />
-                  <Select
-                    label="Language"
-                    value={general.language}
-                    onChange={(e) =>
-                      setGeneral({ ...general, language: e.target.value })
-                    }
-                    options={[
-                      { label: "English", value: "en" },
-                      { label: "Swahili", value: "sw" },
-                    ]}
-                  />
-                  <Input
-                    label="Timezone"
-                    value={general.timezone}
-                    onChange={(e) =>
-                      setGeneral({ ...general, timezone: e.target.value })
-                    }
-                  />
-                  <Select
-                    label="Currency"
-                    value={general.currency}
-                    onChange={(e) =>
-                      setGeneral({ ...general, currency: e.target.value })
-                    }
-                    options={[
-                      { label: "KES", value: "KES" },
-                      { label: "USD", value: "USD" },
-                      { label: "EUR", value: "EUR" },
-                    ]}
-                  />
-                </div>
+      <div className="min-h-0 flex-1 overflow-y-auto pt-6 scrollbar-thin">
+        {tab === "general" && (
+          <Card
+            title="General"
+            actions={
+              <Button size="sm" loading={generalSaving} onClick={saveGeneral}>
+                Save
+              </Button>
+            }
+          >
+            {generalLoading ? (
+              <div className="flex justify-center py-8">
+                <Spinner />
               </div>
-
-              <div>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
-                  URLs
-                </p>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <div className="md:col-span-2">
+            ) : (
+              <div className="space-y-6">
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                    Platform
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                     <Input
-                      label="API URL"
-                      value={general.apiUrl ?? ""}
+                      label="App name"
+                      value={general.appName}
                       onChange={(e) =>
-                        setGeneral({ ...general, apiUrl: e.target.value })
+                        setGeneral({ ...general, appName: e.target.value })
                       }
-                      placeholder="https://api.digitalsafaris.co.ke"
                     />
-                  </div>
-                  <Input
-                    label="Customer app URL"
-                    value={general.clientUrl ?? ""}
-                    onChange={(e) =>
-                      setGeneral({ ...general, clientUrl: e.target.value })
-                    }
-                    placeholder="https://app.digitalsafaris.co.ke"
-                  />
-                  <Input
-                    label="Admin URL"
-                    value={general.adminUrl ?? ""}
-                    onChange={(e) =>
-                      setGeneral({ ...general, adminUrl: e.target.value })
-                    }
-                    placeholder="https://admin.digitalsafaris.co.ke"
-                  />
-                  <Input
-                    label="Partner URL"
-                    value={general.partnerUrl ?? ""}
-                    onChange={(e) =>
-                      setGeneral({ ...general, partnerUrl: e.target.value })
-                    }
-                    placeholder="https://partner.digitalsafaris.co.ke"
-                  />
-                  <Input
-                    label="Website URL"
-                    value={general.websiteUrl ?? ""}
-                    onChange={(e) =>
-                      setGeneral({ ...general, websiteUrl: e.target.value })
-                    }
-                    placeholder="https://digitalsafaris.co.ke"
-                  />
-                  <div className="md:col-span-2">
-                    <Input
-                      label="Customer app URL (legacy)"
-                      value={general.appUrl ?? ""}
+                    <Select
+                      label="Language"
+                      value={general.language}
                       onChange={(e) =>
-                        setGeneral({ ...general, appUrl: e.target.value })
+                        setGeneral({ ...general, language: e.target.value })
                       }
-                      helper="Alias of Customer app URL. Keep in sync or leave blank."
+                      options={[
+                        { label: "English", value: "en" },
+                        { label: "Swahili", value: "sw" },
+                      ]}
+                    />
+                    <Input
+                      label="Timezone"
+                      value={general.timezone}
+                      onChange={(e) =>
+                        setGeneral({ ...general, timezone: e.target.value })
+                      }
+                    />
+                    <Select
+                      label="Currency"
+                      value={general.currency}
+                      onChange={(e) =>
+                        setGeneral({ ...general, currency: e.target.value })
+                      }
+                      options={[
+                        { label: "KES", value: "KES" },
+                        { label: "USD", value: "USD" },
+                        { label: "EUR", value: "EUR" },
+                      ]}
                     />
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
-                  Support
-                </p>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <Input
-                    label="Support email"
-                    type="email"
-                    value={general.supportEmail}
-                    onChange={(e) =>
-                      setGeneral({ ...general, supportEmail: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="Support phone"
-                    value={general.supportPhone}
-                    onChange={(e) =>
-                      setGeneral({ ...general, supportPhone: e.target.value })
-                    }
-                  />
-                  <div className="md:col-span-2">
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                    URLs
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <div className="md:col-span-2">
+                      <Input
+                        label="API URL"
+                        value={general.apiUrl ?? ""}
+                        onChange={(e) =>
+                          setGeneral({ ...general, apiUrl: e.target.value })
+                        }
+                        placeholder="http://localhost:5000"
+                      />
+                    </div>
                     <Input
-                      label="Logo URL"
-                      value={general.logoUrl ?? ""}
+                      label="Customer app URL"
+                      value={general.clientUrl ?? ""}
                       onChange={(e) =>
-                        setGeneral({ ...general, logoUrl: e.target.value })
+                        setGeneral({ ...general, clientUrl: e.target.value })
                       }
-                      helper="Overrides Branding logo when set. Leave blank to use Branding → Logo."
+                      placeholder="http://localhost:3000"
                     />
+                    <Input
+                      label="Admin URL"
+                      value={general.adminUrl ?? ""}
+                      onChange={(e) =>
+                        setGeneral({ ...general, adminUrl: e.target.value })
+                      }
+                      placeholder="http://localhost:3001"
+                    />
+                    <Input
+                      label="Partner URL"
+                      value={general.partnerUrl ?? ""}
+                      onChange={(e) =>
+                        setGeneral({ ...general, partnerUrl: e.target.value })
+                      }
+                      placeholder="http://localhost:3002"
+                    />
+                    <Input
+                      label="Website URL"
+                      value={general.websiteUrl ?? ""}
+                      onChange={(e) =>
+                        setGeneral({ ...general, websiteUrl: e.target.value })
+                      }
+                      placeholder="http://localhost:3003"
+                    />
+                    <div className="md:col-span-2">
+                      <Input
+                        label="Customer app URL (legacy)"
+                        value={general.appUrl ?? ""}
+                        onChange={(e) =>
+                          setGeneral({ ...general, appUrl: e.target.value })
+                        }
+                        helper="Alias of Customer app URL. Keep in sync or leave blank."
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                    Support
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <Input
+                      label="Support email"
+                      type="email"
+                      value={general.supportEmail}
+                      onChange={(e) =>
+                        setGeneral({
+                          ...general,
+                          supportEmail: e.target.value,
+                        })
+                      }
+                    />
+                    <Input
+                      label="Support phone"
+                      value={general.supportPhone}
+                      onChange={(e) =>
+                        setGeneral({
+                          ...general,
+                          supportPhone: e.target.value,
+                        })
+                      }
+                    />
+                    <div className="md:col-span-2">
+                      <Input
+                        label="Logo URL"
+                        value={general.logoUrl ?? ""}
+                        onChange={(e) =>
+                          setGeneral({ ...general, logoUrl: e.target.value })
+                        }
+                        helper="Overrides Branding logo when set. Leave blank to use Branding → Logo."
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          )}
-        </Card>
-      )}
+            )}
+          </Card>
+        )}
 
-      {tab === "broadcast" && (
-        <Card
-          title="Broadcast"
-          actions={
-            <Button size="sm" loading={broadcastSaving} onClick={saveBroadcast}>
-              Save
-            </Button>
-          }
-        >
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <Input
-              label="Radius (km)"
-              type="number"
-              min={1}
-              value={broadcast.radiusKm}
-              onChange={(e) =>
-                setBroadcast({
-                  ...broadcast,
-                  radiusKm: Number(e.target.value) || 0,
-                })
-              }
-            />
-            <Input
-              label="Expiry (seconds)"
-              type="number"
-              min={10}
-              value={broadcast.expirySeconds}
-              onChange={(e) =>
-                setBroadcast({
-                  ...broadcast,
-                  expirySeconds: Number(e.target.value) || 0,
-                })
-              }
-            />
-          </div>
-        </Card>
-      )}
-
-      {tab === "commission" && (
-        <Card
-          title="Commission"
-          actions={
-            <Button size="sm" loading={commissionSaving} onClick={saveCommission}>
-              Save
-            </Button>
-          }
-        >
-          {commissionLoading ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="space-y-5">
-              <Alert variant="info">
-                Rates apply to all new transactions. Existing records keep
-                the rate they were created with.
-              </Alert>
-
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                <Input
-                  label="Default rate (%)"
-                  type="number"
-                  step="0.1"
-                  min={0}
-                  max={100}
-                  value={commission.defaultRate}
-                  onChange={(e) =>
-                    setCommission({
-                      ...commission,
-                      defaultRate: Number(e.target.value) || 0,
-                    })
-                  }
-                  helper="Used when a service-specific rate is not set."
-                />
-              </div>
-
-              <div>
-                <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
-                  Per service
-                </p>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                  <Input
-                    label="Accommodation (%)"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={100}
-                    value={commission.byService.accommodation ?? 0}
-                    onChange={(e) =>
-                      setServiceRate(
-                        "accommodation",
-                        Number(e.target.value) || 0
-                      )
-                    }
-                  />
-                  <Input
-                    label="Food (%)"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={100}
-                    value={commission.byService.food ?? 0}
-                    onChange={(e) =>
-                      setServiceRate("food", Number(e.target.value) || 0)
-                    }
-                  />
-                  <Input
-                    label="Transport (%)"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={100}
-                    value={commission.byService.transport ?? 0}
-                    onChange={(e) =>
-                      setServiceRate("transport", Number(e.target.value) || 0)
-                    }
-                  />
-                  <Input
-                    label="Dine-In (%)"
-                    type="number"
-                    step="0.1"
-                    min={0}
-                    max={100}
-                    value={commission.byService.dinein ?? 0}
-                    onChange={(e) =>
-                      setServiceRate("dinein", Number(e.target.value) || 0)
-                    }
-                  />
-                </div>
-              </div>
-
-              <div className="rounded-md border border-border bg-surface-alt p-3 text-xs text-text-secondary">
-                <p className="mb-2 font-medium uppercase tracking-wide text-text-muted">
-                  Preview
-                </p>
-                <ul className="space-y-1">
-                  <li>
-                    Accommodation · 10,000 → commission{" "}
-                    <span className="font-medium text-text-primary">
-                      {(
-                        (10_000 * (commission.byService.accommodation ?? 0)) /
-                        100
-                      ).toFixed(2)}
-                    </span>
-                  </li>
-                  <li>
-                    Food · 1,000 → commission{" "}
-                    <span className="font-medium text-text-primary">
-                      {((1_000 * (commission.byService.food ?? 0)) / 100).toFixed(2)}
-                    </span>
-                  </li>
-                  <li>
-                    Transport · 500 → commission{" "}
-                    <span className="font-medium text-text-primary">
-                      {(
-                        (500 * (commission.byService.transport ?? 0)) /
-                        100
-                      ).toFixed(2)}
-                    </span>
-                  </li>
-                  <li>
-                    Dine-In · 2,000 → commission{" "}
-                    <span className="font-medium text-text-primary">
-                      {(
-                        (2_000 * (commission.byService.dinein ?? 0)) /
-                        100
-                      ).toFixed(2)}
-                    </span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          )}
-        </Card>
-      )}
-
-      {tab === "legal" && (
-        <Card
-          title="Legal"
-          actions={
-            <Button size="sm" loading={legalSaving} onClick={saveLegal}>
-              Save
-            </Button>
-          }
-        >
-          <div className="mb-4 flex gap-1">
-            {LEGAL_TYPES.map((t) => (
-              <button
-                key={t}
-                type="button"
-                onClick={() => setLegalType(t)}
-                className={
-                  "rounded-md px-3 py-1.5 text-sm " +
-                  (legalType === t
-                    ? "bg-secondary-500/10 text-secondary-600"
-                    : "text-text-muted hover:bg-surface-alt")
-                }
+        {tab === "broadcast" && (
+          <Card
+            title="Broadcast"
+            actions={
+              <Button
+                size="sm"
+                loading={broadcastSaving}
+                onClick={saveBroadcast}
               >
-                {t[0].toUpperCase() + t.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          {legalLoading || !legal[legalType] ? (
-            <div className="flex justify-center py-8">
-              <Spinner />
-            </div>
-          ) : (
-            <div className="space-y-3">
+                Save
+              </Button>
+            }
+          >
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <Input
-                label="Title"
-                value={legal[legalType]!.title}
+                label="Radius (km)"
+                type="number"
+                min={1}
+                value={broadcast.radiusKm}
                 onChange={(e) =>
-                  setLegal((prev) => ({
-                    ...prev,
-                    [legalType]: {
-                      ...prev[legalType]!,
-                      title: e.target.value,
-                    },
-                  }))
+                  setBroadcast({
+                    ...broadcast,
+                    radiusKm: Number(e.target.value) || 0,
+                  })
                 }
               />
-              <div>
-                <label className="mb-1 block text-xs font-medium text-text-secondary">
-                  Content
-                </label>
-                <textarea
-                  rows={14}
-                  value={legal[legalType]!.content}
+              <Input
+                label="Expiry (seconds)"
+                type="number"
+                min={10}
+                value={broadcast.expirySeconds}
+                onChange={(e) =>
+                  setBroadcast({
+                    ...broadcast,
+                    expirySeconds: Number(e.target.value) || 0,
+                  })
+                }
+              />
+            </div>
+          </Card>
+        )}
+
+        {tab === "commission" && (
+          <Card
+            title="Commission"
+            actions={
+              <Button
+                size="sm"
+                loading={commissionSaving}
+                onClick={saveCommission}
+              >
+                Save
+              </Button>
+            }
+          >
+            {commissionLoading ? (
+              <div className="flex justify-center py-8">
+                <Spinner />
+              </div>
+            ) : (
+              <div className="space-y-5">
+                <Alert variant="info">
+                  Rates apply to all new transactions. Existing records keep the
+                  rate they were created with.
+                </Alert>
+
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <Input
+                    label="Default rate (%)"
+                    type="number"
+                    step="0.1"
+                    min={0}
+                    max={100}
+                    value={commission.defaultRate}
+                    onChange={(e) =>
+                      setCommission({
+                        ...commission,
+                        defaultRate: Number(e.target.value) || 0,
+                      })
+                    }
+                    helper="Used when a service-specific rate is not set."
+                  />
+                </div>
+
+                <div>
+                  <p className="mb-3 text-xs font-medium uppercase tracking-wide text-text-muted">
+                    Per service
+                  </p>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+                    <Input
+                      label="Accommodation (%)"
+                      type="number"
+                      step="0.1"
+                      min={0}
+                      max={100}
+                      value={commission.byService.accommodation ?? 0}
+                      onChange={(e) =>
+                        setServiceRate(
+                          "accommodation",
+                          Number(e.target.value) || 0
+                        )
+                      }
+                    />
+                    <Input
+                      label="Food (%)"
+                      type="number"
+                      step="0.1"
+                      min={0}
+                      max={100}
+                      value={commission.byService.food ?? 0}
+                      onChange={(e) =>
+                        setServiceRate("food", Number(e.target.value) || 0)
+                      }
+                    />
+                    <Input
+                      label="Transport (%)"
+                      type="number"
+                      step="0.1"
+                      min={0}
+                      max={100}
+                      value={commission.byService.transport ?? 0}
+                      onChange={(e) =>
+                        setServiceRate(
+                          "transport",
+                          Number(e.target.value) || 0
+                        )
+                      }
+                    />
+                    <Input
+                      label="Dine-In (%)"
+                      type="number"
+                      step="0.1"
+                      min={0}
+                      max={100}
+                      value={commission.byService.dinein ?? 0}
+                      onChange={(e) =>
+                        setServiceRate("dinein", Number(e.target.value) || 0)
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="rounded-md border border-border bg-surface-alt p-3 text-xs text-text-secondary">
+                  <p className="mb-2 font-medium uppercase tracking-wide text-text-muted">
+                    Preview
+                  </p>
+                  <ul className="space-y-1">
+                    <li>
+                      Accommodation · 10,000 → commission{" "}
+                      <span className="font-medium text-text-primary">
+                        {(
+                          (10_000 *
+                            (commission.byService.accommodation ?? 0)) /
+                          100
+                        ).toFixed(2)}
+                      </span>
+                    </li>
+                    <li>
+                      Food · 1,000 → commission{" "}
+                      <span className="font-medium text-text-primary">
+                        {(
+                          (1_000 * (commission.byService.food ?? 0)) /
+                          100
+                        ).toFixed(2)}
+                      </span>
+                    </li>
+                    <li>
+                      Transport · 500 → commission{" "}
+                      <span className="font-medium text-text-primary">
+                        {(
+                          (500 * (commission.byService.transport ?? 0)) /
+                          100
+                        ).toFixed(2)}
+                      </span>
+                    </li>
+                    <li>
+                      Dine-In · 2,000 → commission{" "}
+                      <span className="font-medium text-text-primary">
+                        {(
+                          (2_000 * (commission.byService.dinein ?? 0)) /
+                          100
+                        ).toFixed(2)}
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            )}
+          </Card>
+        )}
+
+        {tab === "legal" && (
+          <Card
+            title="Legal"
+            actions={
+              <Button size="sm" loading={legalSaving} onClick={saveLegal}>
+                Save
+              </Button>
+            }
+          >
+            <div className="mb-4 flex gap-1">
+              {LEGAL_TYPES.map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setLegalType(t)}
+                  className={
+                    "rounded-md px-3 py-1.5 text-sm " +
+                    (legalType === t
+                      ? "bg-secondary-500/10 text-secondary-600"
+                      : "text-text-muted hover:bg-surface-alt")
+                  }
+                >
+                  {t[0].toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+
+            {legalLoading || !legal[legalType] ? (
+              <div className="flex justify-center py-8">
+                <Spinner />
+              </div>
+            ) : (
+              <div className="space-y-3">
+                <Input
+                  label="Title"
+                  value={legal[legalType]!.title}
                   onChange={(e) =>
                     setLegal((prev) => ({
                       ...prev,
                       [legalType]: {
                         ...prev[legalType]!,
-                        content: e.target.value,
+                        title: e.target.value,
                       },
                     }))
                   }
-                  className="w-full resize-y rounded-md border border-border bg-surface px-3 py-2 font-mono text-xs text-text-primary focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/40"
                 />
+                <div>
+                  <label className="mb-1 block text-xs font-medium text-text-secondary">
+                    Content
+                  </label>
+                  <textarea
+                    rows={14}
+                    value={legal[legalType]!.content}
+                    onChange={(e) =>
+                      setLegal((prev) => ({
+                        ...prev,
+                        [legalType]: {
+                          ...prev[legalType]!,
+                          content: e.target.value,
+                        },
+                      }))
+                    }
+                    className="w-full resize-y rounded-md border border-border bg-surface px-3 py-2 font-mono text-xs text-text-primary focus:border-secondary-500 focus:outline-none focus:ring-2 focus:ring-secondary-500/40"
+                  />
+                </div>
               </div>
-            </div>
-          )}
-        </Card>
-      )}
+            )}
+          </Card>
+        )}
 
-      {tab === "locations" && (
-        <Card padded={false}>
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
-            <div>
-              <p className="text-sm font-medium text-text-primary">Locations</p>
-              <p className="text-xs text-text-muted">
-                Towns, cities, and areas where Digital Safaris operates
-              </p>
-            </div>
-            <Button size="sm" onClick={openLocationCreate}>
-              + Add Location
-            </Button>
-          </div>
-
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              fetchLocations();
-            }}
-            className="grid grid-cols-1 gap-3 border-b border-border p-4 md:grid-cols-4"
-          >
-            <Input
-              placeholder="Search name, county…"
-              value={locationSearch}
-              onChange={(e) => setLocationSearch(e.target.value)}
-            />
-            <Select
-              placeholder="All types"
-              value={locationTypeFilter}
-              onChange={(e) => setLocationTypeFilter(e.target.value)}
-              options={LOCATION_TYPES.map((t) => ({
-                label: capitalize(t),
-                value: t,
-              }))}
-            />
-            <div className="flex gap-2 md:col-span-2">
-              <Button type="submit" variant="secondary" fullWidth>
-                Search
-              </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  setLocationSearch("");
-                  setLocationTypeFilter("");
-                  setTimeout(fetchLocations, 0);
-                }}
-              >
-                Reset
+        {tab === "locations" && (
+          <Card padded={false}>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Locations
+                </p>
+                <p className="text-xs text-text-muted">
+                  Towns, cities, and areas where Digital Safaris operates
+                </p>
+              </div>
+              <Button size="sm" onClick={openLocationCreate}>
+                + Add Location
               </Button>
             </div>
-          </form>
 
-          {locationsError && (
-            <div className="p-4">
-              <Alert variant="danger" title="Failed to load">
-                {locationsError}
-              </Alert>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                fetchLocations();
+              }}
+              className="grid grid-cols-1 gap-3 border-b border-border p-4 md:grid-cols-4"
+            >
+              <Input
+                placeholder="Search name, county…"
+                value={locationSearch}
+                onChange={(e) => setLocationSearch(e.target.value)}
+              />
+              <Select
+                placeholder="All types"
+                value={locationTypeFilter}
+                onChange={(e) => setLocationTypeFilter(e.target.value)}
+                options={LOCATION_TYPES.map((t) => ({
+                  label: capitalize(t),
+                  value: t,
+                }))}
+              />
+              <div className="flex gap-2 md:col-span-2">
+                <Button type="submit" variant="secondary" fullWidth>
+                  Search
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setLocationSearch("");
+                    setLocationTypeFilter("");
+                    setTimeout(fetchLocations, 0);
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </form>
+
+            {locationsError && (
+              <div className="p-4">
+                <Alert variant="danger" title="Failed to load">
+                  {locationsError}
+                </Alert>
+              </div>
+            )}
+
+            <Table
+              columns={locationColumns}
+              data={locations}
+              loading={locationsLoading}
+              rowKey={(r) => r._id}
+            />
+          </Card>
+        )}
+
+        {tab === "downloads" && (
+          <Card padded={false}>
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border p-4">
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Downloads
+                </p>
+                <p className="text-xs text-text-muted">
+                  Publish app installers for customers and partners.
+                </p>
+              </div>
+              <Button size="sm" onClick={openDownloadCreate}>
+                + Add download
+              </Button>
             </div>
-          )}
 
-          <Table
-            columns={locationColumns}
-            data={locations}
-            loading={locationsLoading}
-            rowKey={(r) => r._id}
-          />
-        </Card>
-      )}
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                fetchDownloads();
+              }}
+              className="grid grid-cols-1 gap-3 border-b border-border p-4 md:grid-cols-4"
+            >
+              <Select
+                placeholder="All platforms"
+                value={downloadPlatformFilter}
+                onChange={(e) => setDownloadPlatformFilter(e.target.value)}
+                options={DOWNLOAD_PLATFORMS.map((p) => ({
+                  label: capitalize(p),
+                  value: p,
+                }))}
+              />
+              <div className="flex gap-2 md:col-span-3">
+                <Button type="submit" variant="secondary" fullWidth>
+                  Filter
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    setDownloadPlatformFilter("");
+                    setTimeout(fetchDownloads, 0);
+                  }}
+                >
+                  Reset
+                </Button>
+              </div>
+            </form>
+
+            {downloadsError && (
+              <div className="p-4">
+                <Alert variant="danger" title="Failed to load">
+                  {downloadsError}
+                </Alert>
+              </div>
+            )}
+
+            <Table
+              columns={downloadColumns}
+              data={downloads}
+              loading={downloadsLoading}
+              rowKey={(r) => r._id || r.url}
+              emptyState={
+                <EmptyState
+                  title="No downloads yet"
+                  description="Click Add download to publish the first release."
+                />
+              }
+            />
+          </Card>
+        )}
+      </div>
 
       <Modal
         isOpen={locationFormOpen}
@@ -1162,6 +1562,138 @@ export default function Settings() {
         confirmText="Delete"
         variant="danger"
         loading={locationDeleteLoading}
+      />
+
+      <Modal
+        isOpen={downloadFormOpen}
+        onClose={closeDownloadForm}
+        title={downloadEditing ? "Edit download" : "Add download"}
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={closeDownloadForm}
+              disabled={downloadSaving}
+            >
+              Cancel
+            </Button>
+            <Button onClick={saveDownload} loading={downloadSaving}>
+              {downloadEditing ? "Save" : "Add download"}
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <Input
+            label="Name"
+            value={downloadForm.name}
+            onChange={(e) =>
+              setDownloadForm({ ...downloadForm, name: e.target.value })
+            }
+            placeholder="e.g. Digital Safaris for Windows"
+          />
+          <div className="grid grid-cols-2 gap-3">
+            <Select
+              label="Platform"
+              value={downloadForm.platform}
+              onChange={(e) =>
+                setDownloadForm({
+                  ...downloadForm,
+                  platform: e.target.value as DownloadPlatform,
+                })
+              }
+              options={DOWNLOAD_PLATFORMS.map((p) => ({
+                label: capitalize(p),
+                value: p,
+              }))}
+            />
+            <Input
+              label="Architecture"
+              value={downloadForm.architecture}
+              onChange={(e) =>
+                setDownloadForm({
+                  ...downloadForm,
+                  architecture: e.target.value,
+                })
+              }
+              placeholder="x64"
+            />
+            <Input
+              label="Version"
+              value={downloadForm.version}
+              onChange={(e) =>
+                setDownloadForm({ ...downloadForm, version: e.target.value })
+              }
+              placeholder="1.2.0"
+            />
+            <Input
+              label="Size"
+              value={downloadForm.size}
+              onChange={(e) =>
+                setDownloadForm({ ...downloadForm, size: e.target.value })
+              }
+              placeholder="45 MB"
+            />
+          </div>
+          <Input
+            label="URL"
+            value={downloadForm.url}
+            onChange={(e) =>
+              setDownloadForm({ ...downloadForm, url: e.target.value })
+            }
+            placeholder="https://downloads.example.com/file.exe"
+          />
+          <Input
+            label="Minimum OS"
+            value={downloadForm.minimumOs}
+            onChange={(e) =>
+              setDownloadForm({ ...downloadForm, minimumOs: e.target.value })
+            }
+            placeholder="Windows 10+"
+          />
+          <Input
+            label="Checksum (SHA-256)"
+            value={downloadForm.checksum}
+            onChange={(e) =>
+              setDownloadForm({ ...downloadForm, checksum: e.target.value })
+            }
+            placeholder="Optional"
+          />
+          <Textarea
+            label="Release notes"
+            rows={4}
+            value={downloadForm.releaseNotes}
+            onChange={(e) =>
+              setDownloadForm({
+                ...downloadForm,
+                releaseNotes: e.target.value,
+              })
+            }
+            placeholder="What's new in this version..."
+          />
+          <Switch
+            checked={downloadForm.available}
+            onChange={(v) =>
+              setDownloadForm({ ...downloadForm, available: v })
+            }
+            label="Make this download available immediately"
+          />
+        </div>
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={!!downloadDeleteTarget}
+        onClose={() => setDownloadDeleteTarget(null)}
+        onConfirm={deleteDownload}
+        title="Delete download?"
+        description={
+          downloadDeleteTarget
+            ? `"${downloadDeleteTarget.name}" will be removed from the public list.`
+            : ""
+        }
+        confirmText="Delete"
+        variant="danger"
+        loading={downloadDeleteLoading}
       />
     </div>
   );
