@@ -59,7 +59,7 @@ export default function Sidebar({ groups }: SidebarProps) {
   const { branding } = useBranding();
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
+  const logoUrl = branding.logoUrl || branding.logo || "/logo.png";
   const logoAppearance = branding.logoAppearance;
   const appNameParts = appName.split(/\s+/);
 

@@ -138,25 +138,6 @@ export default function Partners() {
       .finally(() => setLoading(false));
   };
 
-  const refetch = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await partnerApi.list(tab, {
-        page,
-        limit: DEFAULT_PAGE_SIZE,
-        search: search || undefined,
-        status: status || undefined,
-      });
-      setRows(res.data ?? []);
-      setMeta(res.meta ?? null);
-    } catch {
-      setError("Could not load partners.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const refetchSilent = async () => {
     try {
       const res = await partnerApi.list(tab, {

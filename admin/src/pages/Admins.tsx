@@ -59,7 +59,7 @@ export default function Admins() {
   const [rows, setRows] = useState<Admin[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState<number>(DEFAULT_PAGE_SIZE);
+  const [limit] = useState<number>(DEFAULT_PAGE_SIZE);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");

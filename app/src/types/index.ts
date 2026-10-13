@@ -103,6 +103,7 @@ export interface GeoPoint {
 }
 
 export interface Address {
+  address?: string;
   line1?: string;
   line2?: string;
   town?: string;
@@ -154,6 +155,20 @@ export interface CustomerProfile {
   };
   marketingOptIn: boolean;
   pushOptIn: boolean;
+}
+
+export interface LegalDocument {
+  type: "terms" | "privacy" | "cookies";
+  title: string;
+  content: string;
+  version: string;
+  updatedAt: ISODate;
+}
+
+export interface SearchResponse {
+  restaurants: Restaurant[];
+  accommodations: Accommodation[];
+  properties: Property[];
 }
 
 export interface CustomerPreferences {

@@ -4,7 +4,6 @@ import Card from "../components/ui/Card";
 import Table, { type Column } from "../components/ui/Table";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import Select from "../components/ui/Select";
 import Badge from "../components/ui/Badge";
 import Tabs from "../components/ui/Tabs";
 import Pagination from "../components/ui/Pagination";
@@ -74,7 +73,6 @@ export default function Wallets() {
 
 function WalletList() {
   const navigate = useNavigate();
-  const { error: toastError } = useToast();
 
   const [tab, setTab] = useState<PartnerTab>("restaurant");
   const [rows, setRows] = useState<Wallet[]>([]);

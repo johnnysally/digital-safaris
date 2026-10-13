@@ -7,7 +7,6 @@ import Spinner from "../components/ui/Spinner";
 import Alert from "../components/ui/Alert";
 import EmptyState from "../components/ui/EmptyState";
 import { reportApi } from "../api";
-import { useToast } from "../context/toastContext";
 import { formatCurrency } from "../utils/formatCurrency";
 import { formatNumber } from "../utils/formatNumber";
 import { formatDate, formatISODate } from "../utils/formatDate";
@@ -207,7 +206,6 @@ function StatTile({
 }
 
 export default function Reports() {
-  const { error: toastError } = useToast();
   const [tab, setTab] = useState("revenue");
   const [range, setRange] = useState(defaultRange());
 

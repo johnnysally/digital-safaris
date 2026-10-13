@@ -32,7 +32,7 @@ export const ChatWidget: React.FC = () => {
     setInput("");
 
     sendAiChat(userMsg)
-      .then((response) => setMessages(prev => [...prev, { sender: "bot", text: response.reply || response.message || "Thanks for your message." }]))
+      .then((response) => setMessages(prev => [...prev, { sender: "bot", text: response.reply || "Thanks for your message." }]))
       .catch(() => setMessages(prev => [...prev, { sender: "bot", text: "Sorry, we could not reach the concierge right now." }]));
   };
 

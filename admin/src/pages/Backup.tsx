@@ -30,7 +30,7 @@ function statusVariant(status: BackupType["status"]) {
 }
 
 export default function Backup() {
-  const { success, error: toastError, info } = useToast();
+  const { success, error: toastError } = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [backups, setBackups] = useState<BackupType[]>([]);

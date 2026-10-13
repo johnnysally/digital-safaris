@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { Mountain } from "lucide-react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { useBranding } from "../../context/brandingContext";
 
 interface AuthLayoutProps {
   children: ReactNode;
@@ -9,6 +9,15 @@ interface AuthLayoutProps {
 }
 
 export default function AuthLayout({ children, title, description }: AuthLayoutProps) {
+  const { branding } = useBranding();
+  const configuredLogo = branding.logoUrl || branding.logo;
+  const [logoSrc, setLogoSrc] = useState(configuredLogo || "/logo.png");
+  const brandName = branding.metaTitle || "Digital Safaris";
+
+  useEffect(() => {
+    setLogoSrc(configuredLogo || "/logo.png");
+  }, [configuredLogo]);
+
   return (
     <main className="relative isolate min-h-screen overflow-hidden bg-[#24180f] text-white">
       <div
@@ -24,10 +33,22 @@ export default function AuthLayout({ children, title, description }: AuthLayoutP
       <div className="mx-auto grid min-h-screen w-full max-w-[1500px] grid-cols-[minmax(0,1fr)_minmax(340px,420px)] items-center gap-[clamp(36px,7vw,112px)] px-[clamp(28px,7vw,104px)] py-10 max-[820px]:grid-cols-1 max-[820px]:gap-8 max-[820px]:px-8 max-[820px]:py-7 max-[520px]:gap-6 max-[520px]:px-[18px] max-[520px]:py-5">
         <section className="flex min-h-[min(720px,calc(100svh-80px))] flex-col justify-between max-[820px]:min-h-0 max-[820px]:gap-8">
           <Link to="/" className="inline-flex w-fit items-center gap-3 text-white no-underline">
-            <Mountain className="h-10 w-10 text-[#f0b747]" strokeWidth={1.6} aria-hidden="true" />
+            <img
+              src={logoSrc}
+              alt={brandName}
+              className="h-[72px] max-w-[210px] object-contain max-[520px]:h-[58px] max-[520px]:max-w-[170px]"
+              style={branding.logoAppearance ? {
+                maxWidth: `${branding.logoAppearance.maxWidth}px`,
+                maxHeight: `${branding.logoAppearance.maxHeight}px`,
+                objectFit: branding.logoAppearance.fit,
+                padding: `${branding.logoAppearance.padding}px`,
+                borderRadius: `${branding.logoAppearance.borderRadius}px`,
+              } : undefined}
+              onError={() => setLogoSrc("/logo.png")}
+            />
             <span className="flex flex-col">
               <span className="font-[Georgia,serif] text-[1.55rem] font-bold leading-none tracking-[-0.04em]">
-                Digital<span className="text-[#e4a33a]">Safaris</span>
+                {brandName}
               </span>
               <span className="mt-1 text-[0.58rem] font-medium tracking-[0.16em] text-white/75 uppercase">
                 Travel · Explore · Experience

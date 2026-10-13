@@ -90,7 +90,7 @@ function normalizeRefresh(raw: unknown): RefreshResponse {
     throw new Error("Refresh response is missing an access token");
   }
 
-  return { accessToken, refreshToken };
+  return { accessToken, refreshToken: refreshToken ?? "" };
 }
 
 function normalizeMe(raw: unknown): { admin: Admin } {

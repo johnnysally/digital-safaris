@@ -35,12 +35,47 @@ async function styledFaviconUrl(
   return canvas.toDataURL("image/png");
 }
 
-const SiteConfigContext = createContext<SiteConfig | null>(null);
+const DEFAULT_SITE_CONFIG: SiteConfig = {
+  site_name: "Digital Safaris",
+  site_tagline: "Your journey. One platform.",
+  site_description:
+    "DigitalSafaris is Kenya's digital travel platform, bringing accommodation, dining, transport, and local experiences together in one place.",
+  support_email: null,
+  support_phone: null,
+  whatsapp_number: null,
+  app_links: {
+    customer: null,
+    partner_landing: null,
+    transport_partner: null,
+    restaurant_partner: null,
+    accommodation_partner: null,
+  },
+  social_links: {
+    instagram: null,
+    tiktok: null,
+    facebook: null,
+    linkedin: null,
+    x: null,
+    youtube: null,
+  },
+  ai_chat: {
+    enabled: true,
+    name: "DigitalSafaris Concierge",
+    greeting:
+      "Jambo! Welcome to DigitalSafaris. How can I help you plan your journey or partner your business today?",
+    color: "#c47c2b",
+  },
+  site_logo: "/logo.png",
+  payment_methods: [],
+  locations: [],
+};
+
+const SiteConfigContext = createContext<SiteConfig>(DEFAULT_SITE_CONFIG);
 
 export const SiteConfigProvider: React.FC<React.PropsWithChildren> = ({
   children,
 }) => {
-  const [config, setConfig] = useState<SiteConfig | null>(null);
+  const [config, setConfig] = useState<SiteConfig>(DEFAULT_SITE_CONFIG);
 
   useEffect(() => {
     getSiteConfig()
@@ -60,7 +95,9 @@ export const SiteConfigProvider: React.FC<React.PropsWithChildren> = ({
             link.href = favicon;
           });
       })
-      .catch(() => setConfig(null));
+      .catch((error: unknown) => {
+        console.error("Could not load site configuration; using defaults.", error);
+      });
   }, []);
 
   return (

@@ -25,7 +25,7 @@ export default function Logo({
   const [errored, setErrored] = useState(false);
 
   const primary = branding.logoUrl || branding.logo;
-  const src = errored || !primary ? "/favicon.svg" : primary;
+  const src = errored || !primary ? "/logo.png" : primary;
   const appearance = branding.logoAppearance;
 
   return (

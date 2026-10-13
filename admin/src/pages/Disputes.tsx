@@ -12,7 +12,6 @@ import Pagination from "../components/ui/Pagination";
 import Alert from "../components/ui/Alert";
 import Spinner from "../components/ui/Spinner";
 import EmptyState from "../components/ui/EmptyState";
-import Dropdown from "../components/ui/Dropdown";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { disputeApi } from "../api";
@@ -67,8 +66,6 @@ export default function Disputes() {
 /* -------------------------------------------------------------------------- */
 
 function DisputeList({ onOpen }: { onOpen: (id: string) => void }) {
-  const { error: toastError } = useToast();
-
   const [rows, setRows] = useState<Dispute[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(1);

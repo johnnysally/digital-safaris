@@ -12,7 +12,6 @@ import ConfirmDialog from "../components/ui/ConfirmDialog";
 import Pagination from "../components/ui/Pagination";
 import Alert from "../components/ui/Alert";
 import Spinner from "../components/ui/Spinner";
-import EmptyState from "../components/ui/EmptyState";
 import { paymentApi } from "../api";
 import { useToast } from "../context/toastContext";
 import { DEFAULT_PAGE_SIZE, PAYMENT_METHOD_LABELS } from "../utils/constants";

@@ -19,7 +19,7 @@ interface TableProps<T> {
   onRowClick?: (row: T) => void;
 }
 
-export default function Table<T extends Record<string, unknown>>({
+export default function Table<T extends object>({
   columns,
   data,
   loading,
@@ -78,7 +78,9 @@ export default function Table<T extends Record<string, unknown>>({
                   key={col.key}
                   className={classNames("px-4 py-3.5 align-middle", col.className)}
                 >
-                  {col.render ? col.render(row) : (row[col.key] as ReactNode)}
+                  {col.render
+                    ? col.render(row)
+                    : (row[col.key as keyof T] as ReactNode)}
                 </td>
               ))}
             </tr>

@@ -27,7 +27,6 @@ type ToastFn = (message: string, description?: string) => void;
 
 let toastError: ToastFn | null = null;
 let toastWarning: ToastFn | null = null;
-let toastInfo: ToastFn | null = null;
 
 export function bindToast(fns: {
   error?: ToastFn;
@@ -36,7 +35,6 @@ export function bindToast(fns: {
 }): void {
   if (fns.error) toastError = fns.error;
   if (fns.warning) toastWarning = fns.warning;
-  if (fns.info) toastInfo = fns.info;
 }
 
 const axiosInstance: AxiosInstance = axios.create({

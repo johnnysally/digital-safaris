@@ -12,13 +12,17 @@ import { io, type Socket } from "socket.io-client";
 import { useAuth } from "./authContext";
 import { SOCKET_URL } from "../utils/constants";
 
-type EventHandler = (...args: unknown[]) => void;
-
 interface SocketContextValue {
   socket: Socket | null;
   connected: boolean;
-  on: (event: string, handler: EventHandler) => void;
-  off: (event: string, handler: EventHandler) => void;
+  on: <TArgs extends unknown[]>(
+    event: string,
+    handler: (...args: TArgs) => void
+  ) => void;
+  off: <TArgs extends unknown[]>(
+    event: string,
+    handler: (...args: TArgs) => void
+  ) => void;
   emit: (event: string, ...args: unknown[]) => void;
 }
 
@@ -71,15 +75,26 @@ export function SocketProvider({ children }: { children: ReactNode }) {
   }, [isAuthenticated, accessToken]);
 
   const on = useCallback(
-    (event: string, handler: EventHandler) => {
-      socketRef.current?.on(event, handler);
+    <TArgs extends unknown[]>(
+      event: string,
+      handler: (...args: TArgs) => void
+    ) => {
+      socketRef.current?.on(event, (...args: unknown[]) => {
+        handler(...(args as TArgs));
+      });
     },
     []
   );
 
-  const off = useCallback((event: string, handler: EventHandler) => {
-    socketRef.current?.off(event, handler);
-  }, []);
+  const off = useCallback(
+    <TArgs extends unknown[]>(
+      event: string,
+      handler: (...args: TArgs) => void
+    ) => {
+      socketRef.current?.off(event, handler);
+    },
+    []
+  );
 
   const emit = useCallback((event: string, ...args: unknown[]) => {
     socketRef.current?.emit(event, ...args);

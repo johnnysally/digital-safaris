@@ -41,7 +41,7 @@ interface BrandingContextValue {
 const DEFAULT_BRANDING: Branding = {
   logo: null,
   logoUrl: null,
-  favicon: "/favicon.svg",
+  favicon: "/favicon.png",
   emailHeaderLogo: null,
   fontFamily: "Montserrat",
   metaTitle: "Digital Safaris",
@@ -94,7 +94,7 @@ const applyBranding = (branding: Branding) => {
   const logo = branding.logoUrl || branding.logo;
   if (logo) root.style.setProperty("--ds-logo", `url("${logo}")`);
 
-  const favicon = branding.favicon || "/favicon.svg";
+  const favicon = branding.favicon || "/favicon.png";
   root.style.setProperty("--ds-favicon", `url("${favicon}")`);
 
   let link = document.querySelector(

@@ -16,7 +16,7 @@ export default function Header({ onMenuClick }: HeaderProps) {
 
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/favicon.svg";
+  const logoUrl = branding.logoUrl || branding.logo || "/logo.png";
   const logoAppearance = branding.logoAppearance;
 
   return (

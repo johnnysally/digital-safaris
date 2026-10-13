@@ -15,3 +15,4 @@ export { default as healthApi } from "./healthApi";
 export { default as createSocket } from "./socketApi";
 export { default as locationApi } from "./locationApi";
 export { default as downloadApi } from "./downloadApi";
+export type { HealthResponse, MetricsResponse } from "./healthApi";

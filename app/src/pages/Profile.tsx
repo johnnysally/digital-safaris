@@ -120,7 +120,6 @@ export default function Profile() {
       if (customer) {
         setCustomer({ ...customer, avatar: avatarUrl || null });
       }
-      setProfile((prev) => (prev ? { ...prev, avatar: avatarUrl } : prev));
       toastSuccess("Profile photo updated");
       setAvatarOpen(false);
       if (fileRef.current) fileRef.current.value = "";
@@ -155,7 +154,6 @@ export default function Profile() {
       if (customer) {
         setCustomer({ ...customer, avatar: null });
       }
-      setProfile((prev) => (prev ? { ...prev, avatar: undefined } : prev));
       toastSuccess("Profile photo removed");
       setAvatarOpen(false);
     } catch {
@@ -171,10 +169,16 @@ export default function Profile() {
     value: boolean
   ) => {
     if (!preference) return;
-    const next = {
-      ...preference,
-      [group]: { ...(preference as never)[group], [key]: value },
-    } as CustomerPreferences;
+    const next: CustomerPreferences =
+      group === "notifications"
+        ? {
+            ...preference,
+            notifications: { ...preference.notifications, [key]: value },
+          }
+        : {
+            ...preference,
+            categories: { ...preference.categories, [key]: value },
+          };
     setPreference(next);
     try {
       await customerApi.updatePreferences(next);
@@ -201,7 +205,7 @@ export default function Profile() {
     );
   }
 
-  const avatarSrc = customer?.avatar || profile?.avatar || undefined;
+  const avatarSrc = customer?.avatar || undefined;
 
   return (
     <div className="space-y-6">

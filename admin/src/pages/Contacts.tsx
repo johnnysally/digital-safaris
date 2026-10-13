@@ -347,8 +347,6 @@ export default function Contacts() {
             <Pagination
               page={meta.page}
               totalPages={meta.totalPages}
-              total={meta.total}
-              limit={meta.limit}
               onChange={setPage}
             />
           </div>

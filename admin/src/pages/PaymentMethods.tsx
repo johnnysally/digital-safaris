@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
-import Input from "../components/ui/Input";
 import Switch from "../components/ui/Switch";
 import Checkbox from "../components/ui/Checkbox";
 import Badge from "../components/ui/Badge";
@@ -9,7 +8,6 @@ import Spinner from "../components/ui/Spinner";
 import Alert from "../components/ui/Alert";
 import { settingApi } from "../api";
 import { useToast } from "../context/toastContext";
-import { capitalize } from "../utils/helpers";
 import type {
   PaymentMethodConfig,
   PaymentMethodName,

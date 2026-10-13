@@ -109,9 +109,11 @@ export function AccommodationSidebar({
     >
       <div className={`relative flex h-[120px] shrink-0 items-center justify-center border-b border-white/10 ${collapsed ? "px-2" : "px-5"}`}>
         {collapsed ? (
-          <span className="grid size-10 place-items-center rounded-xl border border-[#dda344]/35 bg-[#dda344]/10 font-serif text-sm font-bold tracking-tight text-white" aria-label="DigitalSafaris">
-            D<span className="text-[#e7a12a]">S</span>
-          </span>
+          <img
+            src="/favicon.png"
+            alt="DigitalSafaris"
+            className="size-10 object-contain"
+          />
         ) : <PartnerLogo variant="accommodation-sidebar" />}
         <button
           type="button"
