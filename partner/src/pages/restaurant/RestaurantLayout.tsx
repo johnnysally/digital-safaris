@@ -83,7 +83,7 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 	}
 
 	return (
-		<div className="restaurant-portal flex min-h-screen bg-[#f7f0e7] text-[#33251f] [font-family:Inter,Segoe_UI,sans-serif]">
+		<div className="restaurant-portal restaurant-font-scale flex min-h-screen bg-[#f7f0e7] text-[#33251f] [font-family:Inter,Segoe_UI,sans-serif]">
 			<aside className="sticky top-0 z-20 flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-[#38231f] p-0 text-[#fff7ef] max-[760px]:w-[60px] max-[480px]:w-[52px]">
 				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(43, 25, 23, .97), rgba(58, 31, 25, .91) 62%, rgba(103, 55, 34, .58)), url("${partnerImages.shared.sidebarBackground}")` }} />
 				<div className="relative z-10 flex min-h-full flex-1 flex-col p-[24px_14px_16px] max-[760px]:items-center max-[760px]:px-[5px] max-[760px]:py-[16px]">
