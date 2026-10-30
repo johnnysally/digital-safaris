@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowRight, BarChart3, Bell, BellRing, BusFront, CalendarDays, CarFront, CheckCircle2, ChevronDown, CircleDollarSign, CircleUserRound, Clock3, CreditCard, Gauge, MapPin, Settings, ShieldCheck, Star, Truck, UserRound, Users, Wallet, Wrench, LogOut } from "lucide-react";
+import { ArrowRight, BarChart3, Bell, BellRing, BusFront, CalendarDays, CarFront, ChevronDown, CircleDollarSign, CircleUserRound, Clock3, CreditCard, Gauge, MapPin, Settings, Star, Truck, UserRound, Users, Wallet, Wrench, LogOut } from "lucide-react";
 import profileApi from "../../api/transport/profileApi";
 import vehicleApi from "../../api/transport/vehicleApi";
 import tripApi from "../../api/transport/tripApi";
@@ -108,6 +108,8 @@ interface DashboardData {
 	reviewCount: number;
 }
 
+const EMPTY_TRIPS: Trip[] = [];
+
 function formatDate(value: string) {
 	return formatDateTime(value);
 }
@@ -143,7 +145,7 @@ export function DashboardPage() {
 	}, [reload]);
 
 	const vehicles = data?.vehicles ?? [];
-	const trips = data?.trips ?? [];
+	const trips = data?.trips ?? EMPTY_TRIPS;
 	const activeVehicles = vehicles.filter((vehicle) => vehicle.status === "active");
 	const availableJobs = (data?.jobs ?? []).filter((job) => job.status === "accepted" || job.status === "picked_up");
 	const upcomingTrips = trips.filter((trip) => new Date(trip.scheduledAt).getTime() >= Date.now() && ["requested", "accepted", "ongoing"].includes(trip.status)).sort((a, b) => a.scheduledAt.localeCompare(b.scheduledAt)).slice(0, 4);

@@ -1,5 +1,7 @@
 import React from "react";
 import { Compass, ShieldCheck, Heart, Sparkles, Target, Eye, MapPin, Users } from "lucide-react";
+import { Card } from "../components/ui/Card";
+import { SectionHeader } from "../components/ui/SectionHeader";
 
 export const AboutPage: React.FC = () => {
   return (
@@ -69,10 +71,7 @@ export const AboutPage: React.FC = () => {
 
       {/* Core Values */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-[#e6dfd5]">
-        <div className="text-center space-y-3 mb-14">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#c47c2b]">WHAT GUIDES US</span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">Our Core Values</h2>
-        </div>
+        <SectionHeader eyebrow="WHAT GUIDES US" title="Our Core Values" className="mb-14" />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[
@@ -85,13 +84,13 @@ export const AboutPage: React.FC = () => {
           ].map((val, idx) => {
             const IconComp = val.icon;
             return (
-              <div key={idx} className="bg-white p-8 rounded-3xl border border-[#e6dfd5] card-hover-effect space-y-3">
+              <Card key={idx} className="space-y-3">
                 <div className="w-10 h-10 rounded-xl bg-[#f4efe8] flex items-center justify-center text-[#c47c2b]">
                   <IconComp className="w-5 h-5" />
                 </div>
                 <h3 className="text-base font-bold text-[#191816]">{val.title}</h3>
                 <p className="text-xs text-[#5e5950] leading-relaxed">{val.desc}</p>
-              </div>
+              </Card>
             );
           })}
         </div>

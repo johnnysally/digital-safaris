@@ -11,6 +11,36 @@ interface ApiEnvelope<T> {
 	message?: string;
 }
 
+interface LandingReviewsResponse {
+	items: LandingReview[];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+	return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseLandingReviewsResponse(body: unknown): LandingReview[] {
+	const payload = isRecord(body) && "data" in body ? body.data : body;
+	if (!isRecord(payload) || !Array.isArray(payload.items)) {
+		throw new Error("The landing reviews response did not contain a review list.");
+	}
+
+	const validReviews = payload.items.every((item) =>
+		isRecord(item) &&
+		typeof item.id === "string" &&
+		typeof item.name === "string" &&
+		typeof item.location === "string" &&
+		(item.image === null || typeof item.image === "string") &&
+		typeof item.rating === "number" &&
+		typeof item.comment === "string" &&
+		typeof item.createdAt === "string",
+	);
+	if (!validReviews) {
+		throw new Error("The landing reviews response contained an invalid review.");
+	}
+	return payload.items as LandingReview[];
+}
+
 export interface LandingReview {
 	id: string;
 	name: string;
@@ -26,8 +56,8 @@ interface LandingConfig {
 }
 
 export async function fetchLandingReviews(): Promise<LandingReview[]> {
-	const response = await landingApi.get<ApiEnvelope<{ items: LandingReview[] }>>("/public/reviews?limit=4");
-	return response.data.data.items;
+	const response = await landingApi.get<ApiEnvelope<LandingReviewsResponse>>("/public/reviews");
+	return parseLandingReviewsResponse(response.data);
 }
 
 export async function subscribeToNewsletter(email: string): Promise<void> {

@@ -1,5 +1,25 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-surface-page: var(--bg-cream);
+  --color-surface-card: var(--bg-card);
+  --color-surface-raised: #ffffff;
+  --color-brand-amber: var(--amber-primary);
+  --color-brand-amber-hover: var(--amber-hover);
+  --color-content-strong: var(--text-dark);
+  --color-content-muted: var(--text-muted);
+  --color-brand-border: var(--border-light);
+  --font-brand: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  --spacing-card: 2rem;
+  --spacing-section: 4rem;
+  --text-section-title: 1.875rem;
+  --text-section-title--line-height: 2.25rem;
+  --text-section-title-lg: 3rem;
+  --text-section-title-lg--line-height: 1;
+  --radius-card: 1.5rem;
+  --radius-control: 9999px;
+}
+
 @layer base {
   :root {
     --bg-cream: #f9f7f4;
@@ -23,7 +43,7 @@
     margin: 0;
     background-color: var(--bg-cream);
     color: var(--text-dark);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-family: var(--font-brand);
     -webkit-font-smoothing: antialiased;
     overflow-x: hidden;
   }
@@ -50,27 +70,27 @@
 }
 
 .bg-cream {
-  background-color: #f9f7f4;
+  background-color: var(--bg-cream);
 }
 
 .bg-card-warm {
-  background-color: #f4efe8;
+  background-color: var(--bg-card);
 }
 
 .text-amber-brand {
-  color: #c47c2b;
+  color: var(--amber-primary);
 }
 
 .bg-amber-brand {
-  background-color: #c47c2b;
+  background-color: var(--amber-primary);
 }
 
 .bg-amber-brand:hover {
-  background-color: #b06d20;
+  background-color: var(--amber-hover);
 }
 
 .border-warm {
-  border-color: #e6dfd5;
+  border-color: var(--border-light);
 }
 
 /* Custom card shadow & transition */
@@ -86,5 +106,16 @@
 @media (max-width: 640px) {
   html {
     font-size: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }

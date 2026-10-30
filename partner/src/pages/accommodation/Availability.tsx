@@ -25,12 +25,15 @@ export function AvailabilityPage() {
   const [error, setError] = useState("");
   const [reload, setReload] = useState(0);
 
-  const monthStart = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1));
-  const monthEnd = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0));
-  const dates = useMemo(
-    () => Array.from({ length: monthEnd.getUTCDate() }, (_, index) => new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), index + 1))),
-    [monthEnd, month],
-  );
+  const { monthStart, monthEnd, dates } = useMemo(() => {
+    const monthStart = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), 1));
+    const monthEnd = new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth() + 1, 0));
+    const dates = Array.from(
+      { length: monthEnd.getUTCDate() },
+      (_, index) => new Date(Date.UTC(month.getUTCFullYear(), month.getUTCMonth(), index + 1)),
+    );
+    return { monthStart, monthEnd, dates };
+  }, [month]);
   const selectedRoomDetails = rooms.find((room) => room._id === selectedRoom);
   const monthLabel = month.toLocaleDateString(undefined, { month: "long", year: "numeric", timeZone: "UTC" });
   const availabilityByRoomAndDate = useMemo(
@@ -61,8 +64,10 @@ export function AvailabilityPage() {
         setSelectedRoom((current) => current || roomData[0]?._id || "");
         setFrom((current) => current || dateKey(monthStart));
         setTo((current) => current || dateKey(monthEnd));
-        if (!price && roomData[0]) setPrice(String(roomData[0].basePrice));
-        if (!totalUnits && roomData[0]) setTotalUnits(String(roomData[0].totalUnits));
+        if (roomData[0]) {
+          setPrice((current) => current || String(roomData[0].basePrice));
+          setTotalUnits((current) => current || String(roomData[0].totalUnits));
+        }
       } catch (requestError) {
         if (!cancelled) setError(getApiErrorMessage(requestError, "Could not load room availability."));
       } finally {
@@ -74,7 +79,7 @@ export function AvailabilityPage() {
     return () => {
       cancelled = true;
     };
-  }, [month, reload]);
+  }, [monthStart, monthEnd, reload]);
 
   async function saveAvailability(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

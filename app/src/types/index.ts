@@ -649,7 +649,7 @@ export interface VerifyResponse {
   alreadyVerified?: boolean;
 }
 
-export interface WalletResponse extends CustomerWallet {}
+export type WalletResponse = CustomerWallet;
 
 export interface TopUpResponse {
   reference: string;

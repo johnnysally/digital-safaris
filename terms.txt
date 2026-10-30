@@ -1,0 +1,168 @@
+DIGITALSAFARIS TERMS OF SERVICE
+
+For customer and Partner use
+Last updated: 15 October 2026
+
+IMPORTANT: These Terms are written for use by DigitalSafaris customers and Partners. They should be reviewed by a qualified Kenyan lawyer and checked against the applicable Partner agreements and transaction policies before publication. Nothing in these Terms removes rights that cannot lawfully be excluded.
+
+1. WHO WE ARE AND WHEN THESE TERMS APPLY
+
+These Terms of Service ("Terms") govern your access to and use of the DigitalSafaris website, mobile or web applications, partner dashboard, and related services (together, the "Platform"). "DigitalSafaris", "we", "us", and "our" refer to the operator of the Platform under the DigitalSafaris name. You can contact us using the details in section 19.
+
+These Terms apply to:
+
+• Travellers and other customers who browse, book, order, request, or pay for services through the Platform ("Customers"); and
+• Accommodation providers, restaurants, transport providers, tour or experience providers, and other businesses using the Platform to list, promote, manage, or fulfil services ("Partners").
+
+By creating an account, accessing or using the Platform, placing or accepting an order, or otherwise indicating acceptance, you agree to these Terms. If you do not agree, do not use the Platform. If you use the Platform for a company or other organisation, you confirm that you are authorised to bind it; "you" then includes that organisation.
+
+Some features or services may have additional terms, booking conditions, partner agreements, or policies presented at sign-up or checkout. Those additional terms form part of your agreement with us or the relevant service provider. If they conflict with these Terms, the more specific terms govern that feature or transaction to the extent of the conflict. A Partner's separately signed agreement with DigitalSafaris governs the commercial relationship between that Partner and DigitalSafaris.
+
+2. WHAT DIGITALSAFARIS DOES
+
+DigitalSafaris provides an online platform intended to help Customers discover and connect with independent accommodation, food, transport, and travel-experience providers. Depending on the feature, the Platform may support reservations, food orders, transport requests, communications, booking management, payment processing, reviews, tracking, and related services.
+
+Unless we expressly state otherwise in writing, DigitalSafaris is a platform intermediary, not the provider of accommodation, meals, transport, tours, or other services listed by Partners. The relevant Partner—not DigitalSafaris—is responsible for delivering the Partner's service, its staff, premises, vehicles, permits, safety practices, service descriptions, prices, availability, and compliance with applicable law. A booking or order creates a direct service arrangement between the Customer and the relevant Partner, subject to the terms disclosed for that transaction. DigitalSafaris is not the Customer's travel agent, insurer, employer, or representative and does not guarantee a Partner's performance.
+
+We may provide tools, payment collection or routing, customer support, messaging, and administrative assistance. These activities do not make us the provider of a Partner's underlying service or a guarantor of its performance. The Platform may not be available in every location, at every time, or for every type of service.
+
+3. ELIGIBILITY AND ACCOUNTS
+
+You must be legally capable of entering into a binding contract to accept these Terms. You may not create an account or use the Platform if you are prohibited from doing so under applicable law. If a service has a minimum age or other eligibility condition, that condition will also apply. A parent or legal guardian must arrange and supervise any use by a minor where the law permits such use.
+
+You agree to provide accurate, current, and complete information, keep it updated, and use only accounts you are authorised to use. You are responsible for safeguarding your password, verification codes, and devices, and for activity through your account. Notify us promptly at support@digitalsafaris.com or 0759589399 if you suspect unauthorised access. We may require identity, business, licence, or payment verification before enabling features or releasing a payment.
+
+One person or business may not create accounts to evade a restriction, impersonate another person, or misrepresent its identity or authority. We may reject an application or suspend access where reasonably necessary for safety, fraud prevention, legal compliance, or protection of the Platform and its users.
+
+4. CUSTOMER BOOKINGS, ORDERS, AND SERVICE INFORMATION
+
+Customers are responsible for checking service descriptions, dates, locations, guest or passenger requirements, prices, inclusions, exclusions, accessibility information, cancellation terms, and other conditions before placing an order or booking. Information and images are generally supplied by Partners. We may display, format, or moderate that information, but do not warrant that every listing is complete, accurate, current, or suitable for your needs.
+
+A request, booking, or order is not necessarily accepted when submitted. It is accepted only when the Platform or Partner confirms it, or as otherwise stated during checkout. Availability can change before confirmation. Keep your confirmation and reference details and follow any check-in, collection, delivery, or meeting instructions supplied by the Partner.
+
+You must provide correct contact details, guest or passenger numbers, delivery or pick-up information, and any information reasonably needed to fulfil the service. You are responsible for arriving on time, complying with reasonable house, venue, safety, and service rules, and ensuring that people in your booking do the same. Special requests are not guaranteed unless expressly confirmed.
+
+5. PRICES, PAYMENTS, AND REFUNDS
+
+Prices, taxes, service charges, delivery fees, and any other amounts payable will be shown where applicable before you confirm a transaction. Unless stated otherwise, Platform prices are displayed in Kenyan shillings (KES). A Partner may change its prices or availability for future transactions; a change does not alter a confirmed transaction except as permitted by its disclosed terms or applicable law.
+
+The Platform may support payment methods such as mobile money, cards, a Platform wallet, bank transfer, or cash where the relevant option is available. Payment methods and providers may change. You authorise the applicable payment provider to process the amount you approve. You must use a payment method you are authorised to use and provide accurate payment details. Payment providers may have separate terms and privacy practices.
+
+Some transactions may require advance payment, while others may be paid at a venue or on delivery. The payment timing and method shown for the particular transaction apply. A payment marked pending is not proof of successful payment. Do not make duplicate payments while a transaction is pending; check its status or contact support.
+
+Cancellation, refund, and no-show rules depend on the relevant service and the cancellation policy shown before confirmation, together with applicable law. Review those terms before paying. Where a refund is due, we or the payment provider may return it to the original payment method or, where permitted and disclosed, another appropriate method. Processing times depend on the payment provider and financial institution. Non-refundable amounts, deductions, and deadlines must be disclosed before the transaction, subject to mandatory legal rights.
+
+If a Partner cancels, cannot provide a confirmed service, or materially changes it, contact us promptly. We may help communicate with the Partner and process an eligible refund or other remedy. We do not promise a particular outcome where the Partner is responsible for the service, but this does not limit any rights you have against the Partner or under applicable law.
+
+Wallet features, if offered, are subject to the balance, use, withdrawal, expiry, refund, and verification rules shown in the Platform and any applicable wallet terms. A wallet is not a bank account or deposit unless expressly stated and lawfully authorised. Do not assume that a balance earns interest, is insured, or can be transferred or withdrawn. We may restrict wallet activity to address fraud, errors, chargebacks, legal requirements, or security concerns, and will provide information about the restriction where legally permitted.
+
+Customers must not initiate an unjustified chargeback or payment reversal for a service received. If you believe a payment is incorrect, contact us and the payment provider promptly with the transaction reference and supporting information. This does not prevent you from exercising rights provided by law.
+
+6. CUSTOMER CONDUCT AND SAFETY
+
+You agree to use the Platform lawfully and respectfully. You must not:
+
+• submit false, misleading, unlawful, abusive, discriminatory, threatening, or infringing content;
+• use the Platform to defraud, harass, exploit, endanger, or harm another person;
+• interfere with the Platform, probe or bypass its security, introduce malicious code, scrape data without permission, or disrupt another user's access;
+• misrepresent your identity, qualifications, age, booking, payment, or authority;
+• misuse another person's personal information, payment method, account, or booking;
+• offer, request, or facilitate a prohibited or unlawful service; or
+• use the Platform to avoid a fee or obligation where doing so breaches a transaction's terms or a Partner agreement.
+
+Travel, transport, food, accommodation, tours, and outdoor activities can involve inherent risks. Read the Partner's instructions, disclose relevant requirements directly to the Partner, and use your own judgment. Do not participate if you reasonably believe it is unsafe or you cannot meet stated requirements. In an emergency, contact the appropriate local emergency service; the Platform is not an emergency-response service.
+
+7. PARTNER TERMS
+
+Partners must accept these Terms and any partner onboarding requirements or separate Partner agreement before using Partner features. A Partner represents and warrants that it is a genuine business or service provider, has authority to act for the listed business, and will keep its account, contact, ownership, payout, and service information accurate and current.
+
+Each Partner is solely responsible for:
+
+• obtaining and maintaining all registrations, permits, licences, insurance, approvals, food-safety and transport clearances, and qualifications required for its business and services;
+• complying with applicable laws, including consumer, employment, health and safety, tax, accessibility, food, transport, tourism, and data-protection laws;
+• the accuracy and legality of its listings, prices, images, menus, availability, policies, and claims, and having rights to use all content it supplies;
+• setting and honouring its disclosed service, cancellation, refund, and no-show policies, subject to applicable law;
+• delivering confirmed services safely, on time, and as described, and promptly communicating material changes or cancellations;
+• its staff, contractors, premises, vehicles, equipment, products, customer interactions, and resolution of service complaints; and
+• protecting Customer information and using it only as needed to fulfil the relevant transaction or as otherwise lawfully authorised.
+
+Partners must not mislead Customers, discriminate unlawfully, manipulate reviews, accept bookings they cannot honour, divert a transaction to avoid applicable Platform fees, or use Customer details for unsolicited marketing. Partners must promptly report suspected safety incidents, unlawful activity, data breaches, or material service failures to us and take reasonable steps to protect affected people.
+
+Partner fees, commissions, payment settlement, payout timing, reserves, chargebacks, taxes, and other commercial terms are governed by the Partner agreement or the rates and rules clearly accepted by the Partner. A fee or commission change will be communicated in the manner required by the applicable agreement and law. Partners are responsible for their own taxes and financial records. A Platform wallet or earnings display is a record of amounts calculated or reported through the Platform; it is not by itself a guarantee that funds have settled or are immediately withdrawable.
+
+We may review, reject, suspend, or remove a listing or Partner account where reasonably necessary to protect users, comply with law, investigate a complaint, or enforce these Terms or a Partner agreement. Except where urgent action is needed or notice is legally restricted, we will endeavour to give the Partner notice and an opportunity to respond. Suspension does not release a Partner from existing customer, payment, or legal obligations.
+
+8. REVIEWS, USER CONTENT, AND INTELLECTUAL PROPERTY
+
+You retain ownership of content you submit, such as reviews, listing material, photographs, and messages ("User Content"). You grant DigitalSafaris a worldwide, non-exclusive, royalty-free licence to host, reproduce, display, adapt for formatting, distribute, and use that content to operate, improve, promote, and provide the Platform and related services. This licence lasts while the content is on the Platform and for a reasonable period afterward for backups, records, dispute resolution, and legal compliance. You confirm that you have the rights and permissions needed to grant this licence and that your content does not violate another person's rights or the law.
+
+Reviews should reflect genuine personal experience and must not contain confidential information, personal data about others, threats, unlawful material, or knowingly false claims. We may moderate, decline, or remove content under our policies or where legally required, but are not obliged to pre-screen all content and do not endorse user or Partner statements.
+
+DigitalSafaris and its licensors own the Platform, branding, software, design, and materials other than User Content. We grant you a limited, revocable, non-transferable, non-exclusive licence to use the Platform for its intended purpose. You may not copy, modify, sell, reverse engineer, or create derivative works from the Platform except to the extent such restriction is prohibited by law or we give written permission.
+
+9. THIRD-PARTY SERVICES AND LINKS
+
+The Platform may link to or rely on third-party websites, maps, communications, identity checks, payment services, or other providers. Those services are controlled by their respective providers and may have separate terms. DigitalSafaris is not responsible for third-party services we do not control. A link or integration is not an endorsement. Use third-party services at your own discretion and review their applicable terms.
+
+10. PLATFORM AVAILABILITY, AUTOMATED FEATURES, AND CHANGES
+
+We work to keep the Platform available and secure, but do not guarantee uninterrupted, error-free, or continuous access. We may maintain, update, change, suspend, or discontinue a feature, and may restrict access to address security, legal, operational, or safety needs. Where reasonably practicable, we will give advance notice of material changes that adversely affect active users.
+
+Any AI, recommendation, search, or automated assistance feature is provided for general informational and convenience purposes. It may be inaccurate, incomplete, or out of date and is not professional, emergency, medical, legal, or safety advice. Verify important information with the Partner or an appropriate qualified source before relying on it.
+
+11. PRIVACY AND COMMUNICATIONS
+
+Our collection and use of personal data are described in the DigitalSafaris Privacy Policy, available through the Platform. We may use account and transaction information to provide the Platform, communicate about bookings and payments, prevent fraud, provide support, and meet legal obligations, as further described in that policy and applicable law.
+
+By providing contact details, you agree that we and, where necessary to fulfil a transaction, the relevant Partner or service provider may send service-related communications by email, SMS, phone, in-app message, or other stated channel. Marketing communications will be sent only as permitted by applicable law, and you may opt out where required or offered. Transactional and security messages may still be sent when necessary.
+
+12. SUSPENSION AND TERMINATION
+
+You may stop using the Platform and request account closure by contacting support@digitalsafaris.com or 0759589399, subject to completing outstanding transactions and any record-retention obligations. Closing an account does not cancel a confirmed booking, payment obligation, refund claim, or Partner obligation.
+
+We may suspend or terminate access if we reasonably believe you have breached these Terms, created a safety or legal risk, engaged in fraud or abuse, failed verification, or if continued access is not operationally or legally possible. Where reasonably practicable, we will notify you and provide a way to challenge an error. We may preserve information or restrict transactions as required to investigate, protect users, enforce rights, or comply with law.
+
+Terms that by their nature should continue after termination—including payment obligations, intellectual property, licences, disclaimers, liability limits, dispute provisions, and accrued rights—will survive termination.
+
+13. DISCLAIMERS
+
+To the fullest extent permitted by law, the Platform is provided on an "as available" basis. We do not warrant that it will meet every requirement, be uninterrupted or error-free, or that listings, third-party content, or Partner services will always be accurate, available, safe, lawful, or satisfactory. We do not control and are not responsible for the acts or omissions of Partners or other users.
+
+Nothing in these Terms excludes a guarantee, warranty, consumer protection, or other right that cannot lawfully be excluded. Where the law requires a remedy, these Terms do not remove it.
+
+14. LIABILITY
+
+To the fullest extent permitted by applicable law, DigitalSafaris is not liable for indirect, incidental, special, exemplary, or consequential loss; loss of profits, revenue, opportunity, goodwill, data, or anticipated savings; or loss arising from a Partner's service, another user's conduct, or a third-party service, where such loss is not directly caused by our breach of a non-excludable duty.
+
+To the fullest extent permitted by law, DigitalSafaris' total liability arising out of or relating to the Platform or these Terms is limited to the amount of direct loss proven to have been caused by DigitalSafaris' breach of these Terms. This limitation does not exclude or restrict liability that cannot lawfully be excluded or restricted, including liability for fraud, wilful misconduct, or death or personal injury caused by negligence where the law prohibits limitation.
+
+Nothing in these Terms limits a Customer's rights against the Partner that provides the relevant service. The liability limits in this section apply only to the extent permitted by law and do not remove any mandatory consumer protection.
+
+15. INDEMNITY
+
+To the extent permitted by law, you agree to indemnify DigitalSafaris and its personnel against third-party claims, losses, and reasonable costs arising from your unlawful conduct, material breach of these Terms, infringement of another person's rights, or (for Partners) your listed or delivered services, staff, premises, vehicles, or regulatory non-compliance. This does not apply to the extent a claim results from DigitalSafaris' own breach, negligence, or wilful misconduct, and does not restrict rights that cannot lawfully be waived.
+
+16. COMPLAINTS AND DISPUTES
+
+If you have a question, complaint, or dispute, first contact support@digitalsafaris.com or 0759589399, include your account or transaction reference, and explain the outcome you seek. For service issues, contact the relevant Partner promptly as well. We will make reasonable efforts to review and facilitate communication, but our support process does not replace formal legal rights, regulatory complaints, or court remedies.
+
+These Terms are governed by the laws of Kenya, without preventing a consumer from relying on mandatory protections available under the law that applies to them. Subject to mandatory law and any applicable Partner agreement, disputes may be brought before the courts of competent jurisdiction in Kenya. Nothing here prevents a party from seeking urgent interim relief from a court with jurisdiction.
+
+17. CHANGES TO THESE TERMS
+
+We may update these Terms to reflect changes in the Platform, law, or our operations. We will post the updated version and change the "Last updated" date. For material changes, we will provide reasonable advance notice through the Platform or by a contact method associated with your account where practicable. Changes apply from the stated effective date and do not retroactively alter a confirmed transaction unless required by law or agreed by the parties. Your continued use after the effective date constitutes acceptance of the updated Terms. If you do not agree, stop using the Platform and contact us about closing your account or outstanding transactions.
+
+18. GENERAL
+
+If a provision is held invalid or unenforceable, it will be limited or severed only to the extent necessary; the remaining provisions continue in effect. A failure or delay in enforcing a provision is not a waiver. You may not assign these Terms without our prior written consent. We may assign them as part of a merger, reorganisation, or transfer of the Platform, provided this does not reduce mandatory legal rights.
+
+These Terms, together with applicable feature terms, transaction conditions, and any Partner agreement, form the agreement relating to your use of the Platform and supersede prior statements on that subject. They do not create a partnership, employment, agency, joint venture, or franchise relationship between DigitalSafaris and a Customer or Partner. A person who is not a party to these Terms has no right to enforce them except where applicable law provides otherwise.
+
+Notices to DigitalSafaris may be sent to support@digitalsafaris.com or 0759589399. We may give notices to you through the Platform or the current email or phone number on your account. Electronic notices and records may be used to the extent permitted by law.
+
+19. CONTACT
+
+DigitalSafaris support: support@digitalsafaris.com
+Partner support: support@digitalsafaris.com
+Telephone: 0759589399
+Legal notices: support@digitalsafaris.com or 0759589399

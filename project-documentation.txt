@@ -1,0 +1,405 @@
+DIGITALSAFARIS
+PROJECT DOCUMENTATION
+
+Document purpose
+================
+This document describes the current DigitalSafaris codebase for developers,
+operators, and maintainers. It is based on the repository structure and
+configuration currently present. Payment providers, integrations, and enabled
+features depend on deployment configuration and may change.
+
+1. PROJECT OVERVIEW
+===================
+DigitalSafaris is a multi-application travel and hospitality platform. It
+connects travellers with accommodation, restaurant, and transport businesses.
+The repository contains a Node.js API and four independently built web
+frontends:
+
+  backend/   Express API and shared platform services
+  app/       Customer-facing booking and travel app
+  partner/   Partner portal for accommodation, restaurant, and transport
+  admin/     Internal operations and administration dashboard
+  website/   Public marketing and partner-acquisition website
+
+There is no root npm workspace or single root build command. Install, run, lint,
+and build each application from its own directory.
+
+2. TECHNOLOGY
+=============
+Backend:
+  Node.js (backend package specifies Node >=18)
+  Express 4, MongoDB with Mongoose, JWT, Socket.IO
+  Optional/configurable Redis, Firebase, Cloudinary, M-Pesa, Stripe,
+  email/SMS providers, and AI service integrations
+
+Frontends:
+  React, TypeScript, Vite, React Router, Axios
+  Socket.IO client where real-time updates are used
+  Tailwind CSS; versions vary by app
+
+The marketing website currently uses React 19, React Router 7, and Vite 7.
+The other frontends currently use React 18, React Router 6, and Vite 6.
+Use a Node version compatible with the Vite version in the application being
+built; Node 20.19+ or 22.12+ is recommended for the Vite 7 website.
+
+3. LOCAL DEVELOPMENT
+====================
+Prerequisites:
+  - Node.js and npm
+  - MongoDB connection for the backend
+  - Redis only when enabled
+  - Credentials for any external integrations you intend to use
+
+Install dependencies separately:
+
+  cd backend
+  npm ci
+
+  cd ..\app
+  npm ci
+
+  cd ..\partner
+  npm ci
+
+  cd ..\admin
+  npm ci
+
+  cd ..\website
+  npm ci
+
+Configure backend/backend .env (the dotenv loader reads the backend process
+working directory) and configure frontend environment files in each frontend
+directory. Do not commit environment files or secrets.
+
+Start each process in a separate terminal from the relevant directory:
+
+  cd backend
+  npm run dev
+
+  cd app
+  npm run dev
+
+  cd partner
+  npm run dev
+
+  cd admin
+  npm run dev
+
+  cd website
+  npm run dev
+
+Default development addresses:
+  Backend API:       http://localhost:5000
+  Customer app:      http://localhost:3000
+  Partner portal:    http://localhost:3002
+  Admin dashboard:   http://localhost:3001
+  Public website:    http://localhost:3003
+
+Backend checks:
+  GET /             Basic API response with environment and timestamp
+  GET /health       Health response with uptime and timestamp
+
+The customer app uses a Vite development proxy for /api. The admin Vite
+configuration also defines this proxy, but the admin client uses it only when
+VITE_API_URL is set to a relative /api URL; its default API URL points directly
+to localhost:5000. The partner and public website use their configured API URL
+directly. For local integration, ensure the backend CORS origins and frontend
+API/socket URLs agree with the actual local or deployed addresses.
+
+4. ENVIRONMENT CONFIGURATION
+============================
+Backend variables are read in backend/config/env.js. Put values in
+backend/.env (or inject them through the deployment environment). The list
+below is a reference to supported configuration names; not every integration
+is required for every deployment.
+
+Application and URLs:
+  PORT, NODE_ENV, APP_NAME
+  API_URL, CLIENT_URL, ADMIN_URL, PARTNER_URL, WEBSITE_URL
+  CORS_ORIGINS
+
+Database and cache:
+  MONGODB_URI
+  REDIS_ENABLED, REDIS_URL
+
+Authentication:
+  JWT_SECRET, JWT_EXPIRES
+  JWT_REFRESH_SECRET, JWT_REFRESH_EXPIRES
+
+File storage:
+  STORAGE_PROVIDER, LOCAL_UPLOAD_PATH, LOCAL_UPLOAD_URL
+  CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET
+
+Payments:
+  MPESA_ENV, MPESA_BASE_URL, MPESA_CONSUMER_KEY, MPESA_CONSUMER_SECRET
+  MPESA_SHORTCODE, MPESA_TILL_NUMBER, MPESA_PASSKEY
+  MPESA_TRANSACTION_TYPE, MPESA_CALLBACK_URL
+  MPESA_B2C_INITIATOR_NAME, MPESA_B2C_SECURITY_CREDENTIAL
+  MPESA_B2C_COMMAND_ID, MPESA_B2C_RESULT_URL, MPESA_B2C_TIMEOUT_URL
+  STRIPE_SECRET_KEY, STRIPE_PUBLISHABLE_KEY, STRIPE_WEBHOOK_SECRET
+  STRIPE_CURRENCY
+
+Email, SMS, AI, and notifications:
+  EMAIL_PROVIDER, BREVO_API_KEY, BREVO_SENDER_EMAIL, BREVO_SENDER_NAME
+  SMS_ENABLED, SMS_PROVIDER
+  AFRICASTALKING_USERNAME, AFRICASTALKING_API_KEY,
+  AFRICASTALKING_SENDER_ID
+  HDM_API_KEY, HDM_API_URL, HDM_FROM_EMAIL, HDM_FROM_NAME,
+  HDM_SMS_SENDER, HDM_SMS_TYPE
+  HDM_AI_API_KEY, HDM_AI_API_URL, HDM_AI_MODEL
+  FIREBASE_ENABLED, FIREBASE_PROJECT_ID, FIREBASE_PRIVATE_KEY,
+  FIREBASE_CLIENT_EMAIL, FIREBASE_DATABASE_URL
+
+Operations:
+  RATE_LIMIT_WINDOW_MS, RATE_LIMIT_MAX, KEEP_ALIVE_ENABLED
+
+Frontend variables:
+  VITE_API_URL       Backend API base URL; normally ends in /api
+  VITE_SOCKET_URL    Backend Socket.IO origin
+  VITE_WEBSITE_URL   Optional partner portal link to the marketing website
+
+VITE_ variables are compiled into browser code and must never contain
+credentials or other secrets. Frontend defaults use localhost API/socket
+addresses. Production deployments must set their correct public endpoint URLs.
+The root .gitignore excludes .env files and build artifacts.
+
+5. APPLICATION RESPONSIBILITIES
+===============================
+Customer app (app/):
+  Registration, email verification, sign-in and recovery; discovery and search;
+  accommodation bookings; restaurant orders and dine-in; transport trips and
+  requests; AI concierge; payments and wallet; tracking; reviews; notifications;
+  and customer profile and addresses.
+
+Partner portal (partner/):
+  A shared frontend with role-specific sections:
+    Accommodation: properties, rooms, availability, bookings, guests, ratings,
+                   reports, wallet, profile, and support.
+    Restaurant:    menus and menu items, food orders, dine-in bookings,
+                   broadcasts, analytics, ratings, reports, and wallet.
+    Transport:     vehicles, jobs, trips, live location, ratings, and wallet.
+  The partner app's top-level routes are under /partner. Its role-specific
+  pages are grouped under /partner/accommodation, /partner/restaurant, and
+  /partner/transport.
+
+Admin dashboard (admin/):
+  Internal dashboard for administration of customers and Partners, operational
+  records, payments, payment methods, commissions, payouts, wallets, disputes,
+  reports, support contacts, legal content, branding, system settings, backups,
+  health, locations, and administrator accounts.
+
+Public website (website/):
+  Marketing pages, service descriptions, business and partner information,
+  FAQs, contact, partner registration, legal pages, SEO, and the website chat
+  interface. It retrieves public site settings and legal content from the API.
+
+Backend (backend/):
+  Shared REST API, authentication, business rules, database models, payment
+  and messaging adapters, file uploads, live events, scheduled maintenance,
+  admin services, and public website data.
+
+6. BACKEND STRUCTURE AND API
+============================
+Important backend directories:
+  server.js          Process bootstrap, middleware, routes, health endpoints,
+                     service initialization, and graceful shutdown
+  config/            Environment, database, Redis, Socket.IO, Firebase, and
+                     third-party service configuration
+  routes/            HTTP route definitions grouped by user or business role
+  controllers/       Request handlers and business workflow orchestration
+  models/            Mongoose data models and persistence schemas
+  middleware/        Authentication, authorization, validation, security,
+                     request handling, and error middleware
+  services/          Shared integrations and reusable platform operations
+  schedulers/        Scheduled payouts, backups, reminders, timeouts, expiry,
+                     and cleanup jobs
+  scripts/           Seeding, administrator setup, and DNS utilities
+  templates/         Email and SMS message templates
+  utils/             Shared helpers, response types, logging, and errors
+
+All API routes are mounted below /api. Main route groups:
+  /api/public          Registration/auth-related public flows, public search,
+                       branding, legal, uploads, payments/webhooks, contact,
+                       and public AI concierge
+  /api/web             Marketing site configuration, contact, AI chat, legal,
+                       and towns
+  /api/customer        Customer auth, profile, addresses, bookings, orders,
+                       dine-in, broadcasts, trips, payments, wallet, reviews,
+                       notifications, tracking, search, and AI concierge
+  /api/accommodation   Accommodation partner auth, profile, properties, rooms,
+                       availability, bookings, guests, ratings, and wallet
+  /api/restaurant      Restaurant partner auth, profile, menus, menu items,
+                       orders, bookings, broadcasts, ratings, and wallet
+  /api/transport       Transport partner auth, profile, vehicles, jobs, trips,
+                       location, ratings, and wallet
+  /api/admin            Admin auth, dashboard, partners, customers, operations,
+                       payments, wallets, contacts, payment methods,
+                       commissions, payouts, reports, disputes, backups,
+                       legal, branding, settings, health, locations, downloads,
+                       and admin users
+
+Exact HTTP methods, parameters, validation, and permission requirements are
+defined in backend/routes and the corresponding controllers/middleware. Treat
+those files as the source of truth when changing API contracts.
+
+Typical backend response helpers are in backend/utils/ApiResponse.js and
+backend/utils/apiError.js. Keep API responses and error handling consistent
+with the existing helpers when adding endpoints.
+
+7. DATA MODEL DOMAINS
+=====================
+MongoDB collections are represented by Mongoose models in backend/models:
+
+  Customer: accounts, profiles, addresses, sessions, OTPs, preferences,
+            notifications, payments, wallets, and reviews
+  Accommodation: accommodation partners, properties, rooms, availability,
+                 bookings, guests, ratings, and wallets
+  Restaurant: restaurant partners, menus, menu items, food orders, dine-in
+              bookings, broadcasts, ratings, and wallets
+  Transport: transport partners, vehicles, trips, delivery jobs, driver
+             locations, ratings, and wallets
+  Admin: administrators and roles, settings, branding, legal documents,
+         payment methods, commissions, payouts, reports, disputes, backups,
+         contacts, downloads, and audit logs
+
+When adding or changing a persisted field, update the relevant model, controller,
+validation, API types, and frontend usage together. Consider indexes, access
+control, retention, and migration/backfill requirements for existing records.
+
+8. PAYMENTS, REAL-TIME EVENTS, AND BACKGROUND TASKS
+===================================================
+Payment code is implemented through backend/services and configured in
+backend/config. Customer payment models and frontend constants currently
+include M-Pesa, Stripe, and wallet. Availability depends on credentials,
+admin configuration, and deployment settings. Do not assume that every method
+described in older product notes is enabled or available in production.
+
+Partner wallets track earnings and payout settings. Admin configuration
+includes payment methods, commissions, and payouts. Verify current rates,
+settlement timing, refunds, and eligibility in the active system settings and
+Partner agreement; values can be configurable and are not guaranteed by this
+documentation.
+
+Socket.IO is initialized on the backend HTTP server. The customer, partner,
+and admin apps use the Socket.IO client for live operational updates such as
+order, trip, booking, broadcast, and driver-location events. Event names and
+room behavior are implemented in backend services/controllers and frontend
+contexts/API modules. Keep event payloads minimal and avoid exposing one user's
+data to another user.
+
+The backend registers scheduled jobs in backend/schedulers/index.js:
+  Payout processing:             Fridays at 17:00
+  Backup job:                    every minute (job applies its own conditions)
+  Booking reminders:             every 15 minutes
+  Order timeouts:                every 5 minutes
+  Broadcast expiry:              every minute
+  Driver-location cleanup:       every 30 minutes
+  Stale-session cleanup:         hourly
+
+Avoid running multiple production backend instances with independent schedulers
+unless jobs are made distributed or otherwise protected against duplicate
+execution.
+
+9. BUILD, LINT, AND RUN SCRIPTS
+===============================
+Backend (from backend/):
+  npm run dev       Start server with nodemon
+  npm start         Start server with Node
+  npm run seed      Run database seed script
+  npm run admin     Run administrator setup script
+  npm run dns       Run DNS setup utility (inspect before use)
+
+Each frontend (from its own directory):
+  npm run dev       Start Vite development server
+  npm run build     Type-check and produce production assets in dist/
+  npm run preview   Serve the production build locally
+  npm run lint      Run ESLint
+
+There is no root-level test command in the current package manifests. Run the
+relevant frontend build and lint commands when making changes. Verify backend
+behavior with focused integration or manual checks where automated tests are
+not defined.
+
+10. DEPLOYMENT NOTES
+====================
+Deploy backend and frontends as separate services or builds:
+  - Backend: run npm ci and npm start in backend/ with its environment
+    variables, database connectivity, integrations, and public API URL.
+  - Frontends: run npm ci and npm run build from that app's directory, then
+    serve its dist/ directory as a static site.
+  - Configure each frontend's VITE_API_URL and VITE_SOCKET_URL to point to the
+    deployed backend. Configure backend CORS origins and CLIENT_URL,
+    ADMIN_URL, PARTNER_URL, and WEBSITE_URL to match deployed sites.
+  - Configure payment callbacks/webhooks, Firebase, storage, email, SMS, and
+    AI integrations only when those features are used.
+  - Provide an SPA fallback to index.html for frontend routes when required by
+    the static host.
+  - Keep secrets in the hosting provider's secret/environment store, not in
+    frontend build variables or source control.
+
+Production runbooks should additionally define database backup verification,
+restore procedures, monitoring, alerting, rate limits, credential rotation,
+incident response, and operational ownership.
+
+11. REPOSITORY AND GIT NOTES
+============================
+The root Git repository contains the platform folders. This checkout also has
+nested Git metadata in admin/ and app/. Running git commands inside those
+directories may operate on their own repositories rather than the root
+repository. Check the current repository before committing or pushing:
+
+  git rev-parse --show-toplevel
+  git remote -v
+  git status --short
+
+partner/ does not have nested Git metadata in this checkout and is part of the
+root repository. If publishing the partner application as a standalone
+repository from the monorepo, use a Git subtree workflow from the repository
+root, for example:
+
+  git subtree push --prefix=partner <partner-repository-url> main
+
+Confirm the destination URL, branch, and remote history before publishing.
+Never use force-push as a shortcut for a non-fast-forward rejection; first
+identify whether the destination contains commits that need to be preserved.
+
+The root .gitignore excludes dependency folders, build output, environment
+files, logs, credentials, backups, and generated TypeScript build information.
+Check `git status` before committing to avoid publishing local secrets or
+generated files.
+
+12. SECURITY AND MAINTENANCE
+============================
+  - Never commit API keys, JWT secrets, private keys, service-account files,
+    database credentials, payment credentials, or populated .env files.
+  - Use least-privilege access for admins and service accounts.
+  - Validate and authorize every server-side request; frontend route guards
+    are not an authorization boundary.
+  - Do not trust prices, commissions, ownership, status, or payment outcomes
+    supplied by a browser; verify them on the backend/provider.
+  - Protect webhook endpoints with provider signature verification and keep
+    callback URLs aligned with the deployed backend.
+  - Minimize personal and location data in logs, analytics, socket events, and
+    support records.
+  - Review dependency updates and security advisories for each package
+    independently; applications have separate lockfiles and dependency trees.
+  - Review privacy.txt and terms.txt with qualified Kenyan counsel and keep
+    their published versions aligned with actual platform operations.
+
+13. USEFUL FILES
+================
+  README.md                       Short project overview and setup summary
+  Structure.txt                   Repository tree reference
+  project-documentation.txt       This guide
+  terms.txt                       DigitalSafaris Terms of Service
+  privacy.txt                     DigitalSafaris Privacy Policy
+  backend/server.js               API/server bootstrap
+  backend/config/env.js           Backend environment variable mapping
+  backend/routes/index.js         API route group mounting
+  backend/schedulers/index.js     Scheduled job registration
+  app/src/routes/AppRoutes.tsx    Customer app routes
+  partner/src/routes/AppRoutes.tsx Partner portal routes
+  admin/src/routes/AppRoutes.tsx  Admin dashboard routes
+  website/src/App.tsx             Public website routes
+
+END OF DOCUMENT

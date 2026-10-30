@@ -64,6 +64,8 @@ axiosInstance.interceptors.response.use(
     const url = original.url ?? "";
 
     const isAuthEndpoint =
+      url.includes("/public/register/customer") ||
+      url.includes("/public/register/resend-verification") ||
       url.includes("/public/register/login") ||
       url.includes("/public/register/refresh") ||
       url.includes("/public/register/forgot-password") ||
@@ -93,7 +95,6 @@ axiosInstance.interceptors.response.use(
         return new Promise((resolve, reject) => {
           pendingQueue.push({
             resolve: (token: string) => {
-              original.headers = original.headers ?? {};
               original.headers.Authorization = `Bearer ${token}`;
               original._retry = true;
               resolve(axiosInstance(original));
@@ -118,7 +119,6 @@ axiosInstance.interceptors.response.use(
 
         flushQueue(null, data.accessToken);
 
-        original.headers = original.headers ?? {};
         original.headers.Authorization = `Bearer ${data.accessToken}`;
         return axiosInstance(original);
       } catch (refreshError) {

@@ -1,0 +1,162 @@
+DIGITALSAFARIS PRIVACY POLICY
+
+For customer and Partner use
+Last updated: 15 October 2026
+
+This policy describes DigitalSafaris' handling of personal data for the Platform. It should be read alongside the Terms of Service. DigitalSafaris may update this policy when its services or data practices change. Nothing in this policy limits rights that cannot lawfully be excluded.
+
+1. ABOUT THIS POLICY
+
+This Privacy Policy explains how DigitalSafaris, the service operating under the DigitalSafaris name, collects, uses, shares, stores, and protects personal data through its website, apps, partner dashboard, and related services (together, the "Platform"). In this policy, "DigitalSafaris", "we", "us", and "our" refer to the Platform operator. You can contact us using the details in section 15.
+
+This policy applies to travellers and other customers ("Customers"), accommodation providers, restaurants, transport providers, guides and other business users ("Partners"), people who contact us, and visitors to our websites. It should be read with our Terms of Service and any notices shown when you use a specific feature.
+
+For personal data processed to run the Platform, DigitalSafaris is generally the data controller. A Partner may separately act as a controller for information it receives and uses to provide its service. In some situations, DigitalSafaris processes information on a Partner's documented instructions; the applicable Partner agreement and a feature notice will describe that arrangement.
+
+2. PERSONAL DATA WE COLLECT
+
+The information we collect depends on how you use the Platform and the choices you make. It may include:
+
+Account and identity information: name, email address, phone number, password credentials, account type, verification status, profile information, and identity or business documents when required for account, Partner, safety, payment, or legal verification. Passwords are stored as password hashes rather than readable passwords.
+
+Partner and business information: business and trading names, business contact details, business type, property, restaurant, vehicle or service details, licences and verification materials, service descriptions, opening hours, availability, prices, payout preferences and payout details, and information about authorised representatives or staff.
+
+Booking and transaction information: bookings, orders, trip and delivery requests, dates and times, service selections, guest or passenger details, special requests, delivery and collection instructions, customer support records, payment method, transaction reference, amount, currency, payment and refund status, and related wallet or payout ledger records.
+
+Payment information: payment providers process payment credentials such as card or mobile-money details. DigitalSafaris may receive payment tokens, transaction identifiers, receipts, partial payment details, and payment status needed to confirm and support transactions. We do not intend to store full card security codes. The relevant payment provider's privacy policy also applies to its processing.
+
+Location information: addresses, town or area, property or business coordinates, delivery addresses and coordinates, trip pick-up and drop-off locations, and transport-partner or driver location updates. Driver or vehicle location may be collected and shared for operational purposes such as availability, dispatch, and tracking an active trip or delivery. Location can be sensitive; provide only the location details needed for the relevant service. We do not claim to collect a Customer's continuous device location unless a feature clearly requests permission and explains that collection.
+
+Communications and content: messages or requests sent to us or through Platform features, support enquiries, reviews, ratings, photographs, profile or listing images, and information you choose to include in a booking or special request. Avoid sending sensitive personal information unless it is necessary for the service and requested through an appropriate channel.
+
+Technical and usage information: device or browser information, IP address, log and diagnostic data, access times, session and security events, and information about how the Platform is used, where collected by the Platform, hosting provider, or security tools. The exact data collected depends on the relevant technical configuration.
+
+Notifications and preferences: notification tokens or identifiers needed to deliver push notifications, communication preferences, and consent or opt-out records.
+
+Information about other people: if you make a booking for a guest, passenger, recipient, or another person, you may provide their name, contact information, and service-related details. You are responsible for ensuring you are authorised to provide that information and should direct those people to this policy.
+
+We may receive information from Partners, payment providers, identity or verification services, communications providers, public business sources, or people who refer you, where lawful and relevant to providing the Platform or protecting users.
+
+3. HOW WE USE PERSONAL DATA
+
+We use personal data for purposes that include:
+
+• creating, authenticating, and administering customer and Partner accounts;
+• verifying account, identity, Partner business, licence, and payout information;
+• displaying listings and enabling discovery, bookings, food orders, transport requests, and other Platform transactions;
+• communicating booking, order, trip, payment, security, and service updates by in-app message, email, SMS, phone, push notification, or other configured channel;
+• sharing necessary transaction details with the relevant Partner so it can confirm and provide the requested service;
+• processing payments, refunds, wallet entries, commissions, payouts, and payment disputes through applicable providers;
+• enabling location-based dispatch, active trip or delivery tracking, and operational safety features;
+• receiving and responding to support requests, reviews, complaints, and disputes;
+• operating, maintaining, troubleshooting, testing, and improving the Platform and its features;
+• detecting, preventing, and investigating fraud, security incidents, abuse, unlawful activity, and breaches of our terms;
+• protecting the rights, safety, and property of Customers, Partners, DigitalSafaris, and others;
+• meeting accounting, tax, regulatory, court, law-enforcement, and other legal obligations; and
+• sending marketing or promotional communications where permitted by law and consistent with your preferences.
+
+We do not use personal data for a purpose that is incompatible with the purpose for which it was collected unless we have a lawful basis and provide any notice required by law.
+
+4. LAWFUL BASES FOR PROCESSING
+
+Where applicable under the Kenya Data Protection Act, 2019 and other relevant privacy laws, we process personal data on one or more of these bases:
+
+• Contract: to create and manage your account, facilitate a booking or Partner service, process a transaction, or take steps you request before entering a contract.
+• Legal obligation: to comply with tax, accounting, consumer, regulatory, court, or other legal requirements.
+• Legitimate interests: to secure and improve the Platform, prevent fraud, support users, manage business operations, and establish or defend legal claims, where those interests are not overridden by your rights.
+• Consent: where we request your permission, such as for certain optional communications, device permissions, or processing that legally requires consent. You may withdraw consent at any time; withdrawal does not affect processing that was lawful before withdrawal.
+• Vital interests or public interest: where necessary in the limited circumstances recognised by applicable law, such as protecting someone's life or safety or carrying out a legally authorised public function.
+
+The applicable basis depends on the specific purpose and context. If we rely on consent, we will explain the choice when requesting it. You may object to processing based on legitimate interests where applicable law gives you that right.
+
+5. HOW WE SHARE PERSONAL DATA
+
+We may share personal data, limited to what is reasonably necessary, with:
+
+• the Partner responsible for a booking, order, transport request, or other service, including contact, guest or passenger, transaction, delivery, and location details needed to fulfil it;
+• payment providers and financial institutions to collect or return payments, verify transactions, prevent fraud, and resolve disputes;
+• hosting, database, cloud storage, image hosting, communications, email, SMS, push-notification, customer-support, security, and technology providers that help operate the Platform;
+• our professional advisers, auditors, insurers, and service providers where needed for legitimate business or legal purposes;
+• law-enforcement agencies, regulators, courts, public authorities, or other persons where required by law or reasonably necessary to protect people, rights, safety, or property;
+• a successor, investor, or transaction counterparty in connection with a proposed or completed merger, financing, restructuring, sale, or transfer of relevant business assets, subject to appropriate safeguards; and
+• other persons where you direct us to share information or give valid consent.
+
+Depending on the service and feature used, providers may include M-Pesa/Safaricom or other mobile-money and payment services, Stripe, Cloudinary, Firebase, Redis or hosting infrastructure, and Brevo or hdmBridge for communications. Providers may process information under their own terms and privacy notices. We share only information reasonably needed for the provider to perform its service or as otherwise permitted by law.
+
+We do not sell personal data for money. We do not allow Partners to use Customer information for unrelated marketing. Partners receiving information to fulfil a transaction are responsible for their subsequent use of that information under applicable law and their own privacy notices.
+
+6. INTERNATIONAL DATA TRANSFERS
+
+DigitalSafaris and its providers may store or process personal data in Kenya or other countries where our service providers operate. Those countries may have data-protection laws different from Kenya's. Before transferring personal data outside Kenya, we will use the safeguards and meet the requirements prescribed by applicable law, which may include assessing the destination and provider, contractual protections, appropriate safeguards, or obtaining consent where legally required.
+
+Where personal data is transferred outside Kenya, DigitalSafaris will apply the safeguards and meet the requirements prescribed by applicable law. For information about a specific transfer, contact us using the details in section 15.
+
+7. LOCATION AND TRACKING
+
+We use location information provided for a listing, booking, delivery, or trip to identify service areas, calculate or coordinate routes, dispatch a Partner, and provide relevant tracking. For an active trip or delivery, a transport Partner's location may be visible to the Customer associated with that service and to authorised operational personnel. A Customer's submitted pick-up, drop-off, or delivery location may be disclosed to the assigned Partner.
+
+Partners must ensure that drivers and other individuals whose location they submit receive any notice and protections required by law. A Partner should submit live location only for legitimate Platform operations and for as long as needed. Customers should not share another person's location without authority. Location displayed by the Platform can be delayed or inaccurate and should not be relied on as an emergency service or a guarantee of exact whereabouts.
+
+8. COOKIES AND SIMILAR TECHNOLOGIES
+
+The Platform may use essential cookies, local storage, session identifiers, or similar technologies to keep users signed in, maintain security, remember choices, and support core features. If optional analytics or advertising technologies are used, they will be subject to applicable law and any notice or choice presented for that feature.
+
+You can manage cookies through your browser or device settings. Blocking essential storage may prevent sign-in or other Platform features from working.
+
+9. MARKETING AND SERVICE COMMUNICATIONS
+
+We may send messages needed to operate an account or transaction, including verification codes, booking or order updates, payment notices, safety notices, and responses to your enquiry. These are service communications and may continue even if you opt out of marketing.
+
+We will send promotional communications only where permitted by law. You can opt out using the unsubscribe link or instructions in the message, changing available account preferences, or contacting us. Opting out of marketing does not affect service messages or processing required to complete a transaction.
+
+10. RETENTION
+
+We keep personal data only for as long as reasonably necessary for the purposes described in this policy, including providing services, maintaining transaction and financial records, resolving complaints, preventing fraud, enforcing agreements, and complying with legal obligations. Retention periods vary by data type and purpose. Information may remain in backup or archived systems for a limited period after deletion from active systems.
+
+We determine retention periods by considering the type and sensitivity of information, why it was collected, how long it is needed to provide the Platform, applicable limitation periods, and legal, accounting, or regulatory requirements. Different data types may therefore be retained for different periods. Information may remain in backup or archived systems for a limited period after deletion from active systems. When personal data is no longer required, we will delete it, anonymise it, or securely retain it only where law permits or requires.
+
+11. SECURITY
+
+We use technical and organisational measures intended to protect personal data against unauthorised access, loss, misuse, alteration, or disclosure. Measures may include access controls, password hashing, secure communications, provider safeguards, backups, and monitoring. No method of transmission or storage is completely secure, and we cannot guarantee absolute security.
+
+You are responsible for protecting your account credentials and notifying us promptly if you believe an account or device has been compromised. We will handle personal-data breaches and notify affected people or authorities when and as required by applicable law.
+
+12. YOUR PRIVACY RIGHTS
+
+Subject to applicable law and any lawful exceptions, you may have the right to:
+
+• be informed about how your personal data is used;
+• request access to personal data we hold about you;
+• request correction of inaccurate or misleading personal data;
+• request deletion of personal data that is no longer necessary or is being processed unlawfully;
+• object to or request restriction of certain processing;
+• withdraw consent where processing relies on consent;
+• request transfer of data in a structured, commonly used format where applicable; and
+• complain to the Office of the Data Protection Commissioner in Kenya or another competent authority.
+
+To exercise a right, contact us at support@digitalsafaris.com or 0759589399 and provide enough information for us to verify your identity and understand the request. We may ask for additional information to protect your account. We will respond within the period required by law. A request may be limited or refused where an exception applies, for example where retention is required by law or data is needed to establish or defend a legal claim; where this happens, we will explain the decision where legally permitted.
+
+If you are a Partner or Customer seeking to access information held independently by another Partner, contact that Partner directly. We may assist or forward the request where appropriate.
+
+13. CHILDREN AND OTHER PEOPLE'S INFORMATION
+
+The Platform is not designed for children to create accounts or independently arrange services. Do not provide a child's personal data unless it is necessary for a booking and you are authorised to do so. A parent or legal guardian should provide and manage any information about a child, and should contact us if they believe a child has provided personal data without appropriate authority.
+
+If you provide personal data about a guest, passenger, employee, driver, or other person, you must have authority to do so and should tell them how their information will be used. We may use it only as explained in this policy or the relevant feature notice and as allowed by law.
+
+14. THIRD-PARTY SITES AND SERVICES
+
+The Platform may link to third-party websites or use third-party payment, mapping, communications, or other services. Their privacy practices are governed by their own notices, not this policy. Review those notices before providing information directly to a third party. This policy does not cover services that DigitalSafaris does not control.
+
+15. CONTACT AND COMPLAINTS
+
+For privacy questions, requests, or complaints, contact:
+
+Privacy enquiries: support@digitalsafaris.com
+Telephone: 0759589399
+
+If you are not satisfied with our response, you may lodge a complaint with the Office of the Data Protection Commissioner of Kenya, subject to its procedures and applicable law.
+
+16. CHANGES TO THIS POLICY
+
+We may update this policy when our services, data practices, vendors, or legal obligations change. We will post the updated policy and revise the "Last updated" date. Where required by law or appropriate for a material change, we will give additional notice through the Platform or a contact method associated with your account. If a change requires consent, we will request it before applying the relevant processing.

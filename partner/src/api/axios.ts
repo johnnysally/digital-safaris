@@ -19,24 +19,35 @@ interface RefreshResponse {
   refreshToken?: string;
 }
 
+interface PendingRefreshRequest {
+  resolve: (token: string) => void;
+  reject: (error: unknown) => void;
+}
+
+interface RoleRefreshState {
+  isRefreshing: boolean;
+  pendingQueue: PendingRefreshRequest[];
+}
+
 const axiosInstance: AxiosInstance = axios.create({
   baseURL: API_URL,
   timeout: 30000,
   headers: { "Content-Type": "application/json" },
 });
 
-let isRefreshing = false;
-let pendingQueue: Array<{
-  resolve: (token: string) => void;
-  reject: (err: unknown) => void;
-}> = [];
+const refreshStates: Record<PartnerRole, RoleRefreshState> = {
+  accommodation: { isRefreshing: false, pendingQueue: [] },
+  restaurant: { isRefreshing: false, pendingQueue: [] },
+  transport: { isRefreshing: false, pendingQueue: [] },
+};
 
-function flushQueue(error: unknown, token: string | null): void {
-  pendingQueue.forEach(({ resolve, reject }) => {
+function flushQueue(role: PartnerRole, error: unknown, token: string | null): void {
+  const state = refreshStates[role];
+  state.pendingQueue.forEach(({ resolve, reject }) => {
     if (token) resolve(token);
     else reject(error);
   });
-  pendingQueue = [];
+  state.pendingQueue = [];
 }
 
 function detectRole(url: string): PartnerRole {
@@ -88,9 +99,10 @@ axiosInstance.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      if (isRefreshing) {
+      const refreshState = refreshStates[role];
+      if (refreshState.isRefreshing) {
         return new Promise((resolve, reject) => {
-          pendingQueue.push({
+          refreshState.pendingQueue.push({
             resolve: (token: string) => {
               original.headers = original.headers ?? {};
               original.headers.Authorization = `Bearer ${token}`;
@@ -103,32 +115,33 @@ axiosInstance.interceptors.response.use(
       }
 
       original._retry = true;
-      isRefreshing = true;
+      refreshState.isRefreshing = true;
 
       try {
         const persistentSession = storage.hasPersistentSession(role);
-        const { data } = await axios.post<RefreshResponse>(
+        const { data } = await axios.post<unknown>(
           `${API_URL}/${role}/auth/refresh`,
           { refreshToken },
           { headers: { "Content-Type": "application/json" } }
         );
+        const refreshed = parseRefreshResponse(data);
 
-        storage.setAccessToken(role, data.accessToken, persistentSession);
-        if (data.refreshToken) {
-          storage.setRefreshToken(role, data.refreshToken, persistentSession);
+        storage.setAccessToken(role, refreshed.accessToken, persistentSession);
+        if (refreshed.refreshToken) {
+          storage.setRefreshToken(role, refreshed.refreshToken, persistentSession);
         }
 
-        flushQueue(null, data.accessToken);
+        flushQueue(role, null, refreshed.accessToken);
 
         original.headers = original.headers ?? {};
-        original.headers.Authorization = `Bearer ${data.accessToken}`;
+        original.headers.Authorization = `Bearer ${refreshed.accessToken}`;
         return axiosInstance(original);
       } catch (refreshError) {
-        flushQueue(refreshError, null);
+        flushQueue(role, refreshError, null);
         redirectToLogin(role);
         return Promise.reject(refreshError);
       } finally {
-        isRefreshing = false;
+        refreshState.isRefreshing = false;
       }
     }
 
@@ -154,6 +167,26 @@ export interface BackendEnvelope<T> {
 export function unwrap<T>(body: unknown): T {
   const b = body as BackendEnvelope<T>;
   return (b?.data ?? body) as T;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+export function parseRefreshResponse(body: unknown): RefreshResponse {
+  const payload = isRecord(body) && "data" in body ? body.data : body;
+  if (!isRecord(payload) || typeof payload.accessToken !== "string" || !payload.accessToken) {
+    throw new Error("The token refresh response did not contain an access token.");
+  }
+  if (payload.refreshToken !== undefined && typeof payload.refreshToken !== "string") {
+    throw new Error("The token refresh response contained an invalid refresh token.");
+  }
+  return {
+    accessToken: payload.accessToken,
+    ...(typeof payload.refreshToken === "string"
+      ? { refreshToken: payload.refreshToken }
+      : {}),
+  };
 }
 
 export function unwrapList<T>(

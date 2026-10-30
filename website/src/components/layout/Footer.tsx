@@ -20,6 +20,11 @@ export const Footer: React.FC = () => {
               <img
                 src={config.site_logo || "/logo.png"}
                 alt="DigitalSafaris Logo"
+                onError={(event) => {
+                  if (event.currentTarget.getAttribute("src") !== "/logo.png") {
+                    event.currentTarget.src = "/logo.png";
+                  }
+                }}
                 className="h-14 sm:h-16 w-auto object-contain"
                 style={config.site_logo_appearance ? {
                   height: `${Math.min(64, config.site_logo_appearance.maxHeight)}px`,

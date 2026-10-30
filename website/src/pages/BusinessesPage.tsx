@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { ArrowUpRight, Globe, TrendingUp, Sliders, BarChart3, Headphones, Rocket, Hotel, Utensils, Car, Compass, Anchor, Bus, Mail } from "lucide-react";
 import { useSiteConfig } from "../context/SiteConfigContext";
 import { BUSINESS_BENEFITS, PARTNER_TYPES, ONBOARDING_STEPS } from "../utils/constants";
+import { buttonClassName, ButtonLink } from "../components/ui/Button";
+import { Card } from "../components/ui/Card";
+import { SectionHeader } from "../components/ui/SectionHeader";
 
 export const BusinessesPage: React.FC = () => {
   const config = useSiteConfig();
@@ -35,16 +38,16 @@ export const BusinessesPage: React.FC = () => {
 
         {/* Hero CTAs */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link
+          <ButtonLink
             to="/partner-registration"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#c47c2b] hover:bg-[#b06d20] text-white text-xs font-bold uppercase tracking-wider px-8 py-4 rounded-full shadow-sm transition-all transform hover:-translate-y-0.5"
+            className="w-full sm:w-auto"
           >
             Become a Partner
             <ArrowUpRight className="w-4 h-4" />
-          </Link>
+          </ButtonLink>
           <a
             href="#how-it-works"
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2 border border-[#191816] hover:bg-[#191816] hover:text-white text-[#191816] text-xs font-bold uppercase tracking-wider px-8 py-4 rounded-full transition-all"
+            className={buttonClassName("secondary", "w-full sm:w-auto")}
           >
             See How It Works
           </a>
@@ -53,21 +56,23 @@ export const BusinessesPage: React.FC = () => {
 
       {/* Section 2: BUILT FOR YOUR BUSINESS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 border-t border-[#e6dfd5]">
-        <div className="text-center space-y-3 mb-14">
-          <span className="text-xs font-bold uppercase tracking-widest text-[#5e5950]">WHY JOIN US</span>
-          <h2 className="text-3xl sm:text-5xl font-extrabold tracking-tight">
-            BUILT FOR <br />
-            <span className="text-[#c47c2b]">YOUR BUSINESS.</span>
-          </h2>
-          <p className="text-sm sm:text-base text-[#5e5950] max-w-xl mx-auto">
-            DigitalSafaris provides business owners with tools to scale and reach more customers.
-          </p>
-        </div>
+        <SectionHeader
+          eyebrow="WHY JOIN US"
+          eyebrowTone="muted"
+          className="mb-14"
+          title={
+            <>
+              BUILT FOR <br />
+              <span className="text-[#c47c2b]">YOUR BUSINESS.</span>
+            </>
+          }
+          description="DigitalSafaris provides business owners with tools to scale and reach more customers."
+        />
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {BUSINESS_BENEFITS.map((b, idx) => {
             return (
-              <div key={idx} className="bg-white p-8 rounded-3xl border border-[#e6dfd5] card-hover-effect space-y-4">
+              <Card key={idx} className="space-y-4">
                 <div className="w-12 h-12 rounded-2xl bg-[#f4efe8] flex items-center justify-center text-[#c47c2b]">
                   {idx === 0 && <Globe className="w-6 h-6" />}
                   {idx === 1 && <TrendingUp className="w-6 h-6" />}
@@ -79,7 +84,7 @@ export const BusinessesPage: React.FC = () => {
 
                 <h3 className="text-lg font-bold text-[#191816]">{b.title}</h3>
                 <p className="text-xs sm:text-sm text-[#5e5950] leading-relaxed">{b.description}</p>
-              </div>
+              </Card>
             );
           })}
         </div>

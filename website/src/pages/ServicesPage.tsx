@@ -138,9 +138,9 @@ export const ServicesPage: React.FC = () => {
             <div className="lg:col-span-6">
               <div className="bg-white p-8 rounded-3xl border border-[#e6dfd5] shadow-sm relative overflow-hidden group">
                 <div
-                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative bg-center bg-cover"
-                  style={{ backgroundImage: "url('/accomodation.jpg')" }}
+                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative overflow-hidden"
                 >
+                  <img src="/accomodation.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-black/25 rounded-2xl" />
 
                   <div className="flex items-center justify-between relative z-10">
@@ -181,9 +181,9 @@ export const ServicesPage: React.FC = () => {
             <div className="lg:col-span-6 order-2 lg:order-1">
               <div className="bg-white p-8 rounded-3xl border border-[#e6dfd5] shadow-sm relative overflow-hidden">
                 <div
-                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative bg-center bg-cover"
-                  style={{ backgroundImage: "url('/Catering.jpg')" }}
+                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative overflow-hidden"
                 >
+                  <img src="/Catering.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-black/25 rounded-2xl" />
 
                   <div className="flex items-center justify-between relative z-10">
@@ -339,9 +339,9 @@ export const ServicesPage: React.FC = () => {
             <div className="lg:col-span-6">
               <div className="bg-white p-8 rounded-3xl border border-[#e6dfd5] shadow-sm relative overflow-hidden">
                 <div
-                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative bg-center bg-cover"
-                  style={{ backgroundImage: "url('/trasportation.jpg')" }}
+                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative overflow-hidden"
                 >
+                  <img src="/trasportation.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-black/25 rounded-2xl" />
 
                   <div className="flex items-center justify-between relative z-10">
@@ -382,9 +382,9 @@ export const ServicesPage: React.FC = () => {
             <div className="lg:col-span-6 order-2 lg:order-1">
               <div className="bg-white p-8 rounded-3xl border border-[#e6dfd5] shadow-sm relative overflow-hidden">
                 <div
-                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative bg-center bg-cover"
-                  style={{ backgroundImage: "url('/experience.jpg')" }}
+                  className="h-72 sm:h-80 rounded-2xl flex flex-col justify-between p-6 relative overflow-hidden"
                 >
+                  <img src="/experience.jpg" alt="" aria-hidden="true" loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
                   <div className="absolute inset-0 bg-black/25 rounded-2xl" />
 
                   <div className="flex items-center justify-between relative z-10">
