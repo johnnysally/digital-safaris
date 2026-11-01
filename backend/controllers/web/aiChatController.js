@@ -6,13 +6,14 @@ import Branding from "../../models/admin/Branding.js";
 import SystemSetting from "../../models/admin/SystemSetting.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 import logger from "../../utils/logger.js";
+import { APP_GUIDE_GENERAL_TEXT } from "../../utils/appGuide.js";
 
 const CACHE_TTL = 300;
 
 const buildSystemPrompt = (context) => {
   const parts = [
     "You are the DigitalSafaris concierge on the public marketing website.",
-    "You help visitors understand the platform, its services, and how to get started.",
+    "You help visitors understand the platform, its services, and how to get started — whether they are travellers or business owners.",
     "Be concise, friendly, and helpful.",
     "",
     "CRITICAL RULES:",
@@ -20,6 +21,9 @@ const buildSystemPrompt = (context) => {
     "- Do NOT invent partner names.",
     "- If no partner data is listed, answer generally about DigitalSafaris services without naming businesses.",
     "- Keep answers short: 2 to 4 sentences maximum.",
+    "",
+    "PLATFORM GUIDE (how DigitalSafaris works — use this to answer how-to questions):",
+    APP_GUIDE_GENERAL_TEXT,
   ];
 
   if (context.restaurants?.length) {

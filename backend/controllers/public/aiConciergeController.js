@@ -5,13 +5,14 @@ import AccommodationPartner from "../../models/accom/AccommodationPartner.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import { APP_GUIDE_GENERAL_TEXT } from "../../utils/appGuide.js";
 
 const CACHE_TTL = 300;
 
 const buildSystemPrompt = (town, context) => {
   const parts = [
     "You are the Digital Safaris concierge.",
-    "You help customers with accommodation, food, transport, and general travel queries.",
+    "You help customers with accommodation, food, transport, and general travel queries, and you also help business owners understand how to join the platform as partners.",
     "Be concise, friendly, and helpful.",
     "",
     "CRITICAL RULES:",
@@ -19,6 +20,9 @@ const buildSystemPrompt = (town, context) => {
     "- Do NOT invent partner names, do NOT reference partners from outside this list, and do NOT use your general knowledge of businesses in this region.",
     "- If no partners are listed, say so clearly and suggest the customer browse the app or try a different town.",
     "- You may give general travel advice (best time to visit, packing tips, cultural notes) as long as it does not name specific businesses.",
+    "",
+    "PLATFORM GUIDE (how DigitalSafaris works — use this to answer how-to questions):",
+    APP_GUIDE_GENERAL_TEXT,
   ];
 
   if (town) parts.push("", `Customer location: ${town}`);

@@ -397,22 +397,20 @@ const registerRestaurant = asyncHandler(async (req, res) => {
     settings,
   });
 
-  try {
-    await smsService.partnerApplicationReceived(partner, {});
-  } catch (err) {
-    logger.error("Applicant SMS failed", { email, error: err.message });
-  }
+  smsService
+    .partnerApplicationReceived(partner, {})
+    .catch((err) =>
+      logger.error("Applicant SMS failed", { email, error: err.message })
+    );
 
-  try {
-    await notifyAdminsOfPartnerApplication({
-      partner,
-      partnerType: "restaurant",
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Admin notification failed", { email, error: err.message });
-  }
+  notifyAdminsOfPartnerApplication({
+    partner,
+    partnerType: "restaurant",
+    branding,
+    settings,
+  }).catch((err) =>
+    logger.error("Admin notification failed", { email, error: err.message })
+  );
 
   res.status(201).json(
     new ApiResponse(
@@ -468,22 +466,20 @@ const registerTransport = asyncHandler(async (req, res) => {
     settings,
   });
 
-  try {
-    await smsService.partnerApplicationReceived(partner, {});
-  } catch (err) {
-    logger.error("Applicant SMS failed", { email, error: err.message });
-  }
+  smsService
+    .partnerApplicationReceived(partner, {})
+    .catch((err) =>
+      logger.error("Applicant SMS failed", { email, error: err.message })
+    );
 
-  try {
-    await notifyAdminsOfPartnerApplication({
-      partner,
-      partnerType: "transport",
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Admin notification failed", { email, error: err.message });
-  }
+  notifyAdminsOfPartnerApplication({
+    partner,
+    partnerType: "transport",
+    branding,
+    settings,
+  }).catch((err) =>
+    logger.error("Admin notification failed", { email, error: err.message })
+  );
 
   res.status(201).json(
     new ApiResponse(
@@ -537,22 +533,20 @@ const registerAccommodation = asyncHandler(async (req, res) => {
     settings,
   });
 
-  try {
-    await smsService.partnerApplicationReceived(partner, {});
-  } catch (err) {
-    logger.error("Applicant SMS failed", { email, error: err.message });
-  }
+  smsService
+    .partnerApplicationReceived(partner, {})
+    .catch((err) =>
+      logger.error("Applicant SMS failed", { email, error: err.message })
+    );
 
-  try {
-    await notifyAdminsOfPartnerApplication({
-      partner,
-      partnerType: "accommodation",
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Admin notification failed", { email, error: err.message });
-  }
+  notifyAdminsOfPartnerApplication({
+    partner,
+    partnerType: "accommodation",
+    branding,
+    settings,
+  }).catch((err) =>
+    logger.error("Admin notification failed", { email, error: err.message })
+  );
 
   res.status(201).json(
     new ApiResponse(

@@ -6,6 +6,7 @@ import Location from "../../models/admin/Location.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import APP_GUIDE_CUSTOMER_TEXT from "../../utils/appGuide.js";
 
 const CACHE_TTL = 300;
 
@@ -21,6 +22,9 @@ const buildSystemPrompt = (customer, context) => {
     "- For questions about where Digital Safaris operates, list ONLY the towns in the OPERATIONAL LOCATIONS section.",
     "- If a customer asks about a town that is not listed, say you don't have partners there yet.",
     "- You may give general travel advice (best time to visit, packing tips, cultural notes) as long as it does not name specific businesses.",
+    "",
+    "PLATFORM GUIDE (how DigitalSafaris works for customers — use this to answer how-to questions):",
+    APP_GUIDE_CUSTOMER_TEXT,
     "",
     `Customer name: ${customer.firstName}.`,
   ];
