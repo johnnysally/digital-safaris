@@ -9,16 +9,20 @@ const render = (ctx, bodyHtml, extra = {}) => ({
 const resolveContext = (payload = {}) => {
   const branding = payload.branding || {};
   const settings = payload.settings || {};
+  const site = settings.websiteUrl || "https://digitalsafaris.co.ke";
   return {
     logoUrl: branding.logoUrl || branding.logo || null,
     appName: settings.appName || "Digital Safaris",
     primaryColor: branding.primaryColor || "#1A1F2E",
     secondaryColor: branding.secondaryColor || "#C9A063",
-    supportEmail: settings.supportEmail || "support@digitalsafaris.com",
+    supportEmail: settings.supportEmail || "support@digitalsafaris.co.ke",
     supportPhone: settings.supportPhone || "",
-    websiteUrl: settings.websiteUrl || "https://digitalsafaris.com",
-    legalTermsUrl: settings.legalTermsUrl || "https://digitalsafaris.com/terms",
-    legalPrivacyUrl: settings.legalPrivacyUrl || "https://digitalsafaris.com/privacy",
+    websiteUrl: site,
+    legalTermsUrl: settings.legalTermsUrl || `${site}/terms`,
+    legalPrivacyUrl: settings.legalPrivacyUrl || `${site}/privacy`,
+    clientUrl: settings.clientUrl || settings.appUrl || site,
+    partnerUrl: settings.partnerUrl || `${site}/partner`,
+    adminUrl: settings.adminUrl || `${site}/admin`,
   };
 };
 
@@ -28,13 +32,13 @@ const welcomeCustomer = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Welcome, ${recipient.firstName}!</h2>
     <p>Your Digital Safaris account is ready. You can now book accommodations, order food, and request transport — all in one place.</p>
     <p style="margin-top:24px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Explore Now</a>
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Explore Now</a>
     </p>
     <p style="margin-top:24px;">If you have any questions, reply to this email or contact us at ${ctx.supportEmail}.</p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Welcome to ${ctx.appName}`,
-    textLines: [`Welcome, ${recipient.firstName}!`, `Explore: ${ctx.websiteUrl}`, `Support: ${ctx.supportEmail}`],
+    textLines: [`Welcome, ${recipient.firstName}!`, `Explore: ${ctx.clientUrl}`, `Support: ${ctx.supportEmail}`],
   });
 };
 
@@ -248,7 +252,7 @@ const checkOutConfirmation = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>Thank you for staying at <strong>${property.name}</strong>. We'd love a review.</p>
     <p style="margin-top:16px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Leave a Review</a>
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Leave a Review</a>
     </p>
   `;
   return render(ctx, bodyHtml, {
@@ -280,7 +284,7 @@ const reviewRequest = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>How was <strong>${targetName}</strong>? Your review helps others make better choices.</p>
     <p style="margin-top:16px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Write a Review</a>
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Write a Review</a>
     </p>
   `;
   return render(ctx, bodyHtml, {
@@ -678,12 +682,12 @@ const partnerApproved = (recipient, payload = {}) => {
     <p>Hi ${name},</p>
     <p>Your partner account has been approved. You can now start receiving orders.</p>
     <p style="margin-top:16px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Go to Dashboard</a>
+      <a href="${ctx.partnerUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Go to Dashboard</a>
     </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Your partner account is approved`,
-    textLines: [`Your partner account is approved.`],
+    textLines: [`Your partner account is approved.`, `Dashboard: ${ctx.partnerUrl}`],
   });
 };
 
@@ -830,12 +834,12 @@ const newBroadcastReceived = (recipient, payload = {}) => {
     <p>Time needed: ${new Date(request.timeNeeded).toLocaleString()}</p>
     <p>Budget: ${request.currency} ${request.budget}</p>
     <p style="margin-top:16px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Request</a>
+      <a href="${ctx.partnerUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Request</a>
     </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `New broadcast request`,
-    textLines: [`New broadcast: ${request.foodType}`],
+    textLines: [`New broadcast: ${request.foodType}`, `View: ${ctx.partnerUrl}`],
   });
 };
 
@@ -1010,10 +1014,13 @@ const adminNewPartnerApplication = (recipient, payload = {}) => {
     <p><strong>Name:</strong> ${partner.name || `${partner.firstName || ""} ${partner.lastName || ""}`.trim()}</p>
     <p><strong>Email:</strong> ${partner.email}</p>
     <p><strong>Phone:</strong> ${partner.phone}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/partners" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Application</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `New ${partnerType} partner application`,
-    textLines: [`New ${partnerType} application from ${partner.email}`],
+    textLines: [`New ${partnerType} application from ${partner.email}`, `Review: ${ctx.adminUrl}/partners`],
   });
 };
 
@@ -1026,10 +1033,13 @@ const adminNewDispute = (recipient, payload = {}) => {
     <p>A new dispute <strong>${dispute.reference}</strong> has been raised.</p>
     <p><strong>Category:</strong> ${dispute.category}</p>
     <p><strong>Subject:</strong> ${dispute.subject}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/disputes/${dispute.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Dispute</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `New dispute - ${dispute.reference}`,
-    textLines: [`New dispute ${dispute.reference}.`],
+    textLines: [`New dispute ${dispute.reference}.`, `View: ${ctx.adminUrl}/disputes/${dispute.reference}`],
   });
 };
 
@@ -1042,10 +1052,13 @@ const adminNewContact = (recipient, payload = {}) => {
     <p>From: ${contact.name} (${contact.email})</p>
     <p><strong>Subject:</strong> ${contact.subject}</p>
     <p>${contact.message}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/contacts" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open in Admin</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `New contact message`,
-    textLines: [`New contact from ${contact.email}`],
+    textLines: [`New contact from ${contact.email}`, `Open: ${ctx.adminUrl}/contacts`],
   });
 };
 
@@ -1057,10 +1070,13 @@ const adminPayoutApprovalRequired = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>A payout of <strong>${payout.currency} ${payout.amount}</strong> is awaiting your approval.</p>
     <p><strong>Reference:</strong> ${payout.reference}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/payouts/${payout.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Payout</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Payout approval required`,
-    textLines: [`Payout approval required: ${payout.reference}`],
+    textLines: [`Payout approval required: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts/${payout.reference}`],
   });
 };
 
@@ -1071,10 +1087,13 @@ const adminManualPayoutRequest = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Manual Payout Request</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>A manual payout request of <strong>${payout.currency} ${payout.amount}</strong> has been submitted.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/payouts/manual" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Request</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Manual payout request`,
-    textLines: [`Manual payout request: ${payout.reference}`],
+    textLines: [`Manual payout request: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts/manual`],
   });
 };
 
@@ -1085,10 +1104,13 @@ const adminCommissionLedgerAlert = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Commission Ledger Alert</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>Partner <strong>${ledger.partnerName}</strong> has outstanding commission of <strong>${ledger.currency} ${ledger.amount}</strong>.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/commissions" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Ledger</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Commission ledger alert`,
-    textLines: [`Commission owed: ${ledger.currency} ${ledger.amount}`],
+    textLines: [`Commission owed: ${ledger.currency} ${ledger.amount}`, `Open: ${ctx.adminUrl}/commissions`],
   });
 };
 
@@ -1100,10 +1122,13 @@ const adminFailedPayment = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>Payment <strong>${payment.reference}</strong> failed.</p>
     <p><strong>Reason:</strong> ${payment.failureReason || "Unknown"}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/payments/${payment.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Payment</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Failed payment alert`,
-    textLines: [`Payment ${payment.reference} failed.`],
+    textLines: [`Payment ${payment.reference} failed.`, `View: ${ctx.adminUrl}/payments/${payment.reference}`],
   });
 };
 
@@ -1115,10 +1140,13 @@ const adminFailedPayout = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>Payout <strong>${payout.reference}</strong> failed.</p>
     <p><strong>Reason:</strong> ${payout.failureReason || "Unknown"}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/payouts/${payout.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Payout</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Failed payout alert`,
-    textLines: [`Payout ${payout.reference} failed.`],
+    textLines: [`Payout ${payout.reference} failed.`, `View: ${ctx.adminUrl}/payouts/${payout.reference}`],
   });
 };
 
@@ -1130,10 +1158,13 @@ const adminBackupCompleted = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>Backup <strong>${backup.filename}</strong> completed successfully.</p>
     <p><strong>Size:</strong> ${backup.size} bytes</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/backups" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Backups</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Backup completed`,
-    textLines: [`Backup ${backup.filename} completed.`],
+    textLines: [`Backup ${backup.filename} completed.`, `View: ${ctx.adminUrl}/backups`],
   });
 };
 
@@ -1144,10 +1175,13 @@ const adminBackupFailed = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>The scheduled backup failed.</p>
     <p><strong>Reason:</strong> ${payload.reason}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/backups" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Backups</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Backup failed`,
-    textLines: [`Backup failed: ${payload.reason}`],
+    textLines: [`Backup failed: ${payload.reason}`, `Open: ${ctx.adminUrl}/backups`],
   });
 };
 
@@ -1161,10 +1195,13 @@ const adminRevenueSummary = (recipient, payload = {}) => {
     <p><strong>Food Commission:</strong> ${summary.currency} ${summary.food}</p>
     <p><strong>Transport Commission:</strong> ${summary.currency} ${summary.transport}</p>
     <p><strong>Accommodation Commission:</strong> ${summary.currency} ${summary.accommodation}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/reports" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Reports</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `${period} revenue summary`,
-    textLines: [`${period} revenue: ${summary.currency} ${summary.total}`],
+    textLines: [`${period} revenue: ${summary.currency} ${summary.total}`, `Reports: ${ctx.adminUrl}/reports`],
   });
 };
 
@@ -1176,10 +1213,13 @@ const adminSystemHealthAlert = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p><strong>Alert:</strong> ${alert.title}</p>
     <p>${alert.message}</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}/health" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Health</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `System alert - ${alert.title}`,
-    textLines: [`System alert: ${alert.title}`],
+    textLines: [`System alert: ${alert.title}`, `Open: ${ctx.adminUrl}/health`],
   });
 };
 
@@ -1196,10 +1236,13 @@ const adminInvited = (recipient, payload = {}) => {
     <p><strong>Email:</strong> ${recipient.email}</p>
     <p><strong>Temporary password:</strong> ${tempPassword}</p>
     <p>Change your password after first login.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Log in to Admin</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `You've been invited as admin`,
-    textLines: [`Admin invitation. Temp password: ${tempPassword}`],
+    textLines: [`Admin invitation. Temp password: ${tempPassword}`, `Log in: ${ctx.adminUrl}`],
   });
 };
 
@@ -1209,10 +1252,13 @@ const adminAccountCreated = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Admin Account Created</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>Your admin account has been created.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.adminUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Admin</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Admin account created`,
-    textLines: [`Your admin account has been created.`],
+    textLines: [`Your admin account has been created.`, `Open: ${ctx.adminUrl}`],
   });
 };
 
@@ -1359,10 +1405,13 @@ const abandonedBookingReminder = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">You Left Something Behind</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>You were looking at <strong>${property.name}</strong>. Complete your booking before it's gone.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Complete Booking</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Complete your booking`,
-    textLines: [`Complete your booking at ${property.name}.`],
+    textLines: [`Complete your booking at ${property.name}.`, `Resume: ${ctx.clientUrl}`],
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1374,10 +1423,13 @@ const abandonedOrderReminder = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Still Hungry?</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>You left items in your cart from <strong>${restaurant.name}</strong>.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Complete Order</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Complete your order`,
-    textLines: [`Complete your order at ${restaurant.name}.`],
+    textLines: [`Complete your order at ${restaurant.name}.`, `Resume: ${ctx.clientUrl}`],
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1447,10 +1499,13 @@ const reEngagement = (recipient, payload = {}) => {
   const bodyHtml = `
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">We Miss You, ${recipient.firstName}</h2>
     <p>It's been a while. Come back and see what's new on Digital Safaris.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Come Back</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `We miss you`,
-    textLines: [`We miss you at Digital Safaris.`],
+    textLines: [`We miss you at Digital Safaris.`, `Visit: ${ctx.clientUrl}`],
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1518,10 +1573,13 @@ const legalPolicyUpdate = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Policy Update: ${policy.title}</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>We've updated our ${policy.title}. Please review.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Read Policy</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Policy update: ${policy.title}`,
-    textLines: [`Policy updated: ${policy.title}`],
+    textLines: [`Policy updated: ${policy.title}`, `Read: ${ctx.websiteUrl}`],
   });
 };
 
@@ -1531,10 +1589,13 @@ const termsAcceptanceReminder = (recipient, payload = {}) => {
     <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Please Accept Our Updated Terms</h2>
     <p>Hi ${recipient.firstName},</p>
     <p>Please accept the updated Terms of Service to continue using Digital Safaris.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Accept Terms</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Accept updated terms`,
-    textLines: [`Please accept updated terms.`],
+    textLines: [`Please accept updated terms.`, `Open: ${ctx.clientUrl}`],
   });
 };
 
@@ -1559,10 +1620,13 @@ const accountDeletionScheduled = (recipient, payload = {}) => {
     <p>Hi ${recipient.firstName},</p>
     <p>Your account is scheduled for deletion on <strong>${payload.date}</strong>.</p>
     <p>Log in before then to cancel.</p>
+    <p style="margin-top:16px;">
+      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Cancel Deletion</a>
+    </p>
   `;
   return render(ctx, bodyHtml, {
     subject: `Account deletion scheduled`,
-    textLines: [`Account deletion scheduled for ${payload.date}.`],
+    textLines: [`Account deletion scheduled for ${payload.date}.`, `Cancel: ${ctx.clientUrl}`],
   });
 };
 

@@ -2,6 +2,7 @@ import SystemSetting from "../../models/admin/SystemSetting.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import { invalidateEmailContext } from "../../utils/emailContext.js";
 
 const list = asyncHandler(async (req, res) => {
   const items = await SystemSetting.find().sort({ group: 1, key: 1 }).lean();
@@ -21,6 +22,7 @@ const upsert = asyncHandler(async (req, res) => {
     { key, value, group: group || "general", updatedBy: req.admin._id },
     { upsert: true, new: true }
   );
+  invalidateEmailContext();
   res.status(200).json(new ApiResponse(200, item, "Setting saved"));
 });
 
