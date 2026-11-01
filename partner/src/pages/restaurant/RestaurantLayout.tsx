@@ -1,6 +1,6 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from "react";
 import { Link, NavLink, useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { BarChart3, Bell, CalendarDays, ChevronDown, CircleUserRound, ClipboardList, CreditCard, LayoutDashboard, LogOut, Radio, Search, Settings, Star, Utensils, UtensilsCrossed } from "lucide-react";
+import { BarChart3, Bell, CalendarDays, ChevronDown, CircleUserRound, ClipboardList, CreditCard, LayoutDashboard, LogOut, Menu, Radio, Search, Settings, Star, Utensils, UtensilsCrossed } from "lucide-react";
 import authApi from "../../api/restaurant/authApi";
 import profileApi from "../../api/restaurant/profileApi";
 import orderApi from "../../api/restaurant/orderApi";
@@ -10,6 +10,7 @@ import { usePartnerSocket } from "../../context/socketContext";
 import { useToast } from "../../context/toastContext";
 import type { RestaurantPartner } from "../../types";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
+import { PartnerMobileSidebar } from "../../components/layout/PartnerMobileSidebar";
 import { partnerImages } from "../../config/partnerImages";
 
 const restaurantNav = [
@@ -28,6 +29,9 @@ const restaurantNav = [
 ];
 
 export function RestaurantLayout({ children }: { children: ReactNode }) {
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const menuButtonRef = useRef<HTMLButtonElement>(null);
+	const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 	const [partner, setPartner] = useState<RestaurantPartner | null>(null);
 	const [pendingOrders, setPendingOrders] = useState(0);
 	const [shellError, setShellError] = useState("");
@@ -84,7 +88,21 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 
 	return (
 		<div className="restaurant-portal restaurant-font-scale flex min-h-screen bg-[#f7f0e7] text-[#33251f] [font-family:Inter,Segoe_UI,sans-serif]">
-			<aside className="sticky top-0 z-20 flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-[#38231f] p-0 text-[#fff7ef] max-[760px]:w-[60px] max-[480px]:w-[52px]">
+			<PartnerMobileSidebar
+				open={mobileMenuOpen}
+				onClose={closeMobileMenu}
+				onSignOut={() => void signOut()}
+				menuButtonRef={menuButtonRef}
+				sidebarId="restaurant-mobile-sidebar"
+				workspace="Restaurant"
+				items={restaurantNav.map(({ label, path, icon: Icon }) => ({
+					label,
+					to: `/partner/restaurant/${path}`,
+					icon: Icon,
+					badge: path === "orders" ? pendingOrders : undefined,
+				}))}
+			/>
+			<aside className="sticky top-0 z-20 flex h-screen w-[220px] shrink-0 flex-col overflow-y-auto bg-[#38231f] p-0 text-[#fff7ef] max-[760px]:hidden">
 				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg, rgba(43, 25, 23, .97), rgba(58, 31, 25, .91) 62%, rgba(103, 55, 34, .58)), url("${partnerImages.shared.sidebarBackground}")` }} />
 				<div className="relative z-10 flex min-h-full flex-1 flex-col p-[24px_14px_16px] max-[760px]:items-center max-[760px]:px-[5px] max-[760px]:py-[16px]">
 					<Link to="/partner/restaurant/dashboard" className="grid px-1 pb-[28px] text-white no-underline max-[760px]:px-0 max-[760px]:pb-5 [&_svg]:w-[18px]">
@@ -103,6 +121,7 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 			</aside>
 			<div className="min-w-0 flex-1">
 				<header className="sticky top-0 z-10 flex min-h-[68px] items-center justify-between gap-[18px] border-b border-[#eadfd4] bg-[#fffaf4] px-[26px] max-[760px]:min-h-[58px] max-[760px]:px-[12px]">
+					<button ref={menuButtonRef} type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation menu" aria-controls="restaurant-mobile-sidebar" aria-expanded={mobileMenuOpen} className="hidden size-10 shrink-0 items-center justify-center rounded-lg border border-[#e7d9c4] bg-white/70 text-[#593a20] hover:bg-[#f7eee0] max-[760px]:inline-flex"><Menu size={20} aria-hidden="true" /></button>
 					<form className="relative flex h-[38px] w-[min(390px,48%)] items-center gap-2 rounded-lg border border-[#e9ddd1] bg-[#fffdf9] px-[12px] text-[#a1a39b] [&_svg]:size-[16px] [&_input]:w-full [&_input]:min-w-0 [&_input]:border-0 [&_input]:bg-transparent [&_input]:text-[12px] [&_input]:text-[#36382f] [&_input]:outline-none [&_input::placeholder]:text-[#a1a39b] [&_span[role=alert]]:absolute [&_span[role=alert]]:top-[calc(100%+3px)] [&_span[role=alert]]:left-0 [&_span[role=alert]]:text-[10px] [&_span[role=alert]]:text-[#a44b42]" onSubmit={submitSearch}>
 						<Search size={16} />
 						<input aria-label="Search orders" placeholder="Search orders, customers, or menu items..." value={search} onChange={(event) => { setSearch(event.target.value); setSearchError(""); }} />
@@ -110,11 +129,11 @@ export function RestaurantLayout({ children }: { children: ReactNode }) {
 					</form>
 					<div className="flex items-center gap-[18px] max-[760px]:gap-2">
 						<NavLink className="relative grid size-[36px] place-items-center rounded-full border border-[#eadfd4] text-[#795344] no-underline [&_svg]:size-[17px] [&_i]:absolute [&_i]:-right-1 [&_i]:-top-1 [&_i]:grid [&_i]:min-w-[17px] [&_i]:h-[17px] [&_i]:place-items-center [&_i]:rounded-full [&_i]:bg-[#bd7047] [&_i]:px-[3px] [&_i]:text-[9px] [&_i]:not-italic [&_i]:text-white" to="/partner/restaurant/notifications" aria-label={`${pendingOrders} pending orders; view notifications`}><Bell size={17} />{pendingOrders > 0 ? <i>{pendingOrders}</i> : null}</NavLink>
-						<div className="flex items-center gap-2 [&_img]:size-[34px] [&_img]:shrink-0 [&_img]:rounded-full [&_img]:bg-[#edf0e6] [&_img]:object-cover [&_div]:grid [&_div]:gap-[3px] [&_div]:max-[760px]:hidden [&_strong]:max-w-[150px] [&_strong]:truncate [&_strong]:text-[11px] [&_strong]:text-[#3c3f36] [&_small]:text-[10px] [&_small]:text-[#91938a] [&_svg]:w-3 [&_svg]:text-[#898b82] max-[760px]:[&_svg]:hidden">
-							{partner?.logo ? <img src={partner.logo} alt="" /> : partner?.avatar ? <img src={partner.avatar} alt="" /> : <span className="grid size-[30px] shrink-0 place-items-center rounded-full bg-[#edf0e6] text-[#687348]"><CircleUserRound size={21} /></span>}
-							<div><strong>{partner?.name ?? "Restaurant Partner"}</strong><small>Restaurant Partner</small></div>
-							<ChevronDown size={14} />
-						</div>
+						<Link to="/partner/restaurant/profile" aria-label="View restaurant profile" className="flex min-h-11 min-w-11 touch-manipulation items-center gap-2 rounded-full px-1 text-[#3c3f36] no-underline hover:bg-[#f5ece2] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a85f19]">
+							{partner?.logo ? <img className="h-[34px] w-[34px] shrink-0 rounded-full bg-[#edf0e6] object-cover" src={partner.logo} alt="" /> : partner?.avatar ? <img className="h-[34px] w-[34px] shrink-0 rounded-full bg-[#edf0e6] object-cover" src={partner.avatar} alt="" /> : <span className="grid size-[34px] shrink-0 place-items-center rounded-full bg-[#edf0e6] text-[#687348]"><CircleUserRound size={21} /></span>}
+							<div className="grid gap-[3px] max-[760px]:hidden"><strong className="max-w-[150px] truncate text-[11px] text-[#3c3f36]">{partner?.name ?? "Restaurant Partner"}</strong><small className="text-[10px] text-[#91938a]">Restaurant Partner</small></div>
+							<ChevronDown className="w-3 text-[#898b82] max-[760px]:hidden" size={14} />
+						</Link>
 					</div>
 				</header>
 				<main className="mx-auto w-full max-w-[1550px] px-6 py-6 pb-9 max-[760px]:px-3 max-[760px]:py-4 max-[760px]:pb-6">

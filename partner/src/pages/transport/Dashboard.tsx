@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import { ArrowRight, BarChart3, Bell, BellRing, BusFront, CalendarDays, CarFront, ChevronDown, CircleDollarSign, CircleUserRound, Clock3, CreditCard, Gauge, MapPin, Settings, Star, Truck, UserRound, Users, Wallet, Wrench, LogOut } from "lucide-react";
+import { ArrowRight, BarChart3, Bell, BellRing, BusFront, CalendarDays, CarFront, ChevronDown, CircleDollarSign, CircleUserRound, Clock3, CreditCard, Gauge, MapPin, Menu, Settings, Star, Truck, UserRound, Users, Wallet, Wrench, LogOut } from "lucide-react";
 import profileApi from "../../api/transport/profileApi";
 import vehicleApi from "../../api/transport/vehicleApi";
 import tripApi from "../../api/transport/tripApi";
@@ -17,6 +17,7 @@ import { useAuth } from "../../context/authContext";
 import { usePartnerSocket } from "../../context/socketContext";
 import { useToast } from "../../context/toastContext";
 import { ApiFeedback, PageHeader, StatusBadge } from "../../components/layout/Layout";
+import { PartnerMobileSidebar } from "../../components/layout/PartnerMobileSidebar";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
 import { formatCurrency } from "../../utils/formatCurrency";
 import { formatDateTime } from "../../utils/formatDate";
@@ -42,6 +43,9 @@ function money(value: number, currency: string) {
 
 export function TransportLayout({ children }: { children: ReactNode }) {
 	const navigate = useNavigate();
+	const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+	const menuButtonRef = useRef<HTMLButtonElement>(null);
+	const closeMobileMenu = useCallback(() => setMobileMenuOpen(false), []);
 	const { signOut: clearSession } = useAuth();
 	const { showToast } = useToast();
 	const [partner, setPartner] = useState<TransportPartner | null>(null);
@@ -68,7 +72,16 @@ export function TransportLayout({ children }: { children: ReactNode }) {
 
 	return (
 		<div className="flex min-h-screen bg-[#f5efe6] text-[#30271f] font-[DM_Sans,Segoe_UI,sans-serif] max-[760px]:block">
-			<aside className="sticky top-0 h-screen w-[232px] flex-[0_0_232px] overflow-hidden bg-[#24160d] text-white max-[760px]:relative max-[760px]:h-auto max-[760px]:w-full max-[760px]:min-w-0 max-[760px]:flex-none">
+			<PartnerMobileSidebar
+				open={mobileMenuOpen}
+				onClose={closeMobileMenu}
+				onSignOut={() => void signOut()}
+				menuButtonRef={menuButtonRef}
+				sidebarId="transport-mobile-sidebar"
+				workspace="Transport"
+				items={transportNav}
+			/>
+			<aside className="sticky top-0 h-screen w-[232px] flex-[0_0_232px] overflow-hidden bg-[#24160d] text-white max-[760px]:hidden">
 				<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `linear-gradient(180deg,rgba(29,18,10,.96) 0%,rgba(46,28,16,.92) 45%,rgba(111,67,29,.58) 100%),url('${partnerImages.shared.sidebarBackground}')` }} />
 				<div className="relative z-[1] flex h-full flex-col px-[15px] pt-[22px] pb-[18px] max-[760px]:h-auto max-[760px]:px-3 max-[760px]:py-3">
 					<Link to="/partner" className="block text-white no-underline" aria-label="DigitalSafaris partner workspaces">
@@ -82,12 +95,15 @@ export function TransportLayout({ children }: { children: ReactNode }) {
 			</aside>
 			<div className="flex min-w-0 flex-1 flex-col">
 				<header className="flex min-h-[68px] items-center justify-between gap-[18px] border-b border-[rgba(123,109,95,.16)] bg-[rgba(255,252,247,.97)] px-6 py-3 max-[760px]:min-h-[58px] max-[760px]:px-3 max-[760px]:py-2">
+					<button ref={menuButtonRef} type="button" onClick={() => setMobileMenuOpen(true)} aria-label="Open navigation menu" aria-controls="transport-mobile-sidebar" aria-expanded={mobileMenuOpen} className="hidden size-10 shrink-0 items-center justify-center rounded-lg border border-[#e7d9c4] bg-white/70 text-[#593a20] hover:bg-[#f7eee0] max-[760px]:inline-flex"><Menu size={20} aria-hidden="true" /></button>
 					<label className="flex h-[42px] w-[min(470px,56%)] items-center rounded-xl border border-[#e9dfd1] bg-[#faf7f1] px-3 max-[760px]:w-[46%] [&_input]:h-full [&_input]:w-full [&_input]:border-0 [&_input]:bg-transparent [&_input]:p-0 [&_input]:pl-[9px] [&_input]:text-[.82rem] [&_input]:shadow-none"><span className="sr-only">Search transport records</span><input placeholder="Search anything..." /></label>
-					<div className="flex items-center gap-3 text-[#332b24] [&>img]:h-[38px] [&>img]:w-[38px] [&>img]:rounded-full [&>img]:bg-[#eee0c9] [&>img]:object-cover [&>span]:grid [&>span]:h-[38px] [&>span]:w-[38px] [&>span]:place-items-center [&>span]:rounded-full [&>span]:bg-[#eee0c9] [&>span]:text-[#83521e] [&>div]:flex [&>div]:flex-col [&>div]:gap-1 [&_strong]:max-w-[180px] [&_strong]:overflow-hidden [&_strong]:text-ellipsis [&_strong]:whitespace-nowrap [&_strong]:text-[.82rem] [&_small]:text-[.72rem] [&_small]:text-[#898078] max-[760px]:[&>div]:hidden max-[760px]:[&>svg]:hidden">
-						<Link className="relative grid h-[38px] w-[38px] place-items-center rounded-full border border-[#eadfd1] bg-[#f7f0e6] text-[#75461f]" to="/partner/transport/notifications" aria-label="Notifications"><Bell size={19} /></Link>
-						{partner?.avatar ? <img src={partner.avatar} alt="" /> : <span className="grid h-[34px] w-[34px] place-items-center rounded-full bg-[#eee0c9] text-[#83521e]"><CircleUserRound size={22} /></span>}
-						<div><strong>{partner ? `${partner.firstName} ${partner.lastName}` : "Transport Partner"}</strong><small>Transport Partner</small></div>
-						<ChevronDown size={15} />
+					<div className="flex items-center gap-3 text-[#332b24]">
+						<Link className="relative z-10 grid h-11 w-11 shrink-0 touch-manipulation place-items-center rounded-full border border-[#eadfd1] bg-[#f7f0e6] text-[#75461f] hover:bg-[#f1e5d5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a85f19]" to="/partner/transport/notifications" aria-label="View notifications" title="Notifications"><Bell size={19} /></Link>
+						<Link to="/partner/transport/profile" aria-label="View transport profile" className="relative z-10 flex min-h-11 min-w-11 touch-manipulation items-center gap-2 rounded-full px-1 text-[#332b24] no-underline hover:bg-[#f1e5d5] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a85f19]">
+							{partner?.avatar ? <img className="h-[38px] w-[38px] shrink-0 rounded-full bg-[#eee0c9] object-cover" src={partner.avatar} alt="" /> : <span className="grid h-[38px] w-[38px] shrink-0 place-items-center rounded-full bg-[#eee0c9] text-[#83521e]"><CircleUserRound size={22} /></span>}
+							<div className="flex flex-col gap-1 max-[760px]:hidden"><strong className="max-w-[180px] overflow-hidden text-ellipsis whitespace-nowrap text-[.82rem]">{partner ? `${partner.firstName} ${partner.lastName}` : "Transport Partner"}</strong><small className="text-[.72rem] text-[#898078]">Transport Partner</small></div>
+							<ChevronDown className="max-[760px]:hidden" size={15} />
+						</Link>
 					</div>
 				</header>
 				<main className="mx-auto w-full max-w-[1750px] bg-[radial-gradient(ellipse_at_top_right,rgba(224,165,96,.12),transparent_38rem)] px-6 pt-6 pb-8 [&_.page-header]:mb-6 [&_.page-header_h1]:text-3xl [&_.page-header_p]:text-base [&_button]:text-sm [&_input]:text-sm [&_label]:text-sm [&_p]:text-sm [&_select]:text-sm [&_small]:text-xs [&_time]:text-xs max-[760px]:px-3 max-[760px]:pt-4 max-[760px]:pb-6">{children}</main>
@@ -290,7 +306,6 @@ export function TransportNotificationsPage() {
 			const unread = notification.createdAt > readAt;
 			return <article key={notification.id} className={`grid grid-cols-[38px_minmax(0,1fr)_9px] items-center gap-3 border-b border-[var(--border)] p-[14px_16px] [&:last-child]:border-0 [&>span]:grid [&>span]:h-9 [&>span]:w-9 [&>span]:place-items-center [&>span]:rounded-full [&>span]:bg-[#faecd5] [&>span]:text-[#925719] [&>div]:min-w-0 [&_strong]:text-[.8rem] [&_p]:my-[3px] [&_p]:overflow-hidden [&_p]:text-ellipsis [&_p]:text-[.74rem] [&_time]:text-[.66rem] [&>i]:h-2 [&>i]:w-2 [&>i]:rounded-full [&>i]:bg-[#c9821f] ${unread ? "bg-[#fffaf1]" : ""}`}><span><Icon size={17} /></span><div><strong>{notification.title}</strong><p>{notification.detail}</p><time>{new Date(notification.createdAt).toLocaleString()}</time></div>{unread ? <i aria-label="Unread" /> : null}</article>;
 		})}{!loading && notifications.length === 0 ? <div className="flex min-h-[150px] flex-col items-center justify-center gap-2 text-center text-[var(--text-muted)] [&_svg]:text-[var(--gold)] [&_strong]:text-[var(--text)] [&_span]:text-[.76rem]"><BellRing size={24} /><strong>No activity notifications</strong><span>Trip and payout updates will appear as activity is recorded.</span></div> : null}</div>
-		<p className="mx-[2px] my-2.5 text-[.7rem] text-[var(--text-muted)]">Read status is saved in this browser. The transport API does not currently provide a notification preference or read-state endpoint.</p>
 	</div></TransportLayout>;
 }
 

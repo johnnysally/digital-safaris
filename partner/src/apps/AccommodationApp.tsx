@@ -13,6 +13,7 @@ import { ReportsPage } from "../pages/accommodation/Reports";
 import { SupportPage } from "../pages/accommodation/Support";
 import { RoomsPage } from "../pages/accommodation/Rooms";
 import { useAuth } from "../context/authContext";
+import NotFound from "../pages/NotFound";
 
 function ProtectedRoute({ children }: { children: JSX.Element }) {
   const location = useLocation();
@@ -44,7 +45,7 @@ export default function AccommodationApp() {
       <Route path="reports" element={<ProtectedRoute><ReportsPage /></ProtectedRoute>} />
       <Route path="profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
       <Route path="support" element={<ProtectedRoute><SupportPage /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/partner/accommodation/dashboard" replace />} />
+      <Route path="*" element={<NotFound />} />
     </Routes>
   );
 }

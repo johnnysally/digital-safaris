@@ -233,7 +233,6 @@ export function RestaurantNotificationsPage() {
 					</div>
 				)}
 			</section>
-			<p className="m-0 text-xs leading-relaxed text-[#8f8074]">Activity is assembled from existing restaurant records. Read status is saved in this browser; it is not synced to the server.</p>
 		</div>
 	);
 }

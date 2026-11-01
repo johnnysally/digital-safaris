@@ -17,6 +17,7 @@ import { RestaurantNotificationsPage } from "../pages/restaurant/Notifications";
 import { RestaurantReportsPage } from "../pages/restaurant/Reports";
 import { RestaurantWalletPage } from "../pages/restaurant/Wallet";
 import { useAuth } from "../context/authContext";
+import NotFound from "../pages/NotFound";
 
 function RestaurantProtectedRoute({ children }: { children: JSX.Element }) {
 	const location = useLocation();
@@ -47,7 +48,7 @@ export default function RestaurantApp() {
 			<Route path="reports" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantReportsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="notifications" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantNotificationsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
 			<Route path="settings" element={<RestaurantProtectedRoute><RestaurantLayout><RestaurantSettingsPage /></RestaurantLayout></RestaurantProtectedRoute>} />
-			<Route path="*" element={<Navigate to="/partner/restaurant/dashboard" replace />} />
+			<Route path="*" element={<NotFound />} />
 		</Routes>
 	);
 }

@@ -6,6 +6,7 @@ import propertyApi, { type PropertyLocation } from "../../api/accommodation/prop
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
+import { AuthErrorNotice } from "../../components/ui/AuthErrorNotice";
 import { partnerImages } from "../../config/partnerImages";
 
 const loginBackground = `linear-gradient(90deg, rgba(23, 17, 13, 0.47) 0%, rgba(23, 17, 13, 0.2) 52%, rgba(23, 17, 13, 0.16) 100%), url('${partnerImages.accommodation.authBackground}')`;
@@ -84,7 +85,7 @@ export function LoginPage() {
             <span className="text-[#87551b]">Need help signing in?</span>
           </div>
 
-          {error ? <div className="rounded-md border border-[rgba(168,92,82,0.25)] bg-[rgba(168,92,82,0.08)] px-[10px] py-[9px] text-[0.72rem] leading-[1.4] text-[#8e443b]" role="alert">{error}</div> : null}
+          {error ? <AuthErrorNotice title="Sign-in unsuccessful">{error}</AuthErrorNotice> : null}
 
           <button type="submit" className="flex min-h-10 w-full items-center justify-center gap-2.5 rounded-md border-0 bg-[#c9821f] px-[14px] text-white hover:bg-[#b87419] disabled:cursor-wait disabled:opacity-[0.72]" disabled={isSubmitting}>
             {isSubmitting ? "Signing In..." : "Sign In"}<ArrowRight size={16} />
@@ -201,8 +202,8 @@ export function SignupPage() {
                 <span>I agree to the <strong>Terms &amp; Conditions</strong> and <strong>Privacy Policy</strong></span>
               </label>
 
-              {locationError ? <div className="col-span-2 rounded-md border border-[rgba(168,92,82,0.25)] bg-[rgba(168,92,82,0.08)] px-[10px] py-[9px] text-[0.72rem] leading-[1.4] text-[#8e443b] max-[700px]:col-span-1" role="alert">{locationError}</div> : null}
-              {error ? <div className="col-span-2 rounded-md border border-[rgba(168,92,82,0.25)] bg-[rgba(168,92,82,0.08)] px-[10px] py-[9px] text-[0.72rem] leading-[1.4] text-[#8e443b] max-[700px]:col-span-1" role="alert">{error}</div> : null}
+              {locationError ? <AuthErrorNotice title="Registration details unavailable" className="col-span-2 max-[700px]:col-span-1">{locationError}</AuthErrorNotice> : null}
+              {error ? <AuthErrorNotice title="Application not submitted" className="col-span-2 max-[700px]:col-span-1">{error}</AuthErrorNotice> : null}
 
               <button type="submit" className="col-span-2 flex min-h-10 w-full items-center justify-center gap-2.5 rounded-md border-0 bg-[#c9821f] px-[14px] text-white hover:bg-[#b87419] disabled:cursor-wait disabled:opacity-[0.72] max-[700px]:col-span-1" disabled={isSubmitting || !location}>
                 {isSubmitting ? "Submitting..." : "Create Account"}<ArrowRight size={16} />

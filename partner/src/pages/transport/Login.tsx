@@ -4,6 +4,7 @@ import { ArrowRight, BusFront, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } fro
 import authApi from "../../api/transport/authApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
+import { AuthErrorNotice } from "../../components/ui/AuthErrorNotice";
 import { TransportAuthLayout } from "./AuthLayout";
 
 export function TransportLoginPage() {
@@ -57,7 +58,7 @@ export function TransportLoginPage() {
 						<label className="flex items-center gap-1.5 text-[#66615c]"><input className="accent-[#b87317]" type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /> Remember me</label>
 						<button className="border-0 bg-transparent p-0 text-[#8d5714]" type="button" onClick={() => setNotice("Password reset is not available in this portal yet. Please contact your DigitalSafaris administrator.")}>Forgot password?</button>
 					</div>
-					{error ? <div className="rounded-md border border-[#e6bdb4] bg-[#fff1ed] px-3 py-2.5 text-[.74rem] text-[#a33f2e]" role="alert">{error}</div> : null}
+					{error ? <AuthErrorNotice title="Sign-in unsuccessful">{error}</AuthErrorNotice> : null}
 					{notice ? <div className="rounded-md border border-[#e8d8bb] bg-[#fff9ee] px-3 py-2.5 text-[.74rem] text-[#80501b]" role="status">{notice}</div> : null}
 					<button className="flex min-h-[48px] items-center justify-center gap-2 rounded-[9px] border-0 bg-[#b87317] px-4 text-[.8rem] font-bold text-white shadow-[0_5px_13px_rgba(156,92,16,.18)] hover:bg-[#a66512] disabled:cursor-not-allowed disabled:opacity-60" type="submit" disabled={submitting}>{submitting ? "Signing in..." : "Sign In"}<ArrowRight size={17} /></button>
 				</form>

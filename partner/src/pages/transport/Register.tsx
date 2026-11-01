@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, ArrowRight, BusFront, CheckCircle2, LockKeyhole, Mail, MapPin, Phone, UserRound } from "lucide-react";
 import axios, { getApiErrorMessage, unwrap } from "../../api/axios";
 import authApi from "../../api/transport/authApi";
+import { AuthErrorNotice } from "../../components/ui/AuthErrorNotice";
 import { TransportAuthLayout } from "./AuthLayout";
 
 interface TransportLocation {
@@ -142,8 +143,8 @@ export function TransportRegisterPage() {
 								</fieldset>
 								<label className={`${authFieldClass} col-span-full`}><span>Password <small className="text-[.62rem] font-normal text-[#8a837b]">(at least 8 characters)</small></span><span className={authInputClass}><LockKeyhole className="shrink-0" size={16} /><input className={authTextInputClass} type="password" autoComplete="new-password" minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} required /></span></label>
 							</div>
-							{locationError ? <div className="rounded-[7px] border border-[rgba(168,92,82,.22)] bg-[rgba(168,92,82,.08)] px-3 py-2.5 text-[.73rem] leading-[1.45] text-[#8e453e]" role="alert">{locationError}</div> : null}
-							{error ? <div className="rounded-[7px] border border-[rgba(168,92,82,.22)] bg-[rgba(168,92,82,.08)] px-3 py-2.5 text-[.73rem] leading-[1.45] text-[#8e453e]" role="alert">{error}</div> : null}
+							{locationError ? <AuthErrorNotice title="Service areas unavailable">{locationError}</AuthErrorNotice> : null}
+							{error ? <AuthErrorNotice title="Application not submitted">{error}</AuthErrorNotice> : null}
 							<button className={authButtonClass} type="submit" disabled={submitting || loadingLocations || locations.length === 0}>{submitting ? "Submitting application..." : "Create Transport Account"}<ArrowRight size={17} /></button>
 						</form>
 						<p className="mt-4 text-center text-[.73rem] text-[#5f5952]">Already a partner? <Link className="font-semibold text-[#a9600d] no-underline hover:underline" to="/partner/transport/login">Sign in</Link></p>

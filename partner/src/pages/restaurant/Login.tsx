@@ -5,6 +5,7 @@ import authApi from "../../api/restaurant/authApi";
 import { getApiErrorMessage } from "../../api/axios";
 import { useAuth } from "../../context/authContext";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
+import { AuthErrorNotice } from "../../components/ui/AuthErrorNotice";
 import { partnerImages } from "../../config/partnerImages";
 
 const benefits = [
@@ -88,7 +89,7 @@ export function RestaurantLoginPage() {
 								<label className="inline-flex items-center gap-2 text-[9px] text-[#6a827e] [&_input]:m-0 [&_input]:size-[15px] [&_input]:accent-[#be760d]"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /> Remember me</label>
 								<button type="button" className="border-0 bg-transparent p-0 text-[9px] text-[#b86b08]" onClick={() => setHelpOpen(true)}>Forgot password?</button>
 							</div>
-							{error ? <p className="m-0 rounded-md bg-[#fbefed] p-[9px_10px] text-[10px] leading-[1.4] text-[#984d43]" role="alert">{error}</p> : null}
+							{error ? <AuthErrorNotice title="Sign-in unsuccessful">{error}</AuthErrorNotice> : null}
 							{helpOpen ? <p className="m-0 rounded-md bg-[#f3eddd] p-[9px_10px] text-[10px] leading-[1.4] text-[#6d654f]" role="status">For password or account assistance, please contact your DigitalSafaris partner representative.</p> : null}
 							<button className="mt-px flex min-h-[41px] w-full items-center justify-center gap-[9px] rounded-[9px] border border-[#cf8714] bg-[linear-gradient(100deg,#c27a0b,#cb7807)] px-3 text-[12px] font-bold text-white shadow-[0_2px_4px_rgba(135,81,5,.12)] disabled:cursor-wait disabled:opacity-[.68]" type="submit" disabled={busy}>{busy ? "Signing in..." : <><LogInIcon /> Sign In</>}</button>
 						</form>

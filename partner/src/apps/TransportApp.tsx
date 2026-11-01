@@ -12,6 +12,7 @@ import { TransportPaymentsPage } from "../pages/transport/Wallet";
 import { TransportProfilePage } from "../pages/transport/Profile";
 import { TransportSettingsPage } from "../pages/transport/Profile";
 import { useAuth } from "../context/authContext";
+import NotFound from "../pages/NotFound";
 
 function TransportProtectedRoute({ children }: { children: JSX.Element }) {
 	const location = useLocation();
@@ -39,7 +40,7 @@ export default function TransportApp() {
 			<Route path="reports" element={<TransportProtectedRoute><TransportReportsPage /></TransportProtectedRoute>} />
 			<Route path="profile" element={<TransportProtectedRoute><TransportProfilePage /></TransportProtectedRoute>} />
 			<Route path="settings" element={<TransportProtectedRoute><TransportSettingsPage /></TransportProtectedRoute>} />
-			<Route path="*" element={<Navigate to="/partner/transport/dashboard" replace />} />
+			<Route path="*" element={<NotFound />} />
 		</Routes>
 	);
 }

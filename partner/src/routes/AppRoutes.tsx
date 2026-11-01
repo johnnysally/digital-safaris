@@ -5,6 +5,7 @@ const AccommodationApp = lazy(() => import("../apps/AccommodationApp"));
 const RestaurantApp = lazy(() => import("../apps/RestaurantApp"));
 const TransportApp = lazy(() => import("../apps/TransportApp"));
 const PartnerLandingPage = lazy(() => import("../pages/landing/PartnerLandingPage"));
+const NotFound = lazy(() => import("../pages/NotFound"));
 
 function LegacyAccommodationRedirect() {
 	const location = useLocation();
@@ -22,7 +23,7 @@ function AppRoutesContent() {
 				<Route path="/partner/restaurant/*" element={<RestaurantApp />} />
 				<Route path="/partner/transport/*" element={<TransportApp />} />
 				<Route path="/partner/*" element={<LegacyAccommodationRedirect />} />
-				<Route path="*" element={<Navigate to="/partner" replace />} />
+				<Route path="*" element={<NotFound />} />
 			</Routes>
 		</Suspense>
 	);

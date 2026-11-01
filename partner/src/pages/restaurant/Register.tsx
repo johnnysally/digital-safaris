@@ -5,6 +5,7 @@ import axios, { getApiErrorMessage, unwrap } from "../../api/axios";
 import authApi from "../../api/restaurant/authApi";
 import { isNonEmpty, isValidEmail, isValidPhoneNumber } from "../../utils/validators";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
+import { AuthErrorNotice } from "../../components/ui/AuthErrorNotice";
 import { partnerImages } from "../../config/partnerImages";
 
 interface RestaurantLocation {
@@ -166,8 +167,8 @@ export function RestaurantRegisterPage() {
 										<span>Password</span>
 										<div><LockKeyhole size={16} /><input type="password" autoComplete="new-password" minLength={8} placeholder="At least 8 characters" value={password} onChange={(event) => setPassword(event.target.value)} required /></div>
 									</label>
-									{locationError ? <p className="m-0 rounded-md bg-[#fbefed] p-[9px_10px] text-[10px] leading-[1.4] text-[#984d43]" role="alert">{locationError}</p> : null}
-									{error ? <p className="m-0 rounded-md bg-[#fbefed] p-[9px_10px] text-[10px] leading-[1.4] text-[#984d43]" role="alert">{error}</p> : null}
+									{locationError ? <AuthErrorNotice title="Service areas unavailable">{locationError}</AuthErrorNotice> : null}
+									{error ? <AuthErrorNotice title="Application not submitted">{error}</AuthErrorNotice> : null}
 									<button className="mt-px flex min-h-[41px] w-full items-center justify-center gap-[9px] rounded-[9px] border border-[#cf8714] bg-[linear-gradient(100deg,#c27a0b,#cb7807)] px-3 text-[12px] font-bold text-white shadow-[0_2px_4px_rgba(135,81,5,.12)] disabled:cursor-wait disabled:opacity-[.68]" type="submit" disabled={submitting || loadingLocations || locations.length === 0}>{submitting ? "Submitting application..." : <>Create Restaurant Account <ArrowRight size={16} /></>}</button>
 								</form>
 								<p className="mt-[18px] mb-2 text-center text-[10px] text-[#6a827e]">Already have an account? <Link to="/partner/restaurant/login">Sign in <ArrowRight size={13} /></Link></p>
