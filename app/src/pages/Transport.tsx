@@ -18,7 +18,7 @@ import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import Select from "../components/ui/Select";
 import Alert from "../components/ui/Alert";
-import { tripApi } from "../api";
+import { searchApi, tripApi } from "../api";
 import { useToast } from "../context/toastContext";
 import { formatCurrency } from "../utils/formatCurrency";
 
@@ -32,6 +32,7 @@ const SERVICE_OPTIONS = [
 
 export default function TransportPage() {
   const { error: toastError, success: toastSuccess } = useToast();
+  const [heroImage, setHeroImage] = useState("/hero-bg.jpg");
 
   const [pickup, setPickup] = useState({
     address: "",
@@ -56,6 +57,35 @@ export default function TransportPage() {
   const [quoting, setQuoting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadHeroImage = async () => {
+      const [accommodations, properties, restaurants] = await Promise.allSettled([
+        searchApi.accommodations({ page: 1, limit: 12 }),
+        searchApi.properties({ page: 1, limit: 12 }),
+        searchApi.restaurants({ page: 1, limit: 12 }),
+      ]);
+
+      if (!active) return;
+
+      const image =
+        (accommodations.status === "fulfilled" &&
+          accommodations.value.data.find((item) => item.coverImage)?.coverImage) ||
+        (properties.status === "fulfilled" &&
+          properties.value.data.find((item) => item.images?.[0])?.images?.[0]) ||
+        (restaurants.status === "fulfilled" &&
+          restaurants.value.data.find((item) => item.coverImage)?.coverImage);
+
+      if (image) setHeroImage(image);
+    };
+
+    void loadHeroImage();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     setQuote(null);
@@ -127,7 +157,12 @@ export default function TransportPage() {
   return (
     <div className="w-full min-w-0 space-y-6 pb-8">
       <header className="relative isolate overflow-hidden rounded-2xl bg-[#382719] px-5 py-7 text-white shadow-[0_12px_35px_rgba(55,38,21,.16)] sm:px-8 sm:py-9">
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_88%_10%,rgba(231,164,75,.38),transparent_34%),linear-gradient(115deg,#2d2118_0%,#513822_58%,#8a5d32_100%)]" />
+        <img
+          src={heroImage}
+          alt=""
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-[#24170e]/90 via-[#281b10]/75 to-[#281b10]/35" />
         <div className="max-w-2xl">
           <span className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-medium text-[#ffdfaa]">
             <Navigation className="h-3.5 w-3.5" /> YOUR JOURNEY, YOUR WAY

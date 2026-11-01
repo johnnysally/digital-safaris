@@ -4,6 +4,7 @@ import { NavLink } from "react-router-dom";
 import { classNames, fullName } from "../../utils/helpers";
 import { useAuth } from "../../context/authContext";
 import { roleName } from "../../utils/permissions";
+import { useAutoHideScrollbar } from "../../utils/useAutoHideScrollbar";
 import { useBranding } from "../../context/brandingContext";
 import Logo from "../ui/Logo";
 import Avatar from "../ui/Avatar";
@@ -42,6 +43,7 @@ export default function Sidebar({
   const name = fullName(admin?.firstName, admin?.lastName) || "Admin";
   const role = roleName(admin) ?? "—";
   const systemName = branding?.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
+  const { isScrolling, onScroll } = useAutoHideScrollbar();
 
   return (
     <aside
@@ -57,14 +59,11 @@ export default function Sidebar({
           collapsed ? "justify-center px-2" : "px-5"
         )}
       >
-        <span
-          className={classNames(
-            "flex items-center justify-center rounded-xl bg-white shadow-[0_4px_12px_rgba(0,0,0,.12)]",
-            collapsed ? "size-10 p-1" : "size-10 px-2"
-          )}
-        >
-          <Logo size="sm" showText={false} />
-        </span>
+        <Logo
+          size={collapsed ? "sm" : "md"}
+          showText={false}
+          className="shrink-0"
+        />
         {!collapsed && (
           <span className="min-w-0">
             <span className="block truncate text-sm font-semibold tracking-wide text-white">{systemName}</span>
@@ -75,7 +74,12 @@ export default function Sidebar({
 
       <nav
         aria-label="Admin navigation"
-        className={classNames("relative flex-1 space-y-5 overflow-y-auto py-5", collapsed ? "px-2" : "px-3")}
+        onScroll={onScroll}
+        className={classNames(
+          "relative flex-1 space-y-5 overflow-y-auto py-5 scrollbar-auto-hide",
+          isScrolling && "scrollbar-visible",
+          collapsed ? "px-2" : "px-3"
+        )}
       >
         {groups.map((group) => (
           <div className="space-y-1" key={group.title}>

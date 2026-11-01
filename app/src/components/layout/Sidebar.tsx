@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { classNames } from "../../utils/helpers";
 import { useBranding } from "../../context/brandingContext";
+import Logo from "../ui/Logo";
 
 interface SidebarItem {
   label: string;
@@ -59,8 +60,6 @@ export default function Sidebar({ groups }: SidebarProps) {
   const { branding } = useBranding();
   const appName =
     branding.metaTitle?.split("—")[0]?.trim() || "Digital Safaris";
-  const logoUrl = branding.logoUrl || branding.logo || "/logo.png";
-  const logoAppearance = branding.logoAppearance;
   const appNameParts = appName.split(/\s+/);
 
   return (
@@ -78,23 +77,7 @@ export default function Sidebar({ groups }: SidebarProps) {
           to="/"
           className="group flex min-w-0 items-center gap-3 rounded-xl px-1 py-2"
         >
-          <span className="relative shrink-0 rounded-2xl bg-gradient-to-br from-[#f3b34d] via-[#bd711f] to-[#754017] p-[2px] shadow-[0_6px_20px_rgba(223,133,39,0.24)] transition-transform group-hover:scale-105">
-            <span className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-[14px] bg-[#21170f]">
-              <img
-                src={logoUrl}
-                alt=""
-                className="h-full w-full object-cover"
-                style={logoAppearance ? {
-                  maxWidth: `${logoAppearance.maxWidth}px`,
-                  maxHeight: `${logoAppearance.maxHeight}px`,
-                  objectFit: logoAppearance.fit,
-                  padding: `${logoAppearance.padding}px`,
-                  borderRadius: `${logoAppearance.borderRadius}px`,
-                } : undefined}
-              />
-            </span>
-            <span className="absolute -bottom-1 -right-1 h-3 w-3 rounded-full border-2 border-[#21170f] bg-[#75a66a]" />
-          </span>
+          <Logo size="lg" showText={false} className="shrink-0" />
           <span className="min-w-0">
             <span className="block truncate text-[17px] font-bold leading-tight tracking-[-0.04em] text-white">
               {appNameParts.map((part, index) => (

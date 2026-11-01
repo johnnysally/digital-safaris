@@ -26,6 +26,7 @@ import {
 } from "../../utils/permissions";
 import { ROUTES } from "../../utils/constants";
 import storage from "../../utils/storage";
+import { useAutoHideScrollbar } from "../../utils/useAutoHideScrollbar";
 
 interface LayoutProps {
   title?: string;
@@ -191,6 +192,7 @@ export default function Layout({
   const { admin } = useAuth();
   const [collapsed, setCollapsed] = useState(storage.getSidebarCollapsed());
   const [mobileOpen, setMobileOpen] = useState(false);
+  const { isScrolling, onScroll } = useAutoHideScrollbar();
 
   const groups: SidebarGroup[] = useMemo(
     () =>
@@ -233,7 +235,12 @@ export default function Layout({
           search={search}
           notifications={notifications}
         />
-        <main className="flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_100%_0%,rgba(197,138,59,.07),transparent_34rem)] p-4 sm:p-6 lg:p-8">
+        <main
+          onScroll={onScroll}
+          className={`flex-1 overflow-y-auto bg-[radial-gradient(ellipse_at_100%_0%,rgba(197,138,59,.07),transparent_34rem)] p-4 sm:p-6 lg:p-8 scrollbar-auto-hide${
+            isScrolling ? " scrollbar-visible" : ""
+          }`}
+        >
           <div className="mx-auto w-full max-w-[1600px] space-y-6">
             {children ?? <Outlet />}
           </div>

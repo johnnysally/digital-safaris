@@ -52,3 +52,18 @@
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(var(--ds-text-muted));
 }
+
+.scrollbar-auto-hide {
+  scrollbar-color: transparent transparent;
+  scrollbar-width: thin;
+}
+.scrollbar-auto-hide.scrollbar-visible {
+  scrollbar-color: rgb(var(--ds-text-muted)) transparent;
+}
+.scrollbar-auto-hide::-webkit-scrollbar-thumb {
+  background: transparent;
+  transition: background-color 180ms ease;
+}
+.scrollbar-auto-hide.scrollbar-visible::-webkit-scrollbar-thumb {
+  background: rgb(var(--ds-text-muted));
+}
