@@ -101,8 +101,8 @@ const changePassword = asyncHandler(async (req, res) => {
   await customer.save();
 
   const { branding, settings } = await getContext();
-  await emailService.passwordChanged(customer, { branding, settings });
-  await smsService.passwordChanged(customer, {});
+  emailService.send("passwordChanged", customer, { branding, settings });
+  smsService.passwordChanged(customer, {});
 
   res.status(200).json(new ApiResponse(200, null, "Password changed"));
 });
@@ -128,7 +128,12 @@ const changeEmail = asyncHandler(async (req, res) => {
   });
 
   const { branding, settings } = await getContext();
-  await emailService.changeContactOTP(customer, { otp, type: "email", branding, settings });
+  emailService.send("changeContactOTP", customer, {
+    otp,
+    type: "email",
+    branding,
+    settings,
+  });
 
   res.status(200).json(new ApiResponse(200, { pendingEmail: newEmail }, "Verification code sent"));
 });
@@ -217,7 +222,7 @@ const deleteAccount = asyncHandler(async (req, res) => {
   await customer.save();
 
   const { branding, settings } = await getContext();
-  await emailService.accountDeletionScheduled(customer, {
+  emailService.send("accountDeletionScheduled", customer, {
     date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toDateString(),
     branding,
     settings,

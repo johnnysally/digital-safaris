@@ -14,6 +14,7 @@ import helmetMiddleware from "./middleware/global/helmet.js";
 import compressionMiddleware from "./middleware/global/compression.js";
 import rateLimiter from "./middleware/global/rateLimiter.js";
 import sanitize from "./middleware/global/sanitize.js";
+import botProtection from "./middleware/global/botProtection.js";
 import notFound from "./middleware/global/notFound.js";
 import errorHandler from "./middleware/global/errorHandler.js";
 import routes from "./routes/index.js";
@@ -30,6 +31,7 @@ app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(sanitize);
 app.use(requestLogger);
+app.use(botProtection);
 app.use(rateLimiter);
 
 app.use("/api", routes);

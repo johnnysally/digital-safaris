@@ -136,24 +136,17 @@ const register = asyncHandler(async (req, res) => {
 
   const { branding, settings } = await getContext();
 
-  // Applicant email
-  try {
-    await emailService.partnerApplicationReceived(partner, {
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Applicant email failed", { email, error: err.message });
-  }
+  emailService.send("partnerApplicationReceived", partner, {
+    branding,
+    settings,
+  });
 
-  // Applicant SMS
   try {
     await smsService.partnerApplicationReceived(partner, {});
   } catch (err) {
     logger.error("Applicant SMS failed", { email, error: err.message });
   }
 
-  // Admin notifications
   try {
     await notifyAdminsOfPartnerApplication({
       partner,

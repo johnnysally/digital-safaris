@@ -82,6 +82,19 @@ const deliver = async (templateName, recipient, payload = {}) => {
     throw err;
   }
 };
+
+const send = (templateName, recipient, payload = {}) => {
+  Promise.resolve()
+    .then(() => deliver(templateName, recipient, payload))
+    .catch((err) => {
+      logger.error("Async email dispatch failed", {
+        template: templateName,
+        to: recipient?.email,
+        error: err?.response?.data || err?.message,
+      });
+    });
+};
+
 const welcomeCustomer = (recipient, payload = {}) =>
   deliver("welcomeCustomer", recipient, payload);
 
@@ -389,6 +402,7 @@ const changeContactOTP = (recipient, payload = {}) =>
   deliver("changeContactOTP", recipient, payload);
 
 export {
+  send,
   welcomeCustomer,
   emailVerificationLink,
   passwordResetOTP,

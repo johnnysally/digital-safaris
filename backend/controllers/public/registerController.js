@@ -169,14 +169,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
   await customer.save();
 
   const { branding, settings } = await getContext();
-  try {
-    await emailService.welcomeCustomer(customer, { branding, settings });
-  } catch (err) {
-    logger.error("Welcome email failed", {
-      email: customer.email,
-      error: err.message,
-    });
-  }
+  emailService.send("welcomeCustomer", customer, { branding, settings });
 
   res.status(200).json(
     new ApiResponse(200, { customerId: customer._id }, "Email verified. Welcome aboard!")
@@ -273,15 +266,8 @@ const forgotPassword = asyncHandler(async (req, res) => {
       expiresAt: new Date(Date.now() + 10 * 60 * 1000),
     });
 
-    try {
-      const { branding, settings } = await getContext();
-      await emailService.passwordResetOTP(customer, { otp, branding, settings });
-    } catch (err) {
-      logger.error("Password reset email failed", {
-        email,
-        error: err.message,
-      });
-    }
+    const { branding, settings } = await getContext();
+    emailService.send("passwordResetOTP", customer, { otp, branding, settings });
   }
 
   res
@@ -311,16 +297,9 @@ const resetPassword = asyncHandler(async (req, res) => {
   customer.password = newPassword;
   await customer.save();
 
-  try {
-    const { branding, settings } = await getContext();
-    await emailService.passwordChanged(customer, { branding, settings });
-    await smsService.passwordChanged(customer, {});
-  } catch (err) {
-    logger.error("Password changed notification failed", {
-      email,
-      error: err.message,
-    });
-  }
+  const { branding, settings } = await getContext();
+  emailService.send("passwordChanged", customer, { branding, settings });
+  smsService.passwordChanged(customer, {});
 
   res.status(200).json(new ApiResponse(200, null, "Password reset"));
 });
@@ -413,11 +392,10 @@ const registerRestaurant = asyncHandler(async (req, res) => {
 
   const { branding, settings } = await getContext();
 
-  try {
-    await emailService.partnerApplicationReceived(partner, { branding, settings });
-  } catch (err) {
-    logger.error("Applicant email failed", { email, error: err.message });
-  }
+  emailService.send("partnerApplicationReceived", partner, {
+    branding,
+    settings,
+  });
 
   try {
     await smsService.partnerApplicationReceived(partner, {});
@@ -485,11 +463,10 @@ const registerTransport = asyncHandler(async (req, res) => {
 
   const { branding, settings } = await getContext();
 
-  try {
-    await emailService.partnerApplicationReceived(partner, { branding, settings });
-  } catch (err) {
-    logger.error("Applicant email failed", { email, error: err.message });
-  }
+  emailService.send("partnerApplicationReceived", partner, {
+    branding,
+    settings,
+  });
 
   try {
     await smsService.partnerApplicationReceived(partner, {});
@@ -555,11 +532,10 @@ const registerAccommodation = asyncHandler(async (req, res) => {
 
   const { branding, settings } = await getContext();
 
-  try {
-    await emailService.partnerApplicationReceived(partner, { branding, settings });
-  } catch (err) {
-    logger.error("Applicant email failed", { email, error: err.message });
-  }
+  emailService.send("partnerApplicationReceived", partner, {
+    branding,
+    settings,
+  });
 
   try {
     await smsService.partnerApplicationReceived(partner, {});

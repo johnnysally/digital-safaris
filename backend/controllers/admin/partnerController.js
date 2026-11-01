@@ -146,7 +146,7 @@ const approve = asyncHandler(async (req, res) => {
   await partner.save();
 
   const { branding, settings } = await getContext();
-  await emailService.partnerApproved(partner, { branding, settings });
+  emailService.send("partnerApproved", partner, { branding, settings });
 
   const obj = partner.toObject();
   obj.type = normalized;
@@ -169,7 +169,7 @@ const reject = asyncHandler(async (req, res) => {
   await partner.save();
 
   const { branding, settings } = await getContext();
-  await emailService.partnerRejected(partner, {
+  emailService.send("partnerRejected", partner, {
     reason: partner.rejectionReason,
     branding,
     settings,
@@ -195,7 +195,7 @@ const suspend = asyncHandler(async (req, res) => {
   await partner.save();
 
   const { branding, settings } = await getContext();
-  await emailService.partnerSuspended(partner, {
+  emailService.send("partnerSuspended", partner, {
     reason: reason || "Policy violation",
     branding,
     settings,
@@ -220,7 +220,7 @@ const reactivate = asyncHandler(async (req, res) => {
   await partner.save();
 
   const { branding, settings } = await getContext();
-  await emailService.partnerReactivated(partner, { branding, settings });
+  emailService.send("partnerReactivated", partner, { branding, settings });
 
   const obj = partner.toObject();
   obj.type = normalized;

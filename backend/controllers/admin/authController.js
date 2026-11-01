@@ -130,7 +130,7 @@ const changePassword = asyncHandler(async (req, res) => {
   await admin.save();
 
   const { branding, settings } = await getBrandingAndSettings();
-  await emailService.passwordChanged(admin, { branding, settings });
+  emailService.send("passwordChanged", admin, { branding, settings });
 
   res.status(200).json(new ApiResponse(200, null, "Password changed"));
 });
@@ -146,7 +146,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     await admin.save();
 
     const { branding, settings } = await getBrandingAndSettings();
-    await emailService.passwordResetOTP(admin, { otp, branding, settings });
+    emailService.send("passwordResetOTP", admin, { otp, branding, settings });
   }
 
   res.status(200).json(new ApiResponse(200, null, "If the email exists, a reset code was sent"));
@@ -166,7 +166,7 @@ const resetPassword = asyncHandler(async (req, res) => {
   await admin.save();
 
   const { branding, settings } = await getBrandingAndSettings();
-  await emailService.passwordChanged(admin, { branding, settings });
+  emailService.send("passwordChanged", admin, { branding, settings });
 
   res.status(200).json(new ApiResponse(200, null, "Password reset"));
 });
