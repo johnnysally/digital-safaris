@@ -9,6 +9,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import * as emailService from "../../services/emailService.js";
 import * as smsService from "../../services/smsService.js";
 import logger from "../../utils/logger.js";
+import { normalizeTransportServiceTypes } from "../../utils/transportServiceTypes.js";
 
 const getContext = async () => {
   const branding = (await Branding.findOne().lean()) || {};
@@ -123,7 +124,7 @@ const register = asyncHandler(async (req, res) => {
     latitude: finalLat,
     longitude: finalLng,
     location: resolved?._id || null,
-    serviceTypes: Array.isArray(serviceTypes) ? serviceTypes : ["car"],
+    serviceTypes: normalizeTransportServiceTypes(serviceTypes),
     status: "pending",
     isOnline: false,
     isAvailable: false,

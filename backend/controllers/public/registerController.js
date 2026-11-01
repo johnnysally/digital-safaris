@@ -27,6 +27,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import logger from "../../utils/logger.js";
 import * as emailService from "../../services/emailService.js";
 import * as smsService from "../../services/smsService.js";
+import { normalizeTransportServiceTypes } from "../../utils/transportServiceTypes.js";
 
 const getContext = async () => {
   const branding = (await Branding.findOne().lean()) || {};
@@ -433,6 +434,10 @@ const registerTransport = asyncHandler(async (req, res) => {
     serviceTypes,
   } = req.body;
 
+  if (!firstName || !lastName || !email || !phone || !password) {
+    throw new ApiError(400, "Missing required fields");
+  }
+
   const exists = await TransportPartner.findOne({ $or: [{ email }, { phone }, { idNumber }] });
   if (exists) throw new ApiError(400, "Email, phone or ID already registered");
 
@@ -451,7 +456,7 @@ const registerTransport = asyncHandler(async (req, res) => {
     latitude: latitude || null,
     longitude: longitude || null,
     location: locationId,
-    serviceTypes: serviceTypes || [],
+    serviceTypes: normalizeTransportServiceTypes(serviceTypes),
     status: "pending",
     isOnline: false,
     isAvailable: false,

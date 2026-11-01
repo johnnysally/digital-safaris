@@ -4,6 +4,7 @@ import { uploadFile } from "../../services/uploadService.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import { normalizeTransportServiceTypes } from "../../utils/transportServiceTypes.js";
 
 const get = asyncHandler(async (req, res) => {
   const [partner, wallet] = await Promise.all([
@@ -38,6 +39,10 @@ const update = asyncHandler(async (req, res) => {
   const updates = {};
   for (const k of allowed) {
     if (req.body[k] !== undefined) updates[k] = req.body[k];
+  }
+
+  if (updates.serviceTypes !== undefined) {
+    updates.serviceTypes = normalizeTransportServiceTypes(updates.serviceTypes);
   }
 
   const partner = await TransportPartner.findByIdAndUpdate(
