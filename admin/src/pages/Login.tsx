@@ -15,6 +15,7 @@ import { useAuth } from "../context/authContext";
 import { useToast } from "../context/toastContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import Alert from "../components/ui/Alert";
 import Modal from "../components/ui/Modal";
 import { authApi } from "../api";
 import { isEmail, isEmpty } from "../utils/validators";
@@ -41,6 +42,7 @@ export default function Login() {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+  const [authError, setAuthError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -70,6 +72,7 @@ export default function Login() {
     if (!validate()) return;
 
     setLoading(true);
+    setAuthError("");
     try {
       await login({ email: email.trim(), password });
       if (rememberMe) {
@@ -83,7 +86,7 @@ export default function Login() {
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Check your email and password.";
-      toastError("Login failed", msg);
+      setAuthError(msg);
     } finally {
       setLoading(false);
     }
@@ -184,6 +187,11 @@ export default function Login() {
               </header>
 
               <form onSubmit={handleSubmit} className="space-y-3.5">
+              {authError && (
+                <Alert variant="danger" title="Sign-in unsuccessful">
+                  {authError}
+                </Alert>
+              )}
               <div>
                 <label htmlFor="admin-email" className="mb-1.5 block text-[11px] font-semibold text-[#5c554e]">Email address</label>
                 <div className={`group flex h-[48px] items-center gap-2.5 rounded-md border bg-white/75 px-3 transition focus-within:border-[#c9821f] focus-within:ring-2 focus-within:ring-[#c9821f]/15 ${errors.email ? "border-red-400" : "border-[#e6e0d9]"}`}>

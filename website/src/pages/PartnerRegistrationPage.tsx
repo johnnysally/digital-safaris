@@ -1,5 +1,5 @@
 import React, { FormEvent, useEffect, useState } from 'react';
-import { ArrowLeft, ArrowRight, CheckCircle2, Building2, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2, Building2, CircleAlert, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { registerPartnerByType } from '../api/partnerApi';
@@ -408,8 +408,9 @@ export const PartnerRegistrationPage: React.FC = () => {
                                 </div>
 
                                 {error && (
-                                    <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                                        {error}
+                                    <div role="alert" aria-live="assertive" className="flex items-start gap-3 rounded-xl border border-red-200 bg-[linear-gradient(135deg,#fff8f5,#fff0eb)] px-4 py-3.5 text-red-900 shadow-[0_5px_16px_rgba(115,48,38,.08)]">
+                                        <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-red-100 text-red-700"><CircleAlert className="size-[18px]" aria-hidden="true" /></span>
+                                        <span className="min-w-0"><strong className="block text-sm font-bold">We couldn&apos;t submit your application</strong><span className="mt-0.5 block break-words text-sm leading-relaxed text-red-800">{error}</span></span>
                                     </div>
                                 )}
 

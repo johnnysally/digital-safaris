@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { AlertCircle, CheckCircle2, Info, TriangleAlert } from "lucide-react";
 import { classNames } from "../../utils/helpers";
 
 type Variant = "success" | "warning" | "danger" | "info";
@@ -17,24 +18,40 @@ const VARIANTS: Record<Variant, string> = {
   info: "border-info/30 bg-info/10 text-info",
 };
 
+const ICONS = {
+  success: CheckCircle2,
+  warning: TriangleAlert,
+  danger: AlertCircle,
+  info: Info,
+};
+
 export default function Alert({
   variant = "info",
   title,
   children,
   className,
 }: AlertProps) {
+  const Icon = ICONS[variant];
+
   return (
     <div
+      role={variant === "danger" ? "alert" : "status"}
+      aria-live={variant === "danger" ? "assertive" : "polite"}
       className={classNames(
-        "rounded-md border p-3",
+        "flex items-start gap-3 rounded-lg border px-4 py-3.5 shadow-sm",
         VARIANTS[variant],
         className
       )}
     >
-      {title && <p className="text-sm font-medium">{title}</p>}
-      {children && (
-        <div className="mt-0.5 text-xs text-text-secondary">{children}</div>
-      )}
+      <Icon aria-hidden="true" className="mt-0.5 h-5 w-5 shrink-0" />
+      <div className="min-w-0">
+        {title && <p className="m-0 text-sm font-semibold leading-5">{title}</p>}
+        {children && (
+          <div className={classNames("text-sm leading-relaxed opacity-90", title && "mt-1")}>
+            {children}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

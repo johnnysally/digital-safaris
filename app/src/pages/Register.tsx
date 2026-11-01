@@ -5,12 +5,13 @@ import { authApi } from "../api";
 import { useToast } from "../context/toastContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import Alert from "../components/ui/Alert";
 import AuthLayout from "../components/layout/AuthLayout";
 import { isEmail, isEmpty, isPhone } from "../utils/validators";
 import { ROUTES } from "../utils/constants";
 
 export default function Register() {
-  const { error: toastError, success: toastSuccess } = useToast();
+  const { success: toastSuccess } = useToast();
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -22,6 +23,7 @@ export default function Register() {
     town: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitError, setSubmitError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const update = (key: keyof typeof form, value: string) =>
@@ -47,6 +49,7 @@ export default function Register() {
     if (!validate()) return;
 
     setLoading(true);
+    setSubmitError("");
     try {
       await authApi.register({
         firstName: form.firstName.trim(),
@@ -65,7 +68,7 @@ export default function Register() {
     } catch (err) {
       const msg =
         err instanceof Error ? err.message : "Please check your details.";
-      toastError("Registration failed", msg);
+      setSubmitError(msg);
     } finally {
       setLoading(false);
     }
@@ -81,6 +84,12 @@ export default function Register() {
           <h2 className="m-0 font-sans text-[1.4rem] font-bold tracking-[-0.035em] text-[#26231f]">Create your account</h2>
           <p className="mt-1.5 text-[0.7rem] text-[#77736d]">Join DigitalSafaris and start exploring.</p>
         </header>
+
+        {submitError && (
+          <Alert variant="danger" title="Account creation failed" className="mb-4">
+            {submitError}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3 [&_label]:!font-semibold [&_label]:!text-[#493a29]">
             <div className="grid grid-cols-2 gap-3 max-[420px]:grid-cols-1">

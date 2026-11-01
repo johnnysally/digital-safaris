@@ -1,4 +1,5 @@
 import { forwardRef, type InputHTMLAttributes, type ReactNode } from "react";
+import { CircleAlert } from "lucide-react";
 import { classNames } from "../../utils/helpers";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -35,6 +36,8 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             {...rest}
+            aria-invalid={error ? true : rest["aria-invalid"]}
+            aria-describedby={error ? `${inputId}-error` : rest["aria-describedby"]}
             className={classNames(
               "w-full rounded-md border bg-surface px-3 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:bg-surface-alt",
               error
@@ -52,7 +55,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           )}
         </div>
         {error ? (
-          <p className="text-xs text-danger">{error}</p>
+          <p id={`${inputId}-error`} className="flex items-start gap-1.5 text-xs font-medium leading-relaxed text-danger" role="alert">
+            <CircleAlert aria-hidden="true" className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+            <span>{error}</span>
+          </p>
         ) : helper ? (
           <p className="text-xs text-text-muted">{helper}</p>
         ) : null}

@@ -2,9 +2,9 @@ import { useState, type FormEvent } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { ArrowRight, Mail, Lock } from "lucide-react";
 import { useAuth } from "../context/authContext";
-import { useToast } from "../context/toastContext";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
+import Alert from "../components/ui/Alert";
 import AuthLayout from "../components/layout/AuthLayout";
 import { isEmail, isEmpty } from "../utils/validators";
 import { ROUTES } from "../utils/constants";
@@ -15,13 +15,13 @@ interface LocationState {
 
 export default function Login() {
   const { login } = useAuth();
-  const { error: toastError } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ email?: string; password?: string }>({});
+  const [authError, setAuthError] = useState<{ title: string; message: string } | null>(null);
   const [loading, setLoading] = useState(false);
 
   const redirectTo = (() => {
@@ -44,6 +44,7 @@ export default function Login() {
     if (!validate()) return;
 
     setLoading(true);
+    setAuthError(null);
     try {
       await login({ email: email.trim(), password });
       navigate(redirectTo, { replace: true });
@@ -63,14 +64,14 @@ export default function Login() {
       }
 
       if (status === 403 && /suspended/i.test(message || "")) {
-        toastError("Account suspended", "Contact support for assistance.");
+        setAuthError({ title: "Account suspended", message: "Contact support for assistance." });
         return;
       }
 
       const msg =
         message ||
         (err instanceof Error ? err.message : "Check your email and password.");
-      toastError("Login failed", msg);
+      setAuthError({ title: "Sign-in unsuccessful", message: msg });
     } finally {
       setLoading(false);
     }
@@ -86,6 +87,12 @@ export default function Login() {
           <h2 className="m-0 font-sans text-[1.45rem] font-bold tracking-[-0.035em] text-[#26231f]">Welcome back</h2>
           <p className="mt-1.5 text-[0.72rem] text-[#77736d]">Sign in to your DigitalSafaris account.</p>
         </header>
+
+        {authError && (
+          <Alert variant="danger" title={authError.title} className="mb-4">
+            {authError.message}
+          </Alert>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-3.5 [&_label]:!font-semibold [&_label]:!text-[#493a29]">
             <Input
