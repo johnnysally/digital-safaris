@@ -5,6 +5,7 @@ import SystemSetting from "../../models/admin/SystemSetting.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import logger from "../../utils/logger.js";
 import * as emailService from "../../services/emailService.js";
 import * as smsService from "../../services/smsService.js";
 import * as socketService from "../../services/socketService.js";
@@ -13,6 +14,18 @@ const getContext = async () => {
   const branding = (await Branding.findOne().lean()) || {};
   const general = await SystemSetting.findOne({ key: "general" }).lean();
   return { branding, settings: general?.value || {} };
+};
+
+const sendEmail = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[email] fire-and-forget failed", { error: err.message }));
+};
+
+const sendSms = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[sms] fire-and-forget failed", { error: err.message }));
 };
 
 const list = asyncHandler(async (req, res) => {
@@ -63,7 +76,8 @@ const accept = asyncHandler(async (req, res) => {
   }).populate("customer");
 
   if (!order) throw new ApiError(404, "Order not found");
-  if (order.status !== "pending") throw new ApiError(400, "Order cannot be accepted");
+  if (order.status !== "pending")
+    throw new ApiError(400, "Order cannot be accepted");
 
   order.status = "accepted";
   order.acceptedAt = new Date();
@@ -71,13 +85,13 @@ const accept = asyncHandler(async (req, res) => {
 
   if (order.customer) {
     const { branding, settings } = await getContext();
-    await emailService.orderAccepted(order.customer, {
+    sendEmail(emailService.orderAccepted, order.customer, {
       order,
       restaurant: req.partner,
       branding,
       settings,
     });
-    await smsService.orderAccepted(order.customer, {
+    sendSms(smsService.orderAccepted, order.customer, {
       reference: order.reference,
       restaurant: req.partner.name,
     });
@@ -99,7 +113,8 @@ const reject = asyncHandler(async (req, res) => {
   }).populate("customer");
 
   if (!order) throw new ApiError(404, "Order not found");
-  if (order.status !== "pending") throw new ApiError(400, "Order cannot be rejected");
+  if (order.status !== "pending")
+    throw new ApiError(400, "Order cannot be rejected");
 
   order.status = "rejected";
   order.cancelledAt = new Date();
@@ -109,13 +124,13 @@ const reject = asyncHandler(async (req, res) => {
 
   if (order.customer) {
     const { branding, settings } = await getContext();
-    await emailService.orderCancelled(order.customer, {
+    sendEmail(emailService.orderCancelled, order.customer, {
       order,
       reason: order.cancellationReason,
       branding,
       settings,
     });
-    await smsService.orderCancelled(order.customer, {
+    sendSms(smsService.orderCancelled, order.customer, {
       reference: order.reference,
       reason: order.cancellationReason,
     });
@@ -136,7 +151,8 @@ const markPreparing = asyncHandler(async (req, res) => {
   }).populate("customer");
 
   if (!order) throw new ApiError(404, "Order not found");
-  if (order.status !== "accepted") throw new ApiError(400, "Invalid state transition");
+  if (order.status !== "accepted")
+    throw new ApiError(400, "Invalid state transition");
 
   order.status = "preparing";
   order.preparedAt = new Date();
@@ -144,7 +160,11 @@ const markPreparing = asyncHandler(async (req, res) => {
 
   if (order.customer) {
     const { branding, settings } = await getContext();
-    await emailService.orderPreparing(order.customer, { order, branding, settings });
+    sendEmail(emailService.orderPreparing, order.customer, {
+      order,
+      branding,
+      settings,
+    });
   }
 
   res.status(200).json(new ApiResponse(200, order, "Preparing"));
@@ -157,7 +177,8 @@ const markReady = asyncHandler(async (req, res) => {
   }).populate("customer");
 
   if (!order) throw new ApiError(404, "Order not found");
-  if (order.status !== "preparing") throw new ApiError(400, "Invalid state transition");
+  if (order.status !== "preparing")
+    throw new ApiError(400, "Invalid state transition");
 
   order.status = "ready";
   await order.save();
@@ -233,7 +254,7 @@ const markManualDelivery = asyncHandler(async (req, res) => {
 
   if (order.customer) {
     const { branding, settings } = await getContext();
-    await emailService.orderOutForDelivery(order.customer, {
+    sendEmail(emailService.orderOutForDelivery, order.customer, {
       order,
       driver: null,
       branding,
@@ -241,9 +262,11 @@ const markManualDelivery = asyncHandler(async (req, res) => {
     });
   }
 
-  socketService.emitToCustomer(order.customer._id.toString(), "order:out_for_delivery", {
-    reference: order.reference,
-  });
+  socketService.emitToCustomer(
+    order.customer._id.toString(),
+    "order:out_for_delivery",
+    { reference: order.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, order, "Out for delivery"));
 });
@@ -267,19 +290,21 @@ const markDelivered = asyncHandler(async (req, res) => {
 
   if (order.customer) {
     const { branding, settings } = await getContext();
-    await emailService.deliveryReceipt(order.customer, {
+    sendEmail(emailService.deliveryReceipt, order.customer, {
       order,
       branding,
       settings,
     });
-    await smsService.orderDelivered(order.customer, {
+    sendSms(smsService.orderDelivered, order.customer, {
       reference: order.reference,
     });
   }
 
-  socketService.emitToCustomer(order.customer._id.toString(), "order:delivered", {
-    reference: order.reference,
-  });
+  socketService.emitToCustomer(
+    order.customer._id.toString(),
+    "order:delivered",
+    { reference: order.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, order, "Delivered"));
 });

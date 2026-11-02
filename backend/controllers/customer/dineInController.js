@@ -7,9 +7,22 @@ import { generateRef } from "../../utils/helpers.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import logger from "../../utils/logger.js";
 import * as emailService from "../../services/emailService.js";
 import * as smsService from "../../services/smsService.js";
 import * as socketService from "../../services/socketService.js";
+
+const sendEmail = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[email] fire-and-forget failed", { error: err.message }));
+};
+
+const sendSms = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[sms] fire-and-forget failed", { error: err.message }));
+};
 
 const getContext = async () => {
   const branding = (await Branding.findOne().lean()) || {};
@@ -76,8 +89,13 @@ const create = asyncHandler(async (req, res) => {
   });
 
   const { branding, settings } = await getContext();
-  await emailService.dineInBookingConfirmation(req.customer, { booking, restaurant, branding, settings });
-  await smsService.dineInBookingConfirmation(req.customer, {
+  sendEmail(emailService.dineInBookingConfirmation, req.customer, {
+    booking,
+    restaurant,
+    branding,
+    settings,
+  });
+  sendSms(smsService.dineInBookingConfirmation, req.customer, {
     reference: booking.reference,
     restaurant: restaurant.name,
     scheduledAt: new Date(booking.scheduledAt).toLocaleString(),
@@ -129,8 +147,16 @@ const cancel = asyncHandler(async (req, res) => {
   });
 
   const { branding, settings } = await getContext();
-  await emailService.dineInCancelled(req.customer, { booking, reason, branding, settings });
-  await smsService.dineInCancelled(req.customer, { reference: booking.reference, reason });
+  sendEmail(emailService.dineInCancelled, req.customer, {
+    booking,
+    reason,
+    branding,
+    settings,
+  });
+  sendSms(smsService.dineInCancelled, req.customer, {
+    reference: booking.reference,
+    reason,
+  });
 
   res.status(200).json(new ApiResponse(200, booking, "Booking cancelled"));
 });

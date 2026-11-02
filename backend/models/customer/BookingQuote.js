@@ -1,18 +1,6 @@
 import mongoose from "mongoose";
 
-const orderQuoteItemSchema = new mongoose.Schema(
-  {
-    menuItem: { type: mongoose.Schema.Types.ObjectId, ref: "MenuItem" },
-    name: String,
-    price: Number,
-    quantity: Number,
-    subtotal: Number,
-    notes: String,
-  },
-  { _id: false }
-);
-
-const orderQuoteSchema = new mongoose.Schema(
+const bookingQuoteSchema = new mongoose.Schema(
   {
     quoteId: { type: String, required: true, unique: true, index: true },
     customer: {
@@ -20,30 +8,47 @@ const orderQuoteSchema = new mongoose.Schema(
       ref: "Customer",
       required: true,
     },
-    restaurant: {
+    room: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "RestaurantPartner",
+      ref: "Room",
       required: true,
     },
-    type: { type: String, enum: ["delivery", "pickup"], required: true },
-    items: { type: [orderQuoteItemSchema], required: true },
-    subtotal: { type: Number, required: true },
-    deliveryFee: { type: Number, default: 0 },
-    total: { type: Number, required: true },
-    currency: { type: String, default: "KES" },
-    commissionRate: { type: Number, required: true },
-    commissionAmount: { type: Number, required: true },
-    restaurantEarnings: { type: Number, required: true },
-    deliveryAddress: {
-      address: String,
-      town: String,
-      latitude: Number,
-      longitude: Number,
+    property: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Property",
+      required: true,
     },
+    partner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "AccommodationPartner",
+      required: true,
+    },
+    checkIn: { type: Date, required: true },
+    checkOut: { type: Date, required: true },
+    nights: { type: Number, required: true, min: 1 },
+    roomsBooked: { type: Number, required: true, min: 1 },
+    guests: {
+      adults: { type: Number, default: 1, min: 1 },
+      children: { type: Number, default: 0, min: 0 },
+    },
+    pricePerNight: { type: Number, required: true, min: 0 },
+    subtotal: { type: Number, required: true, min: 0 },
+    total: { type: Number, required: true, min: 0 },
+    currency: { type: String, default: "KES" },
+    commissionRate: { type: Number, required: true, min: 0, max: 100 },
+    commissionAmount: { type: Number, required: true, min: 0 },
+    partnerEarnings: { type: Number, required: true, min: 0 },
     expiresAt: { type: Date, required: true, index: true },
-    consumed: { type: Boolean, default: false },
+    consumed: { type: Boolean, default: false, index: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("OrderQuote", orderQuoteSchema);
+bookingQuoteSchema.index({ customer: 1, createdAt: -1 });
+bookingQuoteSchema.index({ customer: 1, consumed: 1 });
+
+const BookingQuote =
+  mongoose.models.BookingQuote ||
+  mongoose.model("BookingQuote", bookingQuoteSchema);
+
+export default BookingQuote;

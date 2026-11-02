@@ -18,6 +18,22 @@ const getContext = async () => {
   return { branding, settings: general?.value || {} };
 };
 
+const sendEmail = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) =>
+      logger.error("[email] fire-and-forget failed", { error: err.message })
+    );
+};
+
+const sendSms = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) =>
+      logger.error("[sms] fire-and-forget failed", { error: err.message })
+    );
+};
+
 const list = asyncHandler(async (req, res) => {
   const { status, page = 1, limit = 20 } = req.query;
   const filter = { partner: req.partner._id };
@@ -96,35 +112,23 @@ const confirm = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    try {
-      await emailService.bookingConfirmation(booking.customer, {
-        booking,
-        property: booking.property,
-        branding,
-        settings,
-      });
-    } catch (err) {
-      logger.error("Booking confirmation email failed", { error: err.message });
-    }
-    try {
-      await smsService.bookingConfirmation(booking.customer, {
-        reference: booking.reference,
-        checkIn: new Date(booking.checkIn).toDateString(),
-      });
-    } catch (err) {
-      logger.error("Booking confirmation SMS failed", { error: err.message });
-    }
+    sendEmail(emailService.bookingConfirmation, booking.customer, {
+      booking,
+      property: booking.property,
+      branding,
+      settings,
+    });
+    sendSms(smsService.bookingConfirmation, booking.customer, {
+      reference: booking.reference,
+      checkIn: new Date(booking.checkIn).toDateString(),
+    });
   }
 
-  try {
-    socketService.emitToCustomer(
-      booking.customer._id.toString(),
-      "booking:confirmed",
-      { reference: booking.reference }
-    );
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToCustomer(
+    booking.customer._id.toString(),
+    "booking:confirmed",
+    { reference: booking.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, booking, "Booking confirmed"));
 });
@@ -150,35 +154,23 @@ const reject = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    try {
-      await emailService.bookingCancelled(booking.customer, {
-        booking,
-        reason: booking.cancellationReason,
-        branding,
-        settings,
-      });
-    } catch (err) {
-      logger.error("Booking cancellation email failed", { error: err.message });
-    }
-    try {
-      await smsService.bookingCancelled(booking.customer, {
-        reference: booking.reference,
-        reason: booking.cancellationReason,
-      });
-    } catch (err) {
-      logger.error("Booking cancellation SMS failed", { error: err.message });
-    }
+    sendEmail(emailService.bookingCancelled, booking.customer, {
+      booking,
+      reason: booking.cancellationReason,
+      branding,
+      settings,
+    });
+    sendSms(smsService.bookingCancelled, booking.customer, {
+      reference: booking.reference,
+      reason: booking.cancellationReason,
+    });
   }
 
-  try {
-    socketService.emitToCustomer(
-      booking.customer._id.toString(),
-      "booking:cancelled",
-      { reference: booking.reference }
-    );
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToCustomer(
+    booking.customer._id.toString(),
+    "booking:cancelled",
+    { reference: booking.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, booking, "Booking rejected"));
 });
@@ -202,34 +194,22 @@ const checkIn = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    try {
-      await emailService.checkInConfirmation(booking.customer, {
-        booking,
-        property: booking.property,
-        branding,
-        settings,
-      });
-    } catch (err) {
-      logger.error("Check-in email failed", { error: err.message });
-    }
-    try {
-      await smsService.checkInConfirmation(booking.customer, {
-        property: booking.property?.name || "your stay",
-      });
-    } catch (err) {
-      logger.error("Check-in SMS failed", { error: err.message });
-    }
+    sendEmail(emailService.checkInConfirmation, booking.customer, {
+      booking,
+      property: booking.property,
+      branding,
+      settings,
+    });
+    sendSms(smsService.checkInConfirmation, booking.customer, {
+      property: booking.property?.name || "your stay",
+    });
   }
 
-  try {
-    socketService.emitToCustomer(
-      booking.customer._id.toString(),
-      "booking:checked_in",
-      { reference: booking.reference }
-    );
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToCustomer(
+    booking.customer._id.toString(),
+    "booking:checked_in",
+    { reference: booking.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, booking, "Checked in"));
 });
@@ -253,34 +233,22 @@ const checkOut = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    try {
-      await emailService.checkOutConfirmation(booking.customer, {
-        booking,
-        property: booking.property,
-        branding,
-        settings,
-      });
-    } catch (err) {
-      logger.error("Check-out email failed", { error: err.message });
-    }
-    try {
-      await smsService.checkOutConfirmation(booking.customer, {
-        property: booking.property?.name || "your stay",
-      });
-    } catch (err) {
-      logger.error("Check-out SMS failed", { error: err.message });
-    }
+    sendEmail(emailService.checkOutConfirmation, booking.customer, {
+      booking,
+      property: booking.property,
+      branding,
+      settings,
+    });
+    sendSms(smsService.checkOutConfirmation, booking.customer, {
+      property: booking.property?.name || "your stay",
+    });
   }
 
-  try {
-    socketService.emitToCustomer(
-      booking.customer._id.toString(),
-      "booking:checked_out",
-      { reference: booking.reference }
-    );
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToCustomer(
+    booking.customer._id.toString(),
+    "booking:checked_out",
+    { reference: booking.reference }
+  );
 
   res.status(200).json(new ApiResponse(200, booking, "Checked out"));
 });
@@ -386,36 +354,24 @@ const assignRoom = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    try {
-      await emailService.roomAssigned(booking.customer, {
-        booking,
-        property: booking.property,
-        roomNumber: unit.number,
-        floor: unit.floor,
-        branding,
-        settings,
-      });
-    } catch (err) {
-      logger.error("Room assigned email failed", { error: err.message });
-    }
-    try {
-      await smsService.roomAssigned(booking.customer, {
-        reference: booking.reference,
-        roomNumber: unit.number,
-      });
-    } catch (err) {
-      logger.error("Room assigned SMS failed", { error: err.message });
-    }
+    sendEmail(emailService.roomAssigned, booking.customer, {
+      booking,
+      property: booking.property,
+      roomNumber: unit.number,
+      floor: unit.floor,
+      branding,
+      settings,
+    });
+    sendSms(smsService.roomAssigned, booking.customer, {
+      reference: booking.reference,
+      roomNumber: unit.number,
+    });
 
-    try {
-      socketService.emitToCustomer(
-        booking.customer._id.toString(),
-        "booking:room_assigned",
-        { reference: booking.reference, roomNumber: unit.number }
-      );
-    } catch {
-      /* socket optional */
-    }
+    socketService.emitToCustomer(
+      booking.customer._id.toString(),
+      "booking:room_assigned",
+      { reference: booking.reference, roomNumber: unit.number }
+    );
   }
 
   res.status(200).json(

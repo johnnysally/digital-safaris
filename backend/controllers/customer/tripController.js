@@ -21,6 +21,18 @@ import * as smsService from "../../services/smsService.js";
 import * as socketService from "../../services/socketService.js";
 import calculateDistance from "../../utils/calculateDistance.js";
 
+const sendEmail = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[email] fire-and-forget failed", { error: err.message }));
+};
+
+const sendSms = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[sms] fire-and-forget failed", { error: err.message }));
+};
+
 const getContext = async () => {
   const branding = (await Branding.findOne().lean()) || {};
   const general = await SystemSetting.findOne({ key: "general" }).lean();
@@ -129,7 +141,6 @@ const create = asyncHandler(async (req, res) => {
       .json(new ApiResponse(200, existing, "Trip already created"));
   }
 
-  // Find an available driver — same logic as the original create, but AFTER payment.
   const available = await DriverLocation.find({
     isOnline: true,
     isAvailable: true,
@@ -150,7 +161,6 @@ const create = asyncHandler(async (req, res) => {
     d.partner?.serviceTypes?.includes(quote.serviceType)
   );
 
-  // If no driver now → refund and error (payment already taken)
   if (matched.length === 0) {
     await refundPayment(payment, req.customer._id, "No drivers available at booking time");
     throw new ApiError(400, `No ${quote.serviceType} drivers available right now`);
@@ -250,47 +260,31 @@ const create = asyncHandler(async (req, res) => {
 
   const { branding, settings } = await getContext();
 
-  try {
-    socketService.emitToTransport(driver.partner._id.toString(), "trip:new", {
-      reference: trip.reference,
-      pickup: trip.pickup.address,
-      dropoff: trip.dropoff.address,
-    });
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToTransport(driver.partner._id.toString(), "trip:new", {
+    reference: trip.reference,
+    pickup: trip.pickup.address,
+    dropoff: trip.dropoff.address,
+  });
 
-  try {
-    await emailService.tripBookingConfirmation(req.customer, {
-      trip,
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Trip confirmation email failed", { error: err.message });
-  }
-  try {
-    await emailService.driverAssigned(req.customer, {
-      trip,
-      driver: driver.partner,
-      vehicle,
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Driver assigned email failed", { error: err.message });
-  }
-  try {
-    await smsService.tripBookingConfirmation(req.customer, {
-      reference: trip.reference,
-      pickup: trip.pickup.address,
-      scheduledAt: trip.scheduledAt
-        ? new Date(trip.scheduledAt).toLocaleString()
-        : "ASAP",
-    });
-  } catch (err) {
-    logger.error("Trip confirmation SMS failed", { error: err.message });
-  }
+  sendEmail(emailService.tripBookingConfirmation, req.customer, {
+    trip,
+    branding,
+    settings,
+  });
+  sendEmail(emailService.driverAssigned, req.customer, {
+    trip,
+    driver: driver.partner,
+    vehicle,
+    branding,
+    settings,
+  });
+  sendSms(smsService.tripBookingConfirmation, req.customer, {
+    reference: trip.reference,
+    pickup: trip.pickup.address,
+    scheduledAt: trip.scheduledAt
+      ? new Date(trip.scheduledAt).toLocaleString()
+      : "ASAP",
+  });
 
   res.status(201).json(new ApiResponse(201, trip, "Trip confirmed"));
 });
@@ -402,7 +396,6 @@ const cancel = asyncHandler(async (req, res) => {
     { $set: { isAvailable: true, activeTrip: null } }
   );
 
-  // Refund wallet-paid trips
   if (trip.paymentStatus === "paid" && trip.paymentReference) {
     const payment = await CustomerPayment.findOne({
       reference: trip.paymentReference,
@@ -432,33 +425,21 @@ const cancel = asyncHandler(async (req, res) => {
     }
   }
 
-  try {
-    socketService.emitToTransport(trip.partner.toString(), "trip:cancelled", {
-      reference: trip.reference,
-    });
-  } catch {
-    /* socket optional */
-  }
+  socketService.emitToTransport(trip.partner.toString(), "trip:cancelled", {
+    reference: trip.reference,
+  });
 
   const { branding, settings } = await getContext();
-  try {
-    await emailService.tripCancelled(req.customer, {
-      trip,
-      reason,
-      branding,
-      settings,
-    });
-  } catch (err) {
-    logger.error("Trip cancellation email failed", { error: err.message });
-  }
-  try {
-    await smsService.tripCancelled(req.customer, {
-      reference: trip.reference,
-      reason,
-    });
-  } catch (err) {
-    logger.error("Trip cancellation SMS failed", { error: err.message });
-  }
+  sendEmail(emailService.tripCancelled, req.customer, {
+    trip,
+    reason,
+    branding,
+    settings,
+  });
+  sendSms(smsService.tripCancelled, req.customer, {
+    reference: trip.reference,
+    reason,
+  });
 
   res.status(200).json(new ApiResponse(200, trip, "Trip cancelled"));
 });

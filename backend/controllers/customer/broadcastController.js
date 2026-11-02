@@ -4,11 +4,18 @@ import SystemSetting from "../../models/admin/SystemSetting.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import logger from "../../utils/logger.js";
 import * as emailService from "../../services/emailService.js";
 import * as socketService from "../../services/socketService.js";
 import * as cacheService from "../../services/cacheService.js";
 import calculateDistance from "../../utils/calculateDistance.js";
 import { generateRef } from "../../utils/helpers.js";
+
+const sendEmail = (fn, ...args) => {
+  Promise.resolve()
+    .then(() => fn(...args))
+    .catch((err) => logger.error("[email] fire-and-forget failed", { error: err.message }));
+};
 
 const getSettings = async () => {
   const broadcast = await SystemSetting.findOne({ key: "broadcast" }).lean();
@@ -66,7 +73,7 @@ const create = asyncHandler(async (req, res) => {
   socketService.broadcastFoodRequest(request.toObject(), restaurantIds);
 
   for (const r of nearby) {
-    await emailService.newBroadcastReceived(r, { request, settings });
+    sendEmail(emailService.newBroadcastReceived, r, { request, settings });
   }
 
   await cacheService.setCache(
