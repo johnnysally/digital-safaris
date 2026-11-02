@@ -55,7 +55,10 @@ const cancelBroadcast = (reference, restaurantIds) => {
 
 const lockBroadcast = (reference, restaurantIds, acceptedBy) => {
   for (const id of restaurantIds) {
-    emitToRoom(`restaurant:${id}`, "broadcast:locked", { reference, acceptedBy });
+    emitToRoom(`restaurant:${id}`, "broadcast:locked", {
+      reference,
+      acceptedBy,
+    });
   }
 };
 

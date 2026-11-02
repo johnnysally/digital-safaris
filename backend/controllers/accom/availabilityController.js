@@ -5,6 +5,21 @@ import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
 
+const toUTCDay = (value) => {
+  const d = value instanceof Date ? value : new Date(value);
+  return new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()));
+};
+
+const buildStayDates = (checkIn, checkOut) => {
+  const dates = [];
+  const start = toUTCDay(checkIn);
+  const end = toUTCDay(checkOut);
+  for (let d = new Date(start); d < end; d.setUTCDate(d.getUTCDate() + 1)) {
+    dates.push(new Date(d));
+  }
+  return dates;
+};
+
 const list = asyncHandler(async (req, res) => {
   const { room, from, to } = req.query;
 
@@ -12,42 +27,53 @@ const list = asyncHandler(async (req, res) => {
   if (room) filter.room = room;
   if (from || to) {
     filter.date = {};
-    if (from) filter.date.$gte = new Date(from);
-    if (to) filter.date.$lte = new Date(to);
+    if (from) filter.date.$gte = toUTCDay(from);
+    if (to) filter.date.$lte = toUTCDay(to);
   }
 
-  const items = await RoomAvailability.find(filter).sort({ date: 1 }).lean();
+  const items = await RoomAvailability.find(filter)
+    .sort({ date: 1 })
+    .lean();
+
   res.status(200).json(new ApiResponse(200, items));
 });
 
 const setRange = asyncHandler(async (req, res) => {
-  const { room: roomId, from, to, totalUnits, price, isBlocked, blockReason } = req.body;
+  const {
+    room: roomId,
+    from,
+    to,
+    totalUnits,
+    price,
+    isBlocked,
+    blockReason,
+  } = req.body;
 
-  const room = await Room.findOne({ _id: roomId, partner: req.partner._id });
+  const room = await Room.findOne({
+    _id: roomId,
+    partner: req.partner._id,
+  });
   if (!room) throw new ApiError(404, "Room not found");
 
-  const start = new Date(from);
-  const end = new Date(to);
+  const start = toUTCDay(from);
+  const end = toUTCDay(to);
   if (end < start) throw new ApiError(400, "Invalid date range");
 
   const days = [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
     days.push(new Date(d));
   }
 
   const results = [];
 
   for (const date of days) {
-    const dayStart = new Date(date);
-    dayStart.setHours(0, 0, 0, 0);
-
     const bookedUnits = await Booking.aggregate([
       {
         $match: {
           room: room._id,
           status: { $in: ["confirmed", "checked_in"] },
-          checkIn: { $lte: dayStart },
-          checkOut: { $gt: dayStart },
+          checkIn: { $lte: date },
+          checkOut: { $gt: date },
         },
       },
       { $group: { _id: null, total: { $sum: "$roomsBooked" } } },
@@ -58,13 +84,13 @@ const setRange = asyncHandler(async (req, res) => {
     const available = Math.max(0, units - booked);
 
     const doc = await RoomAvailability.findOneAndUpdate(
-      { room: room._id, date: dayStart },
+      { room: room._id, date },
       {
         $set: {
           partner: req.partner._id,
           property: room.property,
           room: room._id,
-          date: dayStart,
+          date,
           totalUnits: units,
           bookedUnits: booked,
           availableUnits: available,
@@ -80,35 +106,37 @@ const setRange = asyncHandler(async (req, res) => {
     results.push(doc);
   }
 
-  res.status(200).json(new ApiResponse(200, results, "Availability updated"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, results, "Availability updated"));
 });
 
 const blockDates = asyncHandler(async (req, res) => {
   const { room: roomId, from, to, reason } = req.body;
 
-  const room = await Room.findOne({ _id: roomId, partner: req.partner._id });
+  const room = await Room.findOne({
+    _id: roomId,
+    partner: req.partner._id,
+  });
   if (!room) throw new ApiError(404, "Room not found");
 
-  const start = new Date(from);
-  const end = new Date(to);
+  const start = toUTCDay(from);
+  const end = toUTCDay(to);
 
   const days = [];
-  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+  for (let d = new Date(start); d <= end; d.setUTCDate(d.getUTCDate() + 1)) {
     days.push(new Date(d));
   }
 
   for (const date of days) {
-    const dayStart = new Date(date);
-    dayStart.setHours(0, 0, 0, 0);
-
     await RoomAvailability.findOneAndUpdate(
-      { room: room._id, date: dayStart },
+      { room: room._id, date },
       {
         $set: {
           partner: req.partner._id,
           property: room.property,
           room: room._id,
-          date: dayStart,
+          date,
           totalUnits: room.totalUnits,
           bookedUnits: 0,
           availableUnits: 0,
@@ -122,17 +150,22 @@ const blockDates = asyncHandler(async (req, res) => {
     );
   }
 
-  res.status(200).json(new ApiResponse(200, { count: days.length }, "Dates blocked"));
+  res
+    .status(200)
+    .json(new ApiResponse(200, { count: days.length }, "Dates blocked"));
 });
 
 const unblockDates = asyncHandler(async (req, res) => {
   const { room: roomId, from, to } = req.body;
 
-  const room = await Room.findOne({ _id: roomId, partner: req.partner._id });
+  const room = await Room.findOne({
+    _id: roomId,
+    partner: req.partner._id,
+  });
   if (!room) throw new ApiError(404, "Room not found");
 
-  const start = new Date(from);
-  const end = new Date(to);
+  const start = toUTCDay(from);
+  const end = toUTCDay(to);
 
   const result = await RoomAvailability.updateMany(
     {
@@ -143,7 +176,11 @@ const unblockDates = asyncHandler(async (req, res) => {
   );
 
   res.status(200).json(
-    new ApiResponse(200, { modified: result.modifiedCount }, "Dates unblocked")
+    new ApiResponse(
+      200,
+      { modified: result.modifiedCount },
+      "Dates unblocked"
+    )
   );
 });
 

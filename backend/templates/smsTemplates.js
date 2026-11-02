@@ -39,7 +39,10 @@ const bookingModified = (payload) =>
 const bookingCancelled = (payload) =>
   render(`Booking ${payload.reference} cancelled. Reason: ${payload.reason || "not provided"}. Refunds in 3-5 days.`);
 
+const roomAssigned = (payload) =>
+  render(`Your room: ${payload.roomNumber}. Ref: ${payload.reference}. Digital Safaris.`);
 const checkInConfirmation = (payload) =>
+
   render(`Checked in at ${payload.property}. Enjoy your stay. Digital Safaris.`);
 
 const checkOutConfirmation = (payload) =>
@@ -265,6 +268,7 @@ export {
   bookingReminder24h,
   bookingReminder2h,
   bookingModified,
+  roomAssigned,
   bookingCancelled,
   checkInConfirmation,
   checkOutConfirmation,

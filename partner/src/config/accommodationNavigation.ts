@@ -1,12 +1,15 @@
 import {
+  BedDouble,
+  Bell,
   Calendar,
   CalendarDays,
   ChartNoAxesColumnIncreasing,
-  Bell,
+  DoorOpen,
   House,
   LayoutDashboard,
   Settings,
   Star,
+  Users,
   Wallet,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
@@ -20,7 +23,10 @@ export interface AccommodationNavigationItem {
 export const accommodationNavigation: AccommodationNavigationItem[] = [
   { label: "Dashboard", to: "/partner/accommodation/dashboard", icon: LayoutDashboard },
   { label: "My Property", to: "/partner/accommodation/properties", icon: House },
+  { label: "Rooms & Inventory", to: "/partner/accommodation/rooms", icon: BedDouble },
+  { label: "Room Units", to: "/partner/accommodation/room-units", icon: DoorOpen },
   { label: "Bookings", to: "/partner/accommodation/bookings", icon: CalendarDays },
+  { label: "Guests", to: "/partner/accommodation/guests", icon: Users },
   { label: "Availability", to: "/partner/accommodation/availability", icon: Calendar },
   { label: "Notifications", to: "/partner/accommodation/notifications", icon: Bell },
   { label: "Reviews", to: "/partner/accommodation/reviews", icon: Star },

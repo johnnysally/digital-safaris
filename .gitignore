@@ -68,7 +68,6 @@ coverage/
 .nyc_output/
 *.lcov
 lib-cov/
-.nyc_output/
 
 # ─────────────────────────────────────────
 # EDITOR / IDE
@@ -153,3 +152,51 @@ mongodump-*/
 *.p12
 serviceAccountKey.json
 *-service-account.json
+
+# ─────────────────────────────────────────
+# MOBILE — EXPO / REACT NATIVE
+# ─────────────────────────────────────────
+# Expo
+.expo/
+.expo-shared/
+expo-env.d.ts
+app-env.d.ts
+
+# Expo prebuild / native folders (managed workflow — EAS generates these)
+android/
+ios/
+
+# React Native
+.metro-health-check*
+*.jks
+*.keystore
+*.mobileprovision
+*.orig.*
+
+# Gradle / Android build artifacts (if ever prebuilt)
+.gradle/
+*.apk
+*.aab
+*.hprof
+
+# iOS build artifacts (if ever prebuilt)
+DerivedData/
+Pods/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+
+# EAS
+.eas/
+eas-build-*.json
+
+# React Native Debugger / Flipper
+react-native.config.js.bak
+.flipper/
+
+# Local dev-only mobile folders (safe to ignore across all envs)
+digitalsafaris-mobile/node_modules/
+digitalsafaris-mobile/.expo/
+digitalsafaris-mobile/dist/
+digitalsafaris-mobile/web-build/
+digitalsafaris-mobile/android/
+digitalsafaris-mobile/ios/

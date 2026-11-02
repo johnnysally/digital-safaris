@@ -52,6 +52,7 @@ const tripSchema = new mongoose.Schema(
       enum: ["mpesa", "stripe", "wallet"],
       required: true,
     },
+    paymentReference: { type: String, default: null },
     paymentStatus: {
       type: String,
       enum: ["pending", "paid", "refunded", "failed"],
@@ -63,6 +64,7 @@ const tripSchema = new mongoose.Schema(
       default: "requested",
     },
     cancellationReason: { type: String, default: null },
+    cancelledAt: { type: Date, default: null },
     cancelledBy: {
       type: String,
       enum: ["customer", "partner", "admin", null],
@@ -79,6 +81,7 @@ tripSchema.index({ customer: 1, createdAt: -1 });
 tripSchema.index({ partner: 1, createdAt: -1 });
 tripSchema.index({ status: 1 });
 tripSchema.index({ scheduledAt: 1 });
+tripSchema.index({ paymentReference: 1 });
 
 const Trip = mongoose.model("Trip", tripSchema);
 

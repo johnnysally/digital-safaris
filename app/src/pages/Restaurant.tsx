@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Utensils, MapPin, Star, Search as SearchIcon } from "lucide-react";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
@@ -11,10 +11,11 @@ import EmptyState from "../components/ui/EmptyState";
 import Spinner from "../components/ui/Spinner";
 import Pagination from "../components/ui/Pagination";
 import { searchApi } from "../api";
-import { DEFAULT_PAGE_SIZE, ROUTES } from "../utils/constants";
+import { DEFAULT_PAGE_SIZE } from "../utils/constants";
 import type { Restaurant, Location, PaginationMeta } from "../types";
 
 export default function RestaurantPage() {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<Restaurant[]>([]);
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [locations, setLocations] = useState<Location[]>([]);
@@ -201,9 +202,12 @@ export default function RestaurantPage() {
                       ({r.totalRatings})
                     </span>
                   </span>
-                  <Link to={ROUTES.RESTAURANT}>
-                    <Button size="sm">View menu</Button>
-                  </Link>
+                  <Button
+                    size="sm"
+                    onClick={() => navigate(`/restaurant/${r._id}`)}
+                  >
+                    View menu
+                  </Button>
                 </div>
               </div>
             </Card>

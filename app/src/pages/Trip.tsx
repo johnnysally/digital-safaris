@@ -9,7 +9,6 @@ import Select from "../components/ui/Select";
 import Pagination from "../components/ui/Pagination";
 import Alert from "../components/ui/Alert";
 import Spinner from "../components/ui/Spinner";
-import ConfirmDialog from "../components/ui/ConfirmDialog";
 import Modal from "../components/ui/Modal";
 import Input from "../components/ui/Input";
 import { tripApi } from "../api";
@@ -39,6 +38,12 @@ function statusVariant(status: string): Variant {
   }
 }
 
+function extractError(err: unknown, fallback: string): string {
+  const msg = (err as { response?: { data?: { message?: string } } })
+    ?.response?.data?.message;
+  return typeof msg === "string" && msg ? msg : fallback;
+}
+
 export default function Trip() {
   const { error: toastError, success: toastSuccess } = useToast();
   const [rows, setRows] = useState<TripType[]>([]);
@@ -53,6 +58,7 @@ export default function Trip() {
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
 
   const [rateOpen, setRateOpen] = useState(false);
@@ -102,15 +108,19 @@ export default function Trip() {
     if (!details) return;
     setCancelLoading(true);
     try {
-      const updated = await tripApi.cancel(details._id);
+      const updated = await tripApi.cancel(
+        details._id,
+        cancelReason.trim() || undefined
+      );
       setDetails(updated);
       setRows((prev) =>
         prev.map((r) => (r._id === updated._id ? updated : r))
       );
       toastSuccess("Trip cancelled");
       setCancelOpen(false);
-    } catch {
-      toastError("Could not cancel trip");
+      setCancelReason("");
+    } catch (err) {
+      toastError(extractError(err, "Could not cancel trip"));
     } finally {
       setCancelLoading(false);
     }
@@ -128,8 +138,8 @@ export default function Trip() {
       toastSuccess("Rating submitted");
       setRateOpen(false);
       setReview("");
-    } catch {
-      toastError("Could not submit rating");
+    } catch (err) {
+      toastError(extractError(err, "Could not submit rating"));
     } finally {
       setRateLoading(false);
     }
@@ -348,6 +358,20 @@ export default function Trip() {
               </div>
             </div>
 
+            {details.status === "cancelled" && details.cancellationReason && (
+              <div className="rounded-md border border-border bg-surface-alt p-3 text-sm">
+                <p className="text-xs text-text-muted">Cancellation reason</p>
+                <p className="mt-1 text-text-primary">
+                  {details.cancellationReason}
+                </p>
+                {details.cancelledBy && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    Cancelled by {details.cancelledBy}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 pt-2">
               {["requested", "accepted"].includes(details.status) && (
                 <Button
@@ -371,16 +395,47 @@ export default function Trip() {
         )}
       </Drawer>
 
-      <ConfirmDialog
+      <Modal
         isOpen={cancelOpen}
-        onClose={() => setCancelOpen(false)}
-        onConfirm={handleCancel}
+        onClose={() => {
+          setCancelOpen(false);
+          setCancelReason("");
+        }}
         title="Cancel trip?"
-        description="Your driver will be notified."
-        confirmText="Cancel trip"
-        variant="danger"
-        loading={cancelLoading}
-      />
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCancelOpen(false);
+                setCancelReason("");
+              }}
+            >
+              Keep trip
+            </Button>
+            <Button
+              variant="danger"
+              loading={cancelLoading}
+              onClick={handleCancel}
+            >
+              Cancel trip
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-text-muted">
+            Your driver will be notified. Refunds are handled per our policy.
+          </p>
+          <Input
+            label="Reason (optional)"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="Why are you cancelling?"
+          />
+        </div>
+      </Modal>
 
       <Modal
         isOpen={rateOpen}

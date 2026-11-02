@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  initiate,
   initiateMpesa,
   mpesaCallback,
   initiateStripe,
@@ -16,9 +17,9 @@ router.get("/mpesa/callback", (req, res) => {
 });
 
 router.post("/mpesa/callback", mpesaCallback);
-
 router.post("/stripe/callback", stripeCallback);
 
+router.post("/initiate", authenticateClient, initiate);
 router.post("/mpesa/initiate", authenticateClient, initiateMpesa);
 router.post("/stripe/initiate", authenticateClient, initiateStripe);
 router.post("/wallet/pay", authenticateClient, payWithWallet);

@@ -8,6 +8,18 @@ import type {
   ListParams,
 } from "../types";
 
+export interface PayoutRunResult {
+  skipped: boolean;
+  reason?: string;
+  created: number;
+  partners: Array<{
+    partner: string;
+    partnerType: string;
+    payout: string;
+    amount: number;
+  }>;
+}
+
 const paymentApi = {
   async list(params?: ListParams): Promise<Paginated<Payment>> {
     const res = await axios.get("/admin/payments", { params });
@@ -62,6 +74,15 @@ const paymentApi = {
   async rejectPayout(id: string, reason: string): Promise<Payout> {
     const res = await axios.post(`/admin/payouts/${id}/reject`, { reason });
     return unwrap<Payout>(res.data);
+  },
+
+  async runPayoutsNow(
+    partnerType?: "restaurant" | "transport" | "accommodation"
+  ): Promise<PayoutRunResult> {
+    const res = await axios.post("/admin/payouts/run-now", {
+      partnerType: partnerType || undefined,
+    });
+    return unwrap<PayoutRunResult>(res.data);
   },
 };
 

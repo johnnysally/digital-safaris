@@ -1,14 +1,16 @@
 import axios, { unwrapList, unwrap } from "./axios";
 import type {
   Restaurant,
-  Accommodation,
+  RestaurantDetails,
   Property,
+  PropertyDetails,
   Room,
   MenuItem,
   Location,
   Paginated,
   ListParams,
   SearchResponse,
+  SearchPropertiesParams,
 } from "../types";
 
 const searchApi = {
@@ -17,14 +19,45 @@ const searchApi = {
     return unwrapList<Restaurant>(res.data);
   },
 
-  async accommodations(params?: ListParams): Promise<Paginated<Accommodation>> {
-    const res = await axios.get("/customer/search/accommodations", { params });
-    return unwrapList<Accommodation>(res.data);
+  async restaurantDetails(idOrSlug: string): Promise<RestaurantDetails> {
+    const isObjectId = /^[a-f0-9]{24}$/i.test(idOrSlug);
+
+    // 1. Fetch the restaurant (single call — the new id/slug params make this exact)
+    const listRes = await axios.get("/customer/search/restaurants", {
+      params: isObjectId
+        ? { id: idOrSlug, limit: 1 }
+        : { slug: idOrSlug, limit: 1 },
+    });
+    const listed = unwrapList<Restaurant>(listRes.data).data ?? [];
+    const restaurant = listed[0];
+    if (!restaurant) throw new Error("Restaurant not found");
+
+    // 2. Fetch its menu using the existing restaurantId filter
+    const menuRes = await axios.get("/customer/search/menu-items", {
+      params: { restaurantId: restaurant._id, limit: 500 },
+    });
+    const menu = unwrapList<MenuItem>(menuRes.data).data ?? [];
+
+    return { restaurant, menu };
   },
 
-  async properties(params?: ListParams): Promise<Paginated<Property>> {
+  async accommodations(
+    params?: ListParams,
+  ): Promise<Paginated<Property>> {
+    const res = await axios.get("/customer/search/accommodations", { params });
+    return unwrapList<Property>(res.data);
+  },
+
+  async properties(
+    params?: SearchPropertiesParams,
+  ): Promise<Paginated<Property>> {
     const res = await axios.get("/customer/search/properties", { params });
     return unwrapList<Property>(res.data);
+  },
+
+  async propertyDetails(idOrSlug: string): Promise<PropertyDetails> {
+    const res = await axios.get(`/customer/search/properties/${idOrSlug}`);
+    return unwrap<PropertyDetails>(res.data);
   },
 
   async rooms(params?: ListParams): Promise<Paginated<Room>> {

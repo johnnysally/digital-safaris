@@ -39,11 +39,13 @@ export default function Button({
   rightIcon,
   disabled,
   className,
+  type = "button",
   children,
   ...rest
 }: ButtonProps) {
   return (
     <button
+      type={type}
       {...rest}
       disabled={disabled || loading}
       className={classNames(

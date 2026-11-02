@@ -22,6 +22,14 @@ const processWallet = async (wallet, partnerType, settings) => {
   if (!wallet || wallet.balance <= 0) return null;
   if (wallet.balance < (wallet.minimumPayout || settings.minAmount)) return null;
 
+  // Idempotency guard: don't create a second pending payout for the same wallet
+  const existing = await Payout.findOne({
+    partner: wallet.partner,
+    partnerType,
+    status: { $in: ["pending", "processing"] },
+  });
+  if (existing) return null;
+
   const payout = await Payout.create({
     partner: wallet.partner,
     partnerType,
@@ -45,29 +53,51 @@ const processWallet = async (wallet, partnerType, settings) => {
   return payout;
 };
 
-const runPayoutJob = async () => {
+const runPayoutJob = async ({ force = false, partnerType = null } = {}) => {
   const settings = await getPayoutSettings();
   const now = new Date();
   const dayNames = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
 
-  if (settings.schedule === "weekly" && dayNames[now.getDay()] !== settings.day) return;
-  if (settings.schedule === "monthly" && now.getDate() !== 1) return;
+  if (!force) {
+    if (settings.schedule === "weekly" && dayNames[now.getDay()] !== settings.day) {
+      return { skipped: true, reason: "outside weekly window", created: 0, partners: [] };
+    }
+    if (settings.schedule === "monthly" && now.getDate() !== 1) {
+      return { skipped: true, reason: "outside monthly window", created: 0, partners: [] };
+    }
+    const [rh, rm] = settings.time.split(":").map(Number);
+    if (now.getHours() !== rh || now.getMinutes() !== rm) {
+      return { skipped: true, reason: "outside scheduled time", created: 0, partners: [] };
+    }
+  }
 
-  const [rh, rm] = settings.time.split(":").map(Number);
-  if (now.getHours() !== rh || now.getMinutes() !== rm) return;
+  const wantRest = !partnerType || partnerType === "restaurant";
+  const wantTrans = !partnerType || partnerType === "transport";
+  const wantAccom = !partnerType || partnerType === "accommodation";
 
   const [restWallets, transWallets, accomWallets] = await Promise.all([
-    RestaurantWallet.find({ status: "active" }),
-    TransportWallet.find({ status: "active" }),
-    AccommodationWallet.find({ status: "active" }),
+    wantRest ? RestaurantWallet.find({ status: "active" }) : [],
+    wantTrans ? TransportWallet.find({ status: "active" }) : [],
+    wantAccom ? AccommodationWallet.find({ status: "active" }) : [],
   ]);
 
-  let count = 0;
-  for (const w of restWallets) if (await processWallet(w, "restaurant", settings)) count++;
-  for (const w of transWallets) if (await processWallet(w, "transport", settings)) count++;
-  for (const w of accomWallets) if (await processWallet(w, "accommodation", settings)) count++;
+  const created = [];
+  for (const w of restWallets) {
+    const p = await processWallet(w, "restaurant", settings);
+    if (p) created.push({ partner: w.partner, partnerType: "restaurant", payout: p.reference, amount: p.amount });
+  }
+  for (const w of transWallets) {
+    const p = await processWallet(w, "transport", settings);
+    if (p) created.push({ partner: w.partner, partnerType: "transport", payout: p.reference, amount: p.amount });
+  }
+  for (const w of accomWallets) {
+    const p = await processWallet(w, "accommodation", settings);
+    if (p) created.push({ partner: w.partner, partnerType: "accommodation", payout: p.reference, amount: p.amount });
+  }
 
-  logger.info(`Payout job completed. ${count} payouts queued.`);
+  logger.info(`Payout job completed. ${created.length} payouts queued.${force ? " (forced)" : ""}`);
+
+  return { skipped: false, created: created.length, partners: created };
 };
 
 export { runPayoutJob };

@@ -51,7 +51,7 @@ axiosInstance.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => Promise.reject(error),
 );
 
 axiosInstance.interceptors.response.use(
@@ -111,7 +111,7 @@ axiosInstance.interceptors.response.use(
         const { data } = await axios.post<RefreshResponse>(
           `${API_URL}/public/register/refresh`,
           { refreshToken },
-          { headers: { "Content-Type": "application/json" } }
+          { headers: { "Content-Type": "application/json" } },
         );
 
         storage.setAccessToken(data.accessToken);
@@ -131,7 +131,7 @@ axiosInstance.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export interface BackendList<T> {
@@ -155,7 +155,7 @@ export function unwrap<T>(body: unknown): T {
 }
 
 export function unwrapList<T>(
-  body: unknown
+  body: unknown,
 ): {
   data: T[];
   meta: { page: number; limit: number; total: number; totalPages: number };
@@ -169,7 +169,8 @@ export function unwrapList<T>(
       ? (inner as unknown as T[])
       : [];
 
-  const total = typeof inner?.total === "number" ? inner.total : items.length;
+  const total =
+    typeof inner?.total === "number" ? inner.total : items.length;
   const page = typeof inner?.page === "number" ? inner.page : 1;
   const limit =
     typeof inner?.limit === "number" ? inner.limit : items.length || 20;
@@ -181,6 +182,19 @@ export function unwrapList<T>(
         : 1;
 
   return { data: items, meta: { page, limit, total, totalPages } };
+}
+
+export function getApiErrorMessage(
+  error: unknown,
+  fallback: string,
+): string {
+  if (axios.isAxiosError<{ message?: string }>(error)) {
+    return (
+      error.response?.data?.message ||
+      (error.response ? error.message : fallback)
+    );
+  }
+  return error instanceof Error ? error.message : fallback;
 }
 
 export default axiosInstance;

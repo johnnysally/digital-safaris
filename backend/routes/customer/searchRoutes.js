@@ -1,22 +1,22 @@
 import { Router } from "express";
 import {
-  restaurants,
-  accommodations,
-  properties,
-  rooms,
-  menuItems,
-  locations,
-  global,
+  searchRestaurants,
+  searchAccommodations,
+  searchProperties,
+  searchPropertyDetails,
+  searchMenuItems,
+  searchLocations,
+  globalSearch,
 } from "../../controllers/customer/searchController.js";
 
 const router = Router();
 
-router.get("/restaurants", restaurants);
-router.get("/accommodations", accommodations);
-router.get("/properties", properties);
-router.get("/rooms", rooms);
-router.get("/menu-items", menuItems);
-router.get("/locations", locations);
-router.get("/global", global);
+router.get("/restaurants", searchRestaurants);
+router.get("/accommodations", searchAccommodations);
+router.get("/properties", searchProperties);
+router.get("/properties/:idOrSlug", searchPropertyDetails);
+router.get("/menu-items", searchMenuItems);
+router.get("/locations", searchLocations);
+router.get("/global", globalSearch);
 
 export default router;

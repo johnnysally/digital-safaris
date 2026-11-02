@@ -12,6 +12,8 @@ import { ProfilePage } from "../pages/accommodation/Profile";
 import { ReportsPage } from "../pages/accommodation/Reports";
 import { SupportPage } from "../pages/accommodation/Support";
 import { RoomsPage } from "../pages/accommodation/Rooms";
+import { RoomUnitsPage } from "../pages/accommodation/RoomUnits";
+import { MessagesPage } from "../pages/accommodation/Guests";
 import { useAuth } from "../context/authContext";
 import NotFound from "../pages/NotFound";
 
@@ -20,7 +22,13 @@ function ProtectedRoute({ children }: { children: JSX.Element }) {
   const { isAuthenticated } = useAuth();
 
   if (!isAuthenticated("accommodation")) {
-    return <Navigate to="/partner/accommodation/login" replace state={{ from: location.pathname }} />;
+    return (
+      <Navigate
+        to="/partner/accommodation/login"
+        replace
+        state={{ from: location.pathname }}
+      />
+    );
   }
 
   return children;
@@ -37,6 +45,8 @@ export default function AccommodationApp() {
       <Route path="properties/new" element={<ProtectedRoute><PropertyPage mode="new" /></ProtectedRoute>} />
       <Route path="properties/:propertyId/edit" element={<ProtectedRoute><PropertyPage mode="edit" /></ProtectedRoute>} />
       <Route path="rooms" element={<ProtectedRoute><RoomsPage /></ProtectedRoute>} />
+      <Route path="room-units" element={<ProtectedRoute><RoomUnitsPage /></ProtectedRoute>} />
+      <Route path="guests" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
       <Route path="bookings" element={<ProtectedRoute><BookingsPage /></ProtectedRoute>} />
       <Route path="availability" element={<ProtectedRoute><AvailabilityPage /></ProtectedRoute>} />
       <Route path="notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />

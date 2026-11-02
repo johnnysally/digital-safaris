@@ -1,4 +1,14 @@
-import { buildEmailLayout, buildEmailText } from "./emailLayout.js";
+import {
+  buildEmailLayout,
+  buildEmailText,
+  heading,
+  paragraph,
+  ctaButton,
+  dataTable,
+  highlightBox,
+  divider,
+  smallNote,
+} from "./emailLayout.js";
 
 const render = (ctx, bodyHtml, extra = {}) => ({
   subject: extra.subject || "",
@@ -23,1203 +33,1566 @@ const resolveContext = (payload = {}) => {
     clientUrl: settings.clientUrl || settings.appUrl || site,
     partnerUrl: settings.partnerUrl || `${site}/partner`,
     adminUrl: settings.adminUrl || `${site}/admin`,
+    socialLinks: settings.socialLinks || {},
   };
 };
 
+const fmtDate = (d) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return String(d);
+  return date.toLocaleDateString("en-KE", {
+    weekday: "short",
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+};
+
+const fmtDateTime = (d) => {
+  if (!d) return "—";
+  const date = new Date(d);
+  if (Number.isNaN(date.getTime())) return String(d);
+  return date.toLocaleString("en-KE", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  });
+};
+
+const fmtMoney = (amount, currency = "KES") => {
+  if (amount == null) return "—";
+  const n = Number(amount);
+  if (!Number.isFinite(n)) return `${currency} ${amount}`;
+  return `${currency} ${n.toLocaleString("en-KE", { maximumFractionDigits: 2 })}`;
+};
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — AUTH & ACCOUNT
+// ══════════════════════════════════════════════════════════════
+
 const welcomeCustomer = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Welcome, ${recipient.firstName}!</h2>
-    <p>Your Digital Safaris account is ready. You can now book accommodations, order food, and request transport — all in one place.</p>
-    <p style="margin-top:24px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Explore Now</a>
-    </p>
-    <p style="margin-top:24px;">If you have any questions, reply to this email or contact us at ${ctx.supportEmail}.</p>
+  const body = `
+    ${heading(`Welcome to ${ctx.appName}, ${recipient.firstName}!`)}
+    ${paragraph(`Your account is ready. Explore verified stays, local restaurants, and reliable transport across Kenya — all in one app.`)}
+    ${highlightBox({ label: "What you can do", value: "Stays · Food · Transport", secondaryColor: ctx.secondaryColor })}
+    ${ctaButton({ label: "Start exploring", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Need help? Reply to this email or contact ${ctx.supportEmail}.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Welcome to ${ctx.appName}`,
     textLines: [`Welcome, ${recipient.firstName}!`, `Explore: ${ctx.clientUrl}`, `Support: ${ctx.supportEmail}`],
+    preheader: `Your Digital Safaris account is ready to use.`,
   });
 };
 
 const emailVerificationLink = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { link } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Verify Your Email</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Thanks for signing up. Click the button below to verify your email and activate your account.</p>
-    <p style="margin:24px 0;">
-      <a href="${link}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:14px 28px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Verify Email</a>
-    </p>
-    <p>Or paste this link into your browser:</p>
-    <p style="font-family:monospace;font-size:12px;word-break:break-all;background-color:#F5F5F5;padding:12px;border-radius:6px;">${link}</p>
-    <p>This link expires in 48 hours.</p>
-    <p>If you did not create this account, ignore this email.</p>
+  const body = `
+    ${heading("Verify your email")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Thanks for signing up. Click the button below to verify your email and activate your account.`)}
+    ${ctaButton({ label: "Verify email", href: link, secondaryColor: ctx.secondaryColor })}
+    ${paragraph(`Or paste this link into your browser:`, { margin: "12px 0 6px", size: 13, color: "#6b7280" })}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:8px;margin-bottom:16px;">
+      <tr><td style="padding:14px 16px;font-family:Consolas,Monaco,monospace;font-size:12px;color:#374151;word-break:break-all;">${link}</td></tr>
+    </table>
+    ${smallNote(`This link expires in 48 hours. If you did not create this account, ignore this email.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Verify your email — ${ctx.appName}`,
     textLines: [`Verify your email: ${link}`, `Link expires in 48 hours.`],
+    preheader: `Click to activate your ${ctx.appName} account.`,
   });
 };
 
 const passwordResetOTP = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Reset Your Password</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Use the code below to reset your password. It expires in 10 minutes.</p>
-    <p style="font-size:32px;font-weight:bold;letter-spacing:6px;color:${ctx.secondaryColor};margin:24px 0;text-align:center;">${payload.otp}</p>
-    <p>If you did not request this, ignore this email.</p>
+  const body = `
+    ${heading("Reset your password")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Use the code below to reset your password. It expires in 10 minutes.`)}
+    ${highlightBox({ label: "Your code", value: payload.otp, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`If you did not request this, ignore this email.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Password reset code - ${payload.otp}`,
+  return render(ctx, body, {
+    subject: `Your password reset code: ${payload.otp}`,
     textLines: [`Your password reset code is ${payload.otp}. Expires in 10 minutes.`],
+    preheader: `Your password reset code: ${payload.otp}`,
   });
 };
 
 const passwordChanged = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Password Changed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your password was successfully changed.</p>
-    <p>If this wasn't you, contact us immediately at ${ctx.supportEmail}.</p>
+  const body = `
+    ${heading("Password changed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your password was changed successfully.`)}
+    ${paragraph(`If this wasn't you, contact us immediately at <a href="mailto:${ctx.supportEmail}" style="color:${ctx.secondaryColor};text-decoration:none;">${ctx.supportEmail}</a>.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Your password was changed`,
-    textLines: [`Your Digital Safaris password was changed.`],
+  return render(ctx, body, {
+    subject: `Your ${ctx.appName} password was changed`,
+    textLines: [`Your ${ctx.appName} password was changed.`],
+    preheader: `Password change confirmed.`,
   });
 };
 
 const newDeviceLogin = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Login Detected</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A new login was detected on your account from:</p>
-    <p style="background-color:#F5F5F5;padding:12px;border-radius:6px;font-family:monospace;">${payload.device}</p>
-    <p>If this wasn't you, reset your password immediately and contact ${ctx.supportEmail}.</p>
+  const body = `
+    ${heading("New login detected")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A new login was detected on your account from:`)}
+    ${dataTable([{ label: "Device", value: payload.device || "Unknown" }])}
+    ${paragraph(`If this wasn't you, reset your password immediately and contact <a href="mailto:${ctx.supportEmail}" style="color:${ctx.secondaryColor};text-decoration:none;">${ctx.supportEmail}</a>.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New login to your account`,
     textLines: [`New login detected: ${payload.device}`],
+    preheader: `A new device logged into your account.`,
   });
 };
 
 const accountSuspended = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Suspended</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your account has been suspended.</p>
-    <p><strong>Reason:</strong> ${payload.reason}</p>
-    <p>Contact ${ctx.supportEmail} for assistance.</p>
+  const body = `
+    ${heading("Account suspended")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your account has been suspended.`)}
+    ${dataTable([{ label: "Reason", value: payload.reason || "Not specified" }])}
+    ${paragraph(`Contact <a href="mailto:${ctx.supportEmail}" style="color:${ctx.secondaryColor};text-decoration:none;">${ctx.supportEmail}</a> for assistance.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your account has been suspended`,
     textLines: [`Your account was suspended. Reason: ${payload.reason}`],
+    preheader: `Account suspended: ${payload.reason}`,
   });
 };
 
 const accountReactivated = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Reactivated</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your account has been reactivated. You can now use all services.</p>
+  const body = `
+    ${heading("Account reactivated")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your account has been reactivated. You can now use all services.`)}
+    ${ctaButton({ label: "Open app", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your account is active again`,
     textLines: [`Your account has been reactivated.`],
+    preheader: `Welcome back.`,
   });
 };
 
 const accountDeleted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Deleted</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your account has been permanently deleted. We're sorry to see you go.</p>
+  const body = `
+    ${heading("Account deleted")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your account has been permanently deleted. We're sorry to see you go.`)}
+    ${smallNote(`If you believe this was in error, contact ${ctx.supportEmail} within 30 days.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Your account has been deleted`,
-    textLines: [`Your Digital Safaris account has been deleted.`],
+  return render(ctx, body, {
+    subject: `Your ${ctx.appName} account has been deleted`,
+    textLines: [`Your ${ctx.appName} account has been deleted.`],
+    preheader: `Your account has been deleted.`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — BOOKING LIFECYCLE
+// ══════════════════════════════════════════════════════════════
 
 const bookingConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Booking Confirmed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your stay at <strong>${property.name}</strong> is confirmed.</p>
-    <table style="width:100%;margin:16px 0;border-collapse:collapse;">
-      <tr><td style="padding:8px 0;color:#6B7280;">Reference</td><td style="padding:8px 0;text-align:right;font-weight:bold;">${booking.reference}</td></tr>
-      <tr><td style="padding:8px 0;color:#6B7280;">Check-in</td><td style="padding:8px 0;text-align:right;">${new Date(booking.checkIn).toDateString()}</td></tr>
-      <tr><td style="padding:8px 0;color:#6B7280;">Check-out</td><td style="padding:8px 0;text-align:right;">${new Date(booking.checkOut).toDateString()}</td></tr>
-      <tr><td style="padding:8px 0;color:#6B7280;">Total</td><td style="padding:8px 0;text-align:right;font-weight:bold;color:${ctx.secondaryColor};">${booking.currency} ${booking.total}</td></tr>
-    </table>
-    <p>We look forward to hosting you!</p>
+  const body = `
+    ${heading("Booking confirmed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your stay at <strong>${property?.name || "your property"}</strong> is confirmed. We can't wait to host you.`)}
+    ${highlightBox({ label: "Confirmation number", value: booking.reference, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Property", value: property?.name || "—" },
+      { label: "Location", value: [property?.town, property?.address].filter(Boolean).join(" · ") || "—" },
+      { label: "Check-in", value: fmtDate(booking.checkIn) },
+      { label: "Check-out", value: fmtDate(booking.checkOut) },
+      { label: "Nights", value: String(booking.nights) },
+      { label: "Guests", value: `${booking.guests?.adults ?? 0} adult${booking.guests?.adults === 1 ? "" : "s"}${booking.guests?.children ? ` · ${booking.guests.children} children` : ""}` },
+      { label: "Rooms booked", value: String(booking.roomsBooked) },
+      { label: "Total paid", value: fmtMoney(booking.total, booking.currency) },
+    ])}
+    ${ctaButton({ label: "View booking", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`You'll receive a reminder 24 hours before check-in. Contact the property directly if you need to make changes.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Booking confirmed - ${booking.reference}`,
-    textLines: [`Booking confirmed at ${property.name}`, `Reference: ${booking.reference}`],
+  return render(ctx, body, {
+    subject: `Booking confirmed — ${booking.reference}`,
+    textLines: [
+      `Booking confirmed at ${property?.name || "your property"}`,
+      `Reference: ${booking.reference}`,
+      `Check-in: ${fmtDate(booking.checkIn)}`,
+      `Total: ${fmtMoney(booking.total, booking.currency)}`,
+    ],
+    preheader: `Your stay at ${property?.name || "the property"} is confirmed. Ref ${booking.reference}.`,
   });
 };
 
 const bookingReminder24h = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Stay is Tomorrow</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your check-in at <strong>${property.name}</strong> is tomorrow.</p>
-    <p><strong>Address:</strong> ${property.address}, ${property.town}</p>
-    <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toDateString()}</p>
+  const body = `
+    ${heading("Your stay is tomorrow")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A friendly reminder: your check-in at <strong>${property?.name || "the property"}</strong> is tomorrow.`)}
+    ${dataTable([
+      { label: "Address", value: `${property?.address || ""}, ${property?.town || ""}` },
+      { label: "Check-in", value: fmtDate(booking.checkIn) },
+      { label: "Check-in from", value: property?.checkInTime || "14:00" },
+      { label: "Reference", value: booking.reference },
+    ])}
+    ${ctaButton({ label: "View directions", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Have your booking reference or QR code ready at reception.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Reminder: Check-in tomorrow at ${property.name}`,
-    textLines: [`Check-in tomorrow at ${property.name}.`],
+  return render(ctx, body, {
+    subject: `Reminder: Check-in tomorrow at ${property?.name || "the property"}`,
+    textLines: [`Check-in tomorrow at ${property?.name || "the property"}.`, `Ref: ${booking.reference}`],
+    preheader: `Your check-in is tomorrow. Ref ${booking.reference}.`,
   });
 };
 
 const bookingReminder2h = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Check-in in 2 Hours</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your check-in at <strong>${property.name}</strong> is in 2 hours.</p>
-    <p>Have your QR code ready at reception.</p>
+  const { booking, property } = payload;
+  const body = `
+    ${heading("Check-in in 2 hours")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your check-in at <strong>${property?.name || "the property"}</strong> is in 2 hours.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Address", value: `${property?.address || ""}, ${property?.town || ""}` },
+    ])}
+    ${paragraph(`Have your QR code ready at reception for a smooth check-in.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Check-in in 2 hours at ${property.name}`,
-    textLines: [`Check-in in 2 hours at ${property.name}.`],
+  return render(ctx, body, {
+    subject: `Check-in in 2 hours — ${property?.name || "the property"}`,
+    textLines: [`Check-in in 2 hours.`, `Ref: ${booking.reference}`],
+    preheader: `Your check-in is in 2 hours.`,
   });
 };
 
 const bookingModified = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { booking } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Booking Modified</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your booking <strong>${booking.reference}</strong> has been updated.</p>
+  const { booking, property } = payload;
+  const body = `
+    ${heading("Booking updated")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your booking${property?.name ? ` at <strong>${property.name}</strong>` : ""} has been updated.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Check-in", value: fmtDate(booking.checkIn) },
+      { label: "Check-out", value: fmtDate(booking.checkOut) },
+      { label: "Total", value: fmtMoney(booking.total, booking.currency) },
+    ])}
+    ${ctaButton({ label: "View updated booking", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Booking updated - ${booking.reference}`,
+  return render(ctx, body, {
+    subject: `Booking updated — ${booking.reference}`,
     textLines: [`Booking ${booking.reference} updated.`],
+    preheader: `Your booking has been updated.`,
   });
 };
 
 const bookingCancelled = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Booking Cancelled</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your booking <strong>${booking.reference}</strong> has been cancelled.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
-    <p>Any refund due will be processed within 3-5 business days.</p>
+  const body = `
+    ${heading("Booking cancelled")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your booking <strong>${booking.reference}</strong> has been cancelled.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
+    ${paragraph(`Any refund due will be processed within 3–5 business days to your original payment method.`)}
+    ${ctaButton({ label: "Book another stay", href: `${ctx.clientUrl}/accommodation`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Booking cancelled - ${booking.reference}`,
-    textLines: [`Booking ${booking.reference} cancelled.`],
+  return render(ctx, body, {
+    subject: `Booking cancelled — ${booking.reference}`,
+    textLines: [`Booking ${booking.reference} cancelled.`, `Reason: ${reason || "Not provided"}`],
+    preheader: `Your booking has been cancelled.`,
   });
 };
 
 const checkInConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Checked In</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>You are checked in at <strong>${property.name}</strong>. Enjoy your stay!</p>
+  const body = `
+    ${heading("You're checked in")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You've successfully checked in at <strong>${property?.name || "the property"}</strong>. Enjoy your stay!`)}
+    ${highlightBox({ label: "Enjoy", value: "Have a great stay", secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Need anything during your stay? Contact the property directly.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Welcome to ${property.name}`,
-    textLines: [`Checked in at ${property.name}.`],
+  return render(ctx, body, {
+    subject: `Welcome to ${property?.name || "the property"}`,
+    textLines: [`Checked in at ${property?.name || "the property"}.`],
+    preheader: `You're checked in. Enjoy your stay.`,
   });
 };
 
 const checkOutConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Checked Out</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Thank you for staying at <strong>${property.name}</strong>. We'd love a review.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Leave a Review</a>
-    </p>
+  const body = `
+    ${heading("You're checked out")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Thank you for staying at <strong>${property?.name || "the property"}</strong>. We'd love to hear how it went.`)}
+    ${ctaButton({ label: "Leave a review", href: `${ctx.clientUrl}/reviews`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Your review helps other travelers make better choices.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Thanks for staying at ${property.name}`,
-    textLines: [`Thank you for staying at ${property.name}.`],
+  return render(ctx, body, {
+    subject: `Thanks for staying at ${property?.name || "the property"}`,
+    textLines: [`Thank you for staying at ${property?.name || "the property"}.`],
+    preheader: `Thanks for staying with us. Leave a review.`,
   });
 };
 
 const refundProcessed = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { amount, reference } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Refund Processed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A refund of <strong>${amount}</strong> has been processed for <strong>${reference}</strong>.</p>
-    <p>Funds may take 3-5 business days to reflect.</p>
+  const body = `
+    ${heading("Refund processed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A refund has been processed for your booking.`)}
+    ${highlightBox({ label: "Refund amount", value: amount, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "Reference", value: reference }])}
+    ${smallNote(`Refunds typically appear in your account within 3–5 business days.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Refund processed - ${reference}`,
+  return render(ctx, body, {
+    subject: `Refund processed — ${reference}`,
     textLines: [`Refund of ${amount} for ${reference} processed.`],
+    preheader: `Your refund of ${amount} has been processed.`,
   });
 };
 
 const reviewRequest = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { targetName } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">How was your experience?</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>How was <strong>${targetName}</strong>? Your review helps others make better choices.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Write a Review</a>
-    </p>
+  const body = `
+    ${heading("How was your experience?")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`How was <strong>${payload.targetName || "your recent experience"}</strong>? Your feedback helps other travelers and rewards great hosts.`)}
+    ${ctaButton({ label: "Write a review", href: `${ctx.clientUrl}/reviews`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `How was ${targetName}?`,
-    textLines: [`Please review ${targetName}.`],
+  return render(ctx, body, {
+    subject: `How was ${payload.targetName || "your recent experience"}?`,
+    textLines: [`Please review ${payload.targetName || "your experience"}.`],
+    preheader: `We'd love your review.`,
   });
 };
+
+const roomAssigned = (recipient, payload = {}) => {
+  const ctx = resolveContext(payload);
+  const { booking, property, roomNumber, floor } = payload;
+  const roomLabel = floor ? `Room ${roomNumber} · Floor ${floor}` : `Room ${roomNumber}`;
+  const body = `
+    ${heading("Your room is ready")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`We've assigned your room at <strong>${property?.name || "the property"}</strong>. See you soon!`)}
+    ${highlightBox({ label: "Your room", value: roomLabel, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Check-in", value: fmtDate(booking.checkIn) },
+      { label: "Check-out", value: fmtDate(booking.checkOut) },
+      { label: "Property", value: property?.name || "—" },
+    ])}
+    ${ctaButton({ label: "View booking", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Have your booking reference or QR code ready at reception for a smooth check-in.`)}
+  `;
+  return render(ctx, body, {
+    subject: `Room assigned — ${booking.reference}`,
+    textLines: [
+      `Your room is ${roomLabel}.`,
+      `Booking: ${booking.reference}`,
+      `Check-in: ${fmtDate(booking.checkIn)}`,
+    ],
+    preheader: `You're in ${roomLabel}.`,
+  });
+};
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — ORDER LIFECYCLE
+// ══════════════════════════════════════════════════════════════
 
 const orderConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order } = payload;
-  const itemsRows = order.items
-    .map((i) => `<tr><td style="padding:6px 0;">${i.name} x ${i.quantity}</td><td style="padding:6px 0;text-align:right;">${order.currency} ${i.subtotal}</td></tr>`)
+  const itemRows = (order.items || [])
+    .map((i) => `<tr><td style="padding:8px 16px;font-size:13px;color:#374151;">${i.quantity}× ${i.name}</td><td style="padding:8px 16px;font-size:13px;color:#111827;text-align:right;">${fmtMoney(i.subtotal, order.currency)}</td></tr>`)
     .join("");
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Order Confirmed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your order <strong>${order.reference}</strong> is confirmed.</p>
-    <table style="width:100%;margin:16px 0;border-collapse:collapse;">${itemsRows}
-      <tr><td style="padding:8px 0;border-top:1px solid #E5E7EB;font-weight:bold;">Total</td><td style="padding:8px 0;border-top:1px solid #E5E7EB;text-align:right;font-weight:bold;color:${ctx.secondaryColor};">${order.currency} ${order.total}</td></tr>
+  const body = `
+    ${heading("Order confirmed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order is in. We've sent it to the restaurant — you'll get a notification when they accept.`)}
+    ${highlightBox({ label: "Order number", value: order.reference, secondaryColor: ctx.secondaryColor })}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:10px;overflow:hidden;margin:16px 0;">
+      ${itemRows}
+      <tr>
+        <td style="padding:12px 16px;border-top:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Delivery fee</td>
+        <td style="padding:12px 16px;border-top:1px solid #e5e7eb;font-size:13px;color:#111827;text-align:right;">${fmtMoney(order.deliveryFee || 0, order.currency)}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;font-size:14px;font-weight:700;color:#111827;">Total</td>
+        <td style="padding:12px 16px;font-size:14px;font-weight:700;color:#111827;text-align:right;">${fmtMoney(order.total, order.currency)}</td>
+      </tr>
     </table>
+    ${ctaButton({ label: "Track order", href: `${ctx.clientUrl}/orders`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Order confirmed - ${order.reference}`,
-    textLines: [`Order ${order.reference} confirmed. Total: ${order.currency} ${order.total}`],
+  return render(ctx, body, {
+    subject: `Order confirmed — ${order.reference}`,
+    textLines: [`Order ${order.reference} confirmed. Total: ${fmtMoney(order.total, order.currency)}`],
+    preheader: `Your order ${order.reference} is confirmed.`,
   });
 };
 
 const orderAccepted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order, restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Order Accepted</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>${restaurant.name}</strong> has accepted your order <strong>${order.reference}</strong>.</p>
+  const body = `
+    ${heading("Order accepted")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${restaurant?.name || "The restaurant"}</strong> has accepted your order and will start preparing it shortly.`)}
+    ${dataTable([{ label: "Reference", value: order.reference }])}
+    ${ctaButton({ label: "Track order", href: `${ctx.clientUrl}/orders`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Order accepted - ${order.reference}`,
-    textLines: [`Order ${order.reference} accepted by ${restaurant.name}.`],
+  return render(ctx, body, {
+    subject: `Order accepted — ${order.reference}`,
+    textLines: [`Order ${order.reference} accepted by ${restaurant?.name || "the restaurant"}.`],
+    preheader: `Your order is being prepared.`,
   });
 };
 
 const orderPreparing = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Food is Being Prepared</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your order <strong>${order.reference}</strong> is being prepared.</p>
+  const body = `
+    ${heading("Your food is being prepared")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order is being prepared in the kitchen. We'll notify you when it's ready.`)}
+    ${dataTable([{ label: "Reference", value: order.reference }])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Preparing your order - ${order.reference}`,
+  return render(ctx, body, {
+    subject: `Preparing your order — ${order.reference}`,
     textLines: [`Order ${order.reference} is being prepared.`],
+    preheader: `Your order is being prepared.`,
   });
 };
 
 const orderOutForDelivery = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order, driver } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Out for Delivery</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your order <strong>${order.reference}</strong> is on the way.</p>
-    ${driver ? `<p><strong>Driver:</strong> ${driver.firstName} ${driver.lastName} - ${driver.phone}</p>` : ""}
-    <p>Track live in the app.</p>
+  const body = `
+    ${heading("Out for delivery")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order is on the way!`)}
+    ${dataTable([
+      { label: "Reference", value: order.reference },
+      ...(driver ? [{ label: "Driver", value: `${driver.firstName} ${driver.lastName}` }, { label: "Driver phone", value: driver.phone }] : []),
+    ])}
+    ${ctaButton({ label: "Track delivery", href: `${ctx.clientUrl}/tracking`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Out for delivery - ${order.reference}`,
+  return render(ctx, body, {
+    subject: `Out for delivery — ${order.reference}`,
     textLines: [`Order ${order.reference} out for delivery.`],
+    preheader: `Your order is on the way.`,
   });
 };
 
 const orderDelivered = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Delivered</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your order <strong>${order.reference}</strong> has been delivered. Enjoy your meal!</p>
+  const body = `
+    ${heading("Delivered")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order has been delivered. Enjoy your meal!`)}
+    ${dataTable([{ label: "Reference", value: order.reference }])}
+    ${ctaButton({ label: "Rate your order", href: `${ctx.clientUrl}/reviews`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Order delivered - ${order.reference}`,
+  return render(ctx, body, {
+    subject: `Order delivered — ${order.reference}`,
     textLines: [`Order ${order.reference} delivered.`],
+    preheader: `Your order has arrived.`,
   });
 };
 
 const orderCancelled = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Order Cancelled</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your order <strong>${order.reference}</strong> has been cancelled.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
-    <p>Any refund due will be processed within 3-5 business days.</p>
+  const body = `
+    ${heading("Order cancelled")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order <strong>${order.reference}</strong> has been cancelled.`)}
+    ${dataTable([
+      { label: "Reference", value: order.reference },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
+    ${paragraph(`Any refund due will be processed within 3–5 business days.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Order cancelled - ${order.reference}`,
+  return render(ctx, body, {
+    subject: `Order cancelled — ${order.reference}`,
     textLines: [`Order ${order.reference} cancelled.`],
+    preheader: `Your order has been cancelled.`,
   });
 };
 
 const deliveryReceipt = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Delivery Receipt</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your receipt for order <strong>${order.reference}</strong>.</p>
-    <p style="font-size:20px;font-weight:bold;color:${ctx.secondaryColor};margin-top:16px;">${order.currency} ${order.total}</p>
+  const body = `
+    ${heading("Delivery receipt")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Thank you for your order. Here's your receipt.`)}
+    ${highlightBox({ label: "Total paid", value: fmtMoney(order.total, order.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "Order", value: order.reference }])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Receipt for ${order.reference}`,
-    textLines: [`Receipt: ${order.currency} ${order.total}`],
+  return render(ctx, body, {
+    subject: `Receipt — ${order.reference}`,
+    textLines: [`Receipt: ${fmtMoney(order.total, order.currency)}`],
+    preheader: `Your receipt for order ${order.reference}.`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — DINE-IN
+// ══════════════════════════════════════════════════════════════
 
 const dineInBookingConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Table Booking Confirmed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your table at <strong>${restaurant.name}</strong> is confirmed.</p>
-    <p><strong>Reference:</strong> ${booking.reference}</p>
-    <p><strong>Date:</strong> ${new Date(booking.scheduledAt).toDateString()}</p>
-    <p><strong>Party size:</strong> ${booking.partySize}</p>
+  const body = `
+    ${heading("Table booked")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your table at <strong>${restaurant?.name || "the restaurant"}</strong> is confirmed.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Date", value: fmtDateTime(booking.scheduledAt) },
+      { label: "Party size", value: String(booking.partySize) },
+      { label: "Restaurant", value: restaurant?.name || "—" },
+    ])}
+    ${ctaButton({ label: "View booking", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Table confirmed at ${restaurant.name}`,
-    textLines: [`Table confirmed at ${restaurant.name}.`],
+  return render(ctx, body, {
+    subject: `Table confirmed at ${restaurant?.name || "the restaurant"}`,
+    textLines: [`Table confirmed at ${restaurant?.name || "the restaurant"}.`, `Ref: ${booking.reference}`],
+    preheader: `Your table is booked.`,
   });
 };
 
 const dineInReminder = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Table is in 2 Hours</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Reminder: Your table at <strong>${restaurant.name}</strong> is in 2 hours.</p>
+  const { booking, restaurant } = payload;
+  const body = `
+    ${heading("Your table is in 2 hours")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Reminder: your reservation at <strong>${restaurant?.name || "the restaurant"}</strong> is coming up.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Time", value: fmtDateTime(booking.scheduledAt) },
+      { label: "Party size", value: String(booking.partySize) },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Reminder: Table at ${restaurant.name}`,
-    textLines: [`Reminder: Table at ${restaurant.name}.`],
+  return render(ctx, body, {
+    subject: `Reminder: Table at ${restaurant?.name || "the restaurant"}`,
+    textLines: [`Reminder: Table at ${restaurant?.name || "the restaurant"}.`],
+    preheader: `Your table is in 2 hours.`,
   });
 };
 
 const dineInAccepted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Booking Accepted</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>${restaurant.name}</strong> has accepted your booking <strong>${booking.reference}</strong>.</p>
+  const body = `
+    ${heading("Reservation accepted")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${restaurant?.name || "The restaurant"}</strong> has accepted your reservation.`)}
+    ${dataTable([{ label: "Reference", value: booking.reference }])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Booking accepted - ${booking.reference}`,
+  return render(ctx, body, {
+    subject: `Booking accepted — ${booking.reference}`,
     textLines: [`Booking ${booking.reference} accepted.`],
+    preheader: `Your reservation is confirmed.`,
   });
 };
 
 const dineInCancelled = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Booking Cancelled</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your booking <strong>${booking.reference}</strong> has been cancelled.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
+  const body = `
+    ${heading("Reservation cancelled")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your reservation <strong>${booking.reference}</strong> has been cancelled.`)}
+    ${dataTable([
+      { label: "Reference", value: booking.reference },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Booking cancelled - ${booking.reference}`,
-    textLines: [`Booking ${booking.reference} cancelled.`],
+  return render(ctx, body, {
+    subject: `Reservation cancelled — ${booking.reference}`,
+    textLines: [`Reservation ${booking.reference} cancelled.`],
+    preheader: `Your reservation has been cancelled.`,
   });
 };
 
 const pickupReady = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { booking, restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Order is Ready</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your pickup order at <strong>${restaurant.name}</strong> is ready.</p>
-    <p><strong>Reference:</strong> ${booking.reference}</p>
+  const body = `
+    ${heading("Your order is ready for pickup")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your order at <strong>${restaurant?.name || "the restaurant"}</strong> is ready for pickup.`)}
+    ${dataTable([{ label: "Reference", value: booking.reference }])}
+    ${ctaButton({ label: "Get directions", href: `${ctx.clientUrl}/booking`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Ready for pickup - ${booking.reference}`,
-    textLines: [`Order ready for pickup at ${restaurant.name}.`],
+  return render(ctx, body, {
+    subject: `Ready for pickup — ${booking.reference}`,
+    textLines: [`Order ready for pickup at ${restaurant?.name || "the restaurant"}.`],
+    preheader: `Your order is ready.`,
   });
 };
 
 const pickupCompleted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Pickup Completed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Thank you for picking up from <strong>${restaurant.name}</strong>.</p>
+  const body = `
+    ${heading("Pickup completed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Thank you for picking up from <strong>${restaurant?.name || "the restaurant"}</strong>. We hope you enjoy it!`)}
+    ${ctaButton({ label: "Leave a review", href: `${ctx.clientUrl}/reviews`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Thanks for your pickup`,
-    textLines: [`Pickup completed at ${restaurant.name}.`],
+    textLines: [`Pickup completed at ${restaurant?.name || "the restaurant"}.`],
+    preheader: `Thanks for your order.`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — TRIP LIFECYCLE
+// ══════════════════════════════════════════════════════════════
 
 const tripBookingConfirmation = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { trip } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Trip Confirmed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your trip <strong>${trip.reference}</strong> is confirmed.</p>
-    <p><strong>Pickup:</strong> ${trip.pickup.address}</p>
-    <p><strong>Drop-off:</strong> ${trip.dropoff.address}</p>
-    <p><strong>Date:</strong> ${new Date(trip.scheduledAt).toDateString()}</p>
-    <p><strong>Fare:</strong> ${trip.currency} ${trip.fare}</p>
+  const body = `
+    ${heading("Trip confirmed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your trip is confirmed. Your driver will be with you shortly.`)}
+    ${highlightBox({ label: "Trip number", value: trip.reference, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Pickup", value: trip.pickup?.address || "—" },
+      { label: "Drop-off", value: trip.dropoff?.address || "—" },
+      { label: "Scheduled", value: fmtDateTime(trip.scheduledAt) },
+      { label: "Distance", value: `${trip.distanceKm || 0} km` },
+      { label: "Fare", value: fmtMoney(trip.fare, trip.currency) },
+    ])}
+    ${ctaButton({ label: "Track trip", href: `${ctx.clientUrl}/tracking`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`You can cancel free of charge until 15 minutes before pickup.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Trip confirmed - ${trip.reference}`,
-    textLines: [`Trip ${trip.reference} confirmed.`],
+  return render(ctx, body, {
+    subject: `Trip confirmed — ${trip.reference}`,
+    textLines: [`Trip ${trip.reference} confirmed.`, `Pickup: ${trip.pickup?.address || "—"}`, `Fare: ${fmtMoney(trip.fare, trip.currency)}`],
+    preheader: `Trip confirmed. Pickup ${trip.pickup?.address || "—"}.`,
   });
 };
 
 const driverAssigned = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { trip, driver, vehicle } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Driver Assigned</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your driver is <strong>${driver.firstName} ${driver.lastName}</strong>.</p>
-    <p><strong>Phone:</strong> ${driver.phone}</p>
-    <p><strong>Vehicle:</strong> ${vehicle.make} ${vehicle.model} - ${vehicle.plateNumber}</p>
+  const body = `
+    ${heading("Your driver is assigned")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${driver.firstName} ${driver.lastName}</strong> will be driving you for trip <strong>${trip.reference}</strong>.`)}
+    ${dataTable([
+      { label: "Driver", value: `${driver.firstName} ${driver.lastName}` },
+      { label: "Phone", value: driver.phone || "—" },
+      { label: "Vehicle", value: vehicle ? `${vehicle.make} ${vehicle.model}` : "—" },
+      { label: "Plate", value: vehicle?.plateNumber || "—" },
+      { label: "Pickup", value: trip.pickup?.address || "—" },
+    ])}
+    ${ctaButton({ label: "Track on map", href: `${ctx.clientUrl}/tracking`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Driver assigned - ${trip.reference}`,
-    textLines: [`Driver ${driver.firstName} ${driver.lastName} assigned.`],
+  return render(ctx, body, {
+    subject: `Driver assigned — ${trip.reference}`,
+    textLines: [`Driver ${driver.firstName} ${driver.lastName} assigned.`, `Phone: ${driver.phone}`],
+    preheader: `Your driver is ${driver.firstName} ${driver.lastName}.`,
   });
 };
 
 const driverArrivingSoon = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { driver } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Driver Arriving Soon</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your driver <strong>${driver.firstName}</strong> is arriving soon.</p>
-    <p>Phone: ${driver.phone}</p>
+  const body = `
+    ${heading("Driver arriving soon")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your driver <strong>${driver.firstName} ${driver.lastName}</strong> is arriving soon. Please be ready.`)}
+    ${dataTable([
+      { label: "Driver", value: `${driver.firstName} ${driver.lastName}` },
+      { label: "Phone", value: driver.phone || "—" },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Driver arriving soon`,
-    textLines: [`Driver arriving soon.`],
+    textLines: [`Driver arriving soon. Phone: ${driver.phone}`],
+    preheader: `Your driver is almost there.`,
   });
 };
 
 const tripStarted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { trip } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Trip Started</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your trip <strong>${trip.reference}</strong> has started. Safe travels!</p>
+  const body = `
+    ${heading("Trip started")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your trip <strong>${trip.reference}</strong> has started. Safe travels!`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Trip started - ${trip.reference}`,
+  return render(ctx, body, {
+    subject: `Trip started — ${trip.reference}`,
     textLines: [`Trip ${trip.reference} started.`],
+    preheader: `Your trip has started.`,
   });
 };
 
 const tripCompleted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { trip } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Trip Completed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your trip <strong>${trip.reference}</strong> is complete.</p>
-    <p><strong>Total:</strong> ${trip.currency} ${trip.fare}</p>
+  const body = `
+    ${heading("Trip completed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your trip has been completed. Thank you for choosing ${ctx.appName}.`)}
+    ${highlightBox({ label: "Total fare", value: fmtMoney(trip.fare, trip.currency), secondaryColor: ctx.secondaryColor })}
+    ${ctaButton({ label: "Rate your driver", href: `${ctx.clientUrl}/reviews`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Trip completed - ${trip.reference}`,
-    textLines: [`Trip ${trip.reference} completed. Total: ${trip.currency} ${trip.fare}`],
+  return render(ctx, body, {
+    subject: `Trip completed — ${trip.reference}`,
+    textLines: [`Trip ${trip.reference} completed. Total: ${fmtMoney(trip.fare, trip.currency)}`],
+    preheader: `Your trip has completed.`,
   });
 };
 
 const tripCancelled = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { trip, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Trip Cancelled</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your trip <strong>${trip.reference}</strong> has been cancelled.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
+  const body = `
+    ${heading("Trip cancelled")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your trip <strong>${trip.reference}</strong> has been cancelled.`)}
+    ${dataTable([
+      { label: "Reference", value: trip.reference },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Trip cancelled - ${trip.reference}`,
+  return render(ctx, body, {
+    subject: `Trip cancelled — ${trip.reference}`,
     textLines: [`Trip ${trip.reference} cancelled.`],
+    preheader: `Your trip has been cancelled.`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// CUSTOMER — PAYMENTS & WALLET
+// ══════════════════════════════════════════════════════════════
 
 const paymentReceived = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payment } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payment Received</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>We received your payment of <strong>${payment.currency} ${payment.amount}</strong>.</p>
-    <p><strong>Reference:</strong> ${payment.reference}</p>
-    <p><strong>Method:</strong> ${payment.method}</p>
+  const body = `
+    ${heading("Payment received")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`We've received your payment. Thank you!`)}
+    ${highlightBox({ label: "Amount paid", value: fmtMoney(payment.amount, payment.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Reference", value: payment.reference },
+      { label: "Method", value: payment.method },
+      { label: "Date", value: fmtDateTime(new Date()) },
+    ])}
+    ${smallNote(`Keep this email for your records. Questions? Contact ${ctx.supportEmail}.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Payment received - ${payment.reference}`,
-    textLines: [`Payment of ${payment.currency} ${payment.amount} received.`],
+  return render(ctx, body, {
+    subject: `Payment received — ${payment.reference}`,
+    textLines: [`Payment of ${fmtMoney(payment.amount, payment.currency)} received.`, `Reference: ${payment.reference}`],
+    preheader: `Payment of ${fmtMoney(payment.amount, payment.currency)} received.`,
   });
 };
 
 const paymentFailed = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payment, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payment Failed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your payment of <strong>${payment.currency} ${payment.amount}</strong> failed.</p>
-    <p><strong>Reason:</strong> ${reason || "Unknown"}</p>
-    <p>Please try again or contact ${ctx.supportEmail}.</p>
+  const body = `
+    ${heading("Payment failed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your payment could not be completed.`)}
+    ${dataTable([
+      { label: "Reference", value: payment.reference },
+      { label: "Amount", value: fmtMoney(payment.amount, payment.currency) },
+      { label: "Reason", value: reason || "Unknown" },
+    ])}
+    ${ctaButton({ label: "Try again", href: `${ctx.clientUrl}/payments`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Payment failed - ${payment.reference}`,
-    textLines: [`Payment failed. Reason: ${reason}`],
+  return render(ctx, body, {
+    subject: `Payment failed — ${payment.reference}`,
+    textLines: [`Payment failed. Reason: ${reason || "Unknown"}`],
+    preheader: `Payment could not be completed.`,
   });
 };
 
 const walletToppedUp = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { amount, balance } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Wallet Topped Up</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your wallet was topped up by <strong>${amount}</strong>.</p>
-    <p><strong>New balance:</strong> ${balance}</p>
+  const body = `
+    ${heading("Wallet topped up")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your wallet has been topped up.`)}
+    ${highlightBox({ label: "New balance", value: balance, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "Topped up", value: amount }])}
+    ${ctaButton({ label: "Open wallet", href: `${ctx.clientUrl}/wallet`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Wallet topped up`,
-    textLines: [`Wallet topped up by ${amount}. Balance: ${balance}`],
+    textLines: [`Wallet topped up by ${amount}. New balance: ${balance}`],
+    preheader: `Your wallet has been credited.`,
   });
 };
 
 const refundIssued = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { amount, reference } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Refund Issued</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A refund of <strong>${amount}</strong> has been issued for <strong>${reference}</strong>.</p>
+  const body = `
+    ${heading("Refund issued")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A refund has been issued to your original payment method.`)}
+    ${highlightBox({ label: "Amount", value: amount, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "Reference", value: reference }])}
+    ${smallNote(`Refunds typically appear within 3–5 business days.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Refund issued - ${reference}`,
+  return render(ctx, body, {
+    subject: `Refund issued — ${reference}`,
     textLines: [`Refund of ${amount} issued for ${reference}.`],
+    preheader: `Refund of ${amount} issued.`,
   });
 };
 
 const payoutToWallet = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { amount, balance } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payout Received</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A payout of <strong>${amount}</strong> has been credited to your wallet.</p>
-    <p><strong>New balance:</strong> ${balance}</p>
+  const body = `
+    ${heading("Payout received")}
+    ${paragraph(`Hi ${recipient.firstName || recipient.name},`)}
+    ${paragraph(`A payout has been credited to your wallet.`)}
+    ${highlightBox({ label: "Amount", value: amount, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "New balance", value: balance }])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Payout received`,
     textLines: [`Payout of ${amount} received. Balance: ${balance}`],
+    preheader: `Payout of ${amount} received.`,
   });
 };
 
+// ══════════════════════════════════════════════════════════════
+// PARTNER — APPLICATION & APPROVAL
+// ══════════════════════════════════════════════════════════════
+
 const partnerApplicationReceived = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const name = recipient.firstName || recipient.name;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Application Received</h2>
-    <p>Hi ${name},</p>
-    <p>We've received your application. Our team will review it within 24-48 hours.</p>
+  const name = recipient.firstName || recipient.name || "there";
+  const body = `
+    ${heading("Application received")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Thanks for applying to join ${ctx.appName}. Our team will review your application within 24–48 hours and email you with the outcome.`)}
+    ${highlightBox({ label: "What happens next", value: "Review · Decision · Email", secondaryColor: ctx.secondaryColor })}
+    ${paragraph(`In the meantime, gather photos and business documents so you can be onboarded faster.`)}
+    ${smallNote(`Questions? Reply to this email — we read every message.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Application received`,
-    textLines: [`We received your application.`],
+  return render(ctx, body, {
+    subject: `We've received your application`,
+    textLines: [`We've received your application. We'll review it within 24–48 hours.`],
+    preheader: `Your application is under review.`,
   });
 };
 
 const partnerApproved = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const name = recipient.firstName || recipient.name;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">You're Approved</h2>
-    <p>Hi ${name},</p>
-    <p>Your partner account has been approved. You can now start receiving orders.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.partnerUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Go to Dashboard</a>
-    </p>
+  const name = recipient.firstName || recipient.name || "there";
+  const body = `
+    ${heading("You're approved!")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Great news — your partner account is approved. You can now sign in and start receiving bookings.`)}
+    ${ctaButton({ label: "Open partner dashboard", href: ctx.partnerUrl, secondaryColor: ctx.secondaryColor })}
+    ${divider()}
+    ${paragraph(`<strong>Getting started tips:</strong>`, { margin: "0 0 8px" })}
+    <ul style="margin:0 0 16px;padding-left:20px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;font-size:14px;line-height:1.75;color:#374151;">
+      <li>Add photos to help customers choose you</li>
+      <li>Set your pricing and availability</li>
+      <li>Turn on notifications so you never miss a booking</li>
+    </ul>
+    ${smallNote(`Questions? Reply to this email or contact ${ctx.supportEmail}.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your partner account is approved`,
-    textLines: [`Your partner account is approved.`, `Dashboard: ${ctx.partnerUrl}`],
+    textLines: [`Your partner account is approved.`, `Sign in: ${ctx.partnerUrl}`],
+    preheader: `Your partner account is approved. Start receiving bookings today.`,
   });
 };
 
 const partnerRejected = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const name = recipient.firstName || recipient.name;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Application Not Approved</h2>
-    <p>Hi ${name},</p>
-    <p>Unfortunately, your application was not approved.</p>
-    <p><strong>Reason:</strong> ${payload.reason || "Not provided"}</p>
+  const name = recipient.firstName || recipient.name || "there";
+  const body = `
+    ${heading("Application not approved")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Unfortunately, your application was not approved.`)}
+    ${dataTable([{ label: "Reason", value: payload.reason || "Not provided" }])}
+    ${paragraph(`You're welcome to reapply once the issues above have been addressed.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Application status update`,
-    textLines: [`Application not approved.`],
+    textLines: [`Application not approved. Reason: ${payload.reason || "Not provided"}`],
+    preheader: `Application status update.`,
   });
 };
 
 const partnerSuspended = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const name = recipient.firstName || recipient.name;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Suspended</h2>
-    <p>Hi ${name},</p>
-    <p>Your account has been suspended.</p>
-    <p><strong>Reason:</strong> ${payload.reason}</p>
-    <p>Contact ${ctx.supportEmail}.</p>
+  const name = recipient.firstName || recipient.name || "there";
+  const body = `
+    ${heading("Account suspended")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Your account has been suspended.`)}
+    ${dataTable([{ label: "Reason", value: payload.reason || "Policy violation" }])}
+    ${paragraph(`Contact ${ctx.supportEmail} to resolve this.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your account has been suspended`,
-    textLines: [`Account suspended.`],
+    textLines: [`Account suspended. Reason: ${payload.reason}`],
+    preheader: `Account suspended.`,
   });
 };
 
 const partnerReactivated = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const name = recipient.firstName || recipient.name;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Reactivated</h2>
-    <p>Hi ${name},</p>
-    <p>Your account has been reactivated.</p>
+  const name = recipient.firstName || recipient.name || "there";
+  const body = `
+    ${heading("Account reactivated")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Your account has been reactivated. You can start receiving bookings again.`)}
+    ${ctaButton({ label: "Open dashboard", href: ctx.partnerUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Account reactivated`,
     textLines: [`Account reactivated.`],
+    preheader: `Welcome back.`,
   });
 };
 
 const vehicleApproved = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { vehicle } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Vehicle Approved</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your vehicle <strong>${vehicle.make} ${vehicle.model} (${vehicle.plateNumber})</strong> has been approved.</p>
+  const body = `
+    ${heading("Vehicle approved")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your vehicle is approved and ready to accept trips.`)}
+    ${dataTable([
+      { label: "Vehicle", value: `${vehicle.make} ${vehicle.model}` },
+      { label: "Plate", value: vehicle.plateNumber },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Vehicle approved`,
     textLines: [`Vehicle ${vehicle.plateNumber} approved.`],
+    preheader: `Your vehicle is approved.`,
   });
 };
 
 const vehicleRejected = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { vehicle, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Vehicle Not Approved</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your vehicle <strong>${vehicle.make} ${vehicle.model} (${vehicle.plateNumber})</strong> was not approved.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
+  const body = `
+    ${heading("Vehicle not approved")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your vehicle could not be approved.`)}
+    ${dataTable([
+      { label: "Vehicle", value: `${vehicle.make} ${vehicle.model}` },
+      { label: "Plate", value: vehicle.plateNumber },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Vehicle not approved`,
     textLines: [`Vehicle not approved.`],
+    preheader: `Vehicle review outcome.`,
   });
 };
 
 const propertyApproved = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Property Approved</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>Your property <strong>${property.name}</strong> has been approved.</p>
+  const body = `
+    ${heading("Property approved")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`Your property is now live and bookable.`)}
+    ${dataTable([{ label: "Property", value: property.name }])}
+    ${ctaButton({ label: "View listing", href: `${ctx.partnerUrl}/accommodation/properties`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Property approved`,
     textLines: [`Property ${property.name} approved.`],
+    preheader: `Your property is live.`,
   });
 };
 
 const propertyRejected = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { property, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Property Not Approved</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>Your property <strong>${property.name}</strong> was not approved.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
+  const body = `
+    ${heading("Property not approved")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`Your property could not be approved.`)}
+    ${dataTable([
+      { label: "Property", value: property.name },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Property not approved`,
     textLines: [`Property not approved.`],
+    preheader: `Property review outcome.`,
   });
 };
 
 const roomApproved = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { room } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Room Approved</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>Your room <strong>${room.name}</strong> has been approved and is now live.</p>
+  const body = `
+    ${heading("Room approved")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`Your room is now live and bookable.`)}
+    ${dataTable([{ label: "Room", value: room.name }])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Room approved`,
     textLines: [`Room ${room.name} approved.`],
+    preheader: `Your room is live.`,
+  });
+};
+
+// ══════════════════════════════════════════════════════════════
+// PARTNER — TRANSACTIONAL NOTIFICATIONS
+// ══════════════════════════════════════════════════════════════
+
+const newBookingReceived = (recipient, payload = {}) => {
+  const ctx = resolveContext(payload);
+  const { booking, property, customer } = payload;
+  const guestName = customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() : "A customer";
+  const body = `
+    ${heading("New booking received")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`You have a new booking at <strong>${property?.name || "your property"}</strong>. Please review and confirm within 24 hours.`)}
+    ${highlightBox({ label: "Booking reference", value: booking.reference, secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Guest", value: guestName },
+      { label: "Guest phone", value: customer?.phone || "—" },
+      { label: "Check-in", value: fmtDate(booking.checkIn) },
+      { label: "Check-out", value: fmtDate(booking.checkOut) },
+      { label: "Nights", value: String(booking.nights) },
+      { label: "Rooms booked", value: String(booking.roomsBooked) },
+      { label: "Guests", value: `${booking.guests?.adults ?? 0} adults${booking.guests?.children ? ` · ${booking.guests.children} children` : ""}` },
+      { label: "You earn", value: fmtMoney(booking.partnerEarnings ?? booking.total, booking.currency) },
+    ])}
+    ${booking.specialRequests ? paragraph(`<strong>Special requests:</strong> ${booking.specialRequests}`, { margin: "8px 0 16px" }) : ""}
+    ${ctaButton({ label: "Review booking", href: `${ctx.partnerUrl}/accommodation/bookings`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Confirming is instant and notifies the guest. If you can't host, please reject the booking so the guest can rebook elsewhere.`)}
+  `;
+  return render(ctx, body, {
+    subject: `New booking — ${booking.reference}`,
+    textLines: [
+      `New booking from ${guestName}`,
+      `Reference: ${booking.reference}`,
+      `Check-in: ${fmtDate(booking.checkIn)}`,
+      `Manage: ${ctx.partnerUrl}/accommodation/bookings`,
+    ],
+    preheader: `New booking from ${guestName}. Ref ${booking.reference}.`,
   });
 };
 
 const newOrderReceived = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { order } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Order</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>You have a new order <strong>${order.reference}</strong>.</p>
-    <p><strong>Total:</strong> ${order.currency} ${order.total}</p>
+  const { order, customer } = payload;
+  const guestName = customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() : "A customer";
+  const itemRows = (order.items || [])
+    .map((i) => `<tr><td style="padding:8px 16px;font-size:13px;color:#374151;">${i.quantity}× ${i.name}</td><td style="padding:8px 16px;font-size:13px;color:#111827;text-align:right;font-weight:600;">${fmtMoney(i.subtotal, order.currency)}</td></tr>`)
+    .join("");
+  const body = `
+    ${heading("New order received")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`You have a new order from <strong>${guestName}</strong>. Please accept or reject it within 5 minutes.`)}
+    ${highlightBox({ label: "Order total", value: fmtMoney(order.total, order.currency), secondaryColor: ctx.secondaryColor })}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:10px;overflow:hidden;margin:16px 0;">
+      ${itemRows}
+      <tr>
+        <td style="padding:12px 16px;border-top:1px solid #e5e7eb;font-size:13px;color:#6b7280;">Delivery fee</td>
+        <td style="padding:12px 16px;border-top:1px solid #e5e7eb;font-size:13px;color:#111827;text-align:right;">${fmtMoney(order.deliveryFee || 0, order.currency)}</td>
+      </tr>
+      <tr>
+        <td style="padding:12px 16px;font-size:14px;font-weight:700;color:#111827;">Total</td>
+        <td style="padding:12px 16px;font-size:14px;font-weight:700;color:#111827;text-align:right;">${fmtMoney(order.total, order.currency)}</td>
+      </tr>
+    </table>
+    ${paragraph(`<strong>Type:</strong> ${order.type === "delivery" ? "Delivery" : "Pickup"}`, { margin: "8px 0 16px", size: 13 })}
+    ${ctaButton({ label: "Review order", href: `${ctx.partnerUrl}/restaurant/orders`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Orders auto-cancel if not accepted within 15 minutes.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `New order - ${order.reference}`,
-    textLines: [`New order ${order.reference}.`],
+  return render(ctx, body, {
+    subject: `New order — ${order.reference}`,
+    textLines: [`New order ${order.reference}. Total: ${fmtMoney(order.total, order.currency)}.`, `Manage: ${ctx.partnerUrl}/restaurant/orders`],
+    preheader: `New order from ${guestName}. Total ${fmtMoney(order.total, order.currency)}.`,
   });
 };
 
 const newBroadcastReceived = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { request } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Broadcast Request</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>Food: <strong>${request.foodType}</strong></p>
-    <p>Preparation: ${request.preparation}</p>
-    <p>Time needed: ${new Date(request.timeNeeded).toLocaleString()}</p>
-    <p>Budget: ${request.currency} ${request.budget}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.partnerUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Request</a>
-    </p>
+  const body = `
+    ${heading("New food broadcast request")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`A customer near you is looking for food. First restaurant to accept wins.`)}
+    ${dataTable([
+      { label: "Food", value: request.foodType },
+      { label: "Preparation", value: request.preparation },
+      { label: "Needed by", value: fmtDateTime(request.timeNeeded) },
+      { label: "Budget", value: fmtMoney(request.budget, request.currency) },
+    ])}
+    ${ctaButton({ label: "Accept request", href: `${ctx.partnerUrl}/restaurant/broadcasts`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`This request expires at ${fmtDateTime(request.broadcastExpiresAt)}.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `New broadcast request`,
-    textLines: [`New broadcast: ${request.foodType}`, `View: ${ctx.partnerUrl}`],
+  return render(ctx, body, {
+    subject: `New broadcast request — ${request.reference}`,
+    textLines: [`New broadcast: ${request.foodType}`, `View: ${ctx.partnerUrl}/restaurant/broadcasts`],
+    preheader: `New broadcast request. First to accept wins.`,
   });
 };
 
 const orderCancelledByCustomer = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { order, reason } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Order Cancelled by Customer</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>Order <strong>${order.reference}</strong> was cancelled by the customer.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
+  const body = `
+    ${heading("Order cancelled by customer")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`Order <strong>${order.reference}</strong> has been cancelled by the customer.`)}
+    ${dataTable([{ label: "Reason", value: reason || "Not provided" }])}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Order cancelled - ${order.reference}`,
+  return render(ctx, body, {
+    subject: `Order cancelled — ${order.reference}`,
     textLines: [`Order ${order.reference} cancelled by customer.`],
+    preheader: `Order cancelled by customer.`,
   });
 };
 
 const newTripRequest = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { trip } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Trip Request</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>Pickup:</strong> ${trip.pickup.address}</p>
-    <p><strong>Drop-off:</strong> ${trip.dropoff.address}</p>
-    <p><strong>Fare:</strong> ${trip.currency} ${trip.fare}</p>
+  const { trip, customer } = payload;
+  const guestName = customer ? `${customer.firstName || ""} ${customer.lastName || ""}`.trim() : "A customer";
+  const body = `
+    ${heading("New trip request")}
+    ${paragraph(`Hi ${recipient.firstName || "there"},`)}
+    ${paragraph(`You have a new trip request from <strong>${guestName}</strong>.`)}
+    ${dataTable([
+      { label: "Pickup", value: trip.pickup?.address || "—" },
+      { label: "Drop-off", value: trip.dropoff?.address || "—" },
+      { label: "Distance", value: `${trip.distanceKm || 0} km` },
+      { label: "Fare", value: fmtMoney(trip.fare, trip.currency) },
+      { label: "Scheduled", value: fmtDateTime(trip.scheduledAt) },
+      { label: "Passengers", value: String(trip.passengers || 1) },
+    ])}
+    ${ctaButton({ label: "Accept trip", href: `${ctx.partnerUrl}/transport/trips`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `New trip request`,
-    textLines: [`New trip request.`],
-  });
-};
-
-const newBookingReceived = (recipient, payload = {}) => {
-  const ctx = resolveContext(payload);
-  const { booking, property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Booking</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>New booking at <strong>${property.name}</strong>.</p>
-    <p><strong>Reference:</strong> ${booking.reference}</p>
-    <p><strong>Check-in:</strong> ${new Date(booking.checkIn).toDateString()}</p>
-    <p><strong>Check-out:</strong> ${new Date(booking.checkOut).toDateString()}</p>
-    <p><strong>Total:</strong> ${booking.currency} ${booking.total}</p>
-  `;
-  return render(ctx, bodyHtml, {
-    subject: `New booking - ${booking.reference}`,
-    textLines: [`New booking ${booking.reference}.`],
+  return render(ctx, body, {
+    subject: `New trip request — ${trip.reference}`,
+    textLines: [`New trip ${trip.reference}. Fare ${fmtMoney(trip.fare, trip.currency)}.`],
+    preheader: `New trip from ${guestName}.`,
   });
 };
 
 const guestCheckedIn = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { guest, booking } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Guest Checked In</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>${guest.firstName} ${guest.lastName} has checked in for booking ${booking.reference}.</p>
+  const body = `
+    ${heading("Guest checked in")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`<strong>${guest.firstName} ${guest.lastName}</strong> has checked in.`)}
+    ${dataTable([{ label: "Booking", value: booking.reference }])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Guest checked in`,
-    textLines: [`Guest checked in for ${booking.reference}.`],
+    textLines: [`${guest.firstName} ${guest.lastName} checked in for ${booking.reference}.`],
+    preheader: `Guest has checked in.`,
   });
 };
 
 const guestCheckedOut = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { guest, booking } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Guest Checked Out</h2>
-    <p>Hi ${recipient.name},</p>
-    <p>${guest.firstName} ${guest.lastName} has checked out from booking ${booking.reference}.</p>
+  const body = `
+    ${heading("Guest checked out")}
+    ${paragraph(`Hi ${recipient.name || recipient.firstName || "there"},`)}
+    ${paragraph(`<strong>${guest.firstName} ${guest.lastName}</strong> has checked out.`)}
+    ${dataTable([{ label: "Booking", value: booking.reference }])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Guest checked out`,
-    textLines: [`Guest checked out from ${booking.reference}.`],
+    textLines: [`${guest.firstName} ${guest.lastName} checked out.`],
+    preheader: `Guest has checked out.`,
   });
 };
 
 const paymentReceivedPartner = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payment } = payload;
-  const name = recipient.name || recipient.firstName;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payment Received</h2>
-    <p>Hi ${name},</p>
-    <p>Payment of <strong>${payment.currency} ${payment.amount}</strong> received for <strong>${payment.reference}</strong>.</p>
+  const name = recipient.name || recipient.firstName || "there";
+  const body = `
+    ${heading("Payment received")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Payment for <strong>${payment.reference}</strong> has been received.`)}
+    ${highlightBox({ label: "Amount", value: fmtMoney(payment.amount, payment.currency), secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Payment received`,
-    textLines: [`Payment of ${payment.currency} ${payment.amount} received.`],
+    textLines: [`Payment of ${fmtMoney(payment.amount, payment.currency)} received.`],
+    preheader: `Payment received.`,
   });
 };
 
 const payoutProcessed = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payout } = payload;
-  const name = recipient.name || recipient.firstName;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payout Processed</h2>
-    <p>Hi ${name},</p>
-    <p>Your payout of <strong>${payout.currency} ${payout.amount}</strong> has been processed.</p>
-    <p><strong>Method:</strong> ${payout.method}</p>
-    <p><strong>Reference:</strong> ${payout.reference}</p>
+  const name = recipient.name || recipient.firstName || "there";
+  const body = `
+    ${heading("Payout processed")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Your payout has been processed and is on its way.`)}
+    ${highlightBox({ label: "Amount", value: fmtMoney(payout.amount, payout.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Method", value: payout.method },
+      { label: "Reference", value: payout.reference },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Payout processed`,
-    textLines: [`Payout of ${payout.currency} ${payout.amount} processed.`],
+    textLines: [`Payout of ${fmtMoney(payout.amount, payout.currency)} processed.`],
+    preheader: `Payout processed.`,
   });
 };
 
 const payoutFailed = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payout, reason } = payload;
-  const name = recipient.name || recipient.firstName;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payout Failed</h2>
-    <p>Hi ${name},</p>
-    <p>Your payout of <strong>${payout.currency} ${payout.amount}</strong> failed.</p>
-    <p><strong>Reason:</strong> ${reason || "Not provided"}</p>
-    <p>Contact ${ctx.supportEmail}.</p>
+  const name = recipient.name || recipient.firstName || "there";
+  const body = `
+    ${heading("Payout failed")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Your payout could not be processed.`)}
+    ${dataTable([
+      { label: "Amount", value: fmtMoney(payout.amount, payout.currency) },
+      { label: "Reason", value: reason || "Not provided" },
+    ])}
+    ${paragraph(`Contact ${ctx.supportEmail} for help.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Payout failed`,
-    textLines: [`Payout failed.`],
+    textLines: [`Payout failed. Reason: ${reason || "Not provided"}`],
+    preheader: `Payout failed.`,
   });
 };
 
 const weeklyEarningsSummary = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { summary } = payload;
-  const name = recipient.name || recipient.firstName;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Weekly Earnings Summary</h2>
-    <p>Hi ${name},</p>
-    <p>Here is your summary for the week.</p>
-    <p><strong>Orders:</strong> ${summary.orders}</p>
-    <p><strong>Gross Earnings:</strong> ${summary.currency} ${summary.gross}</p>
-    <p><strong>Commission:</strong> ${summary.currency} ${summary.commission}</p>
-    <p><strong>Net Earnings:</strong> <span style="color:${ctx.secondaryColor};font-weight:bold;">${summary.currency} ${summary.net}</span></p>
+  const name = recipient.name || recipient.firstName || "there";
+  const body = `
+    ${heading("Weekly earnings summary")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`Here's your earnings summary for the week.`)}
+    ${highlightBox({ label: "Net earnings", value: fmtMoney(summary.net, summary.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Orders", value: String(summary.orders) },
+      { label: "Gross", value: fmtMoney(summary.gross, summary.currency) },
+      { label: "Commission", value: fmtMoney(summary.commission, summary.currency) },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Weekly earnings summary`,
-    textLines: [`Weekly earnings: ${summary.currency} ${summary.net}`],
+    textLines: [`Weekly earnings: ${fmtMoney(summary.net, summary.currency)}`],
+    preheader: `Your weekly earnings summary.`,
   });
 };
 
 const reviewReceived = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { review } = payload;
-  const name = recipient.name || recipient.firstName;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Review Received</h2>
-    <p>Hi ${name},</p>
-    <p>You received a <strong>${review.rating}-star</strong> review.</p>
-    <p style="background-color:#F5F5F5;padding:12px;border-radius:6px;font-style:italic;">"${review.comment}"</p>
+  const name = recipient.name || recipient.firstName || "there";
+  const body = `
+    ${heading("New review received")}
+    ${paragraph(`Hi ${name},`)}
+    ${paragraph(`You received a <strong>${review.rating}-star</strong> review.`)}
+    ${review.comment ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:10px;margin:16px 0;"><tr><td style="padding:16px;font-style:italic;color:#374151;">"${review.comment}"</td></tr></table>` : ""}
+    ${ctaButton({ label: "Reply to review", href: `${ctx.partnerUrl}`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New review received`,
     textLines: [`New ${review.rating}-star review received.`],
+    preheader: `New ${review.rating}-star review received.`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// ADMIN — OPERATIONAL
+// ══════════════════════════════════════════════════════════════
 
 const adminNewPartnerApplication = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { partnerType, partner } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Partner Application</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A new <strong>${partnerType}</strong> partner application has been submitted.</p>
-    <p><strong>Name:</strong> ${partner.name || `${partner.firstName || ""} ${partner.lastName || ""}`.trim()}</p>
-    <p><strong>Email:</strong> ${partner.email}</p>
-    <p><strong>Phone:</strong> ${partner.phone}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/partners" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Application</a>
-    </p>
+  const name = partner.name || `${partner.firstName || ""} ${partner.lastName || ""}`.trim() || "Unnamed";
+  const body = `
+    ${heading("New partner application")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A new <strong>${partnerType}</strong> partner has applied to join. Please review.`)}
+    ${dataTable([
+      { label: "Type", value: partnerType },
+      { label: "Name", value: name },
+      { label: "Email", value: partner.email || "—" },
+      { label: "Phone", value: partner.phone || "—" },
+      { label: "Town", value: partner.town || "—" },
+    ])}
+    ${ctaButton({ label: "Review application", href: `${ctx.adminUrl}/partners`, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Partners expect a decision within 24–48 hours.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New ${partnerType} partner application`,
-    textLines: [`New ${partnerType} application from ${partner.email}`, `Review: ${ctx.adminUrl}/partners`],
+    textLines: [`New ${partnerType} application from ${partner.email}.`, `Review: ${ctx.adminUrl}/partners`],
+    preheader: `New ${partnerType} application from ${name}.`,
   });
 };
 
 const adminNewDispute = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { dispute } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Dispute</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A new dispute <strong>${dispute.reference}</strong> has been raised.</p>
-    <p><strong>Category:</strong> ${dispute.category}</p>
-    <p><strong>Subject:</strong> ${dispute.subject}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/disputes/${dispute.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Dispute</a>
-    </p>
+  const body = `
+    ${heading("New dispute raised")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A new dispute has been raised. Please review and assign.`)}
+    ${dataTable([
+      { label: "Reference", value: dispute.reference },
+      { label: "Category", value: dispute.category },
+      { label: "Subject", value: dispute.subject },
+    ])}
+    ${ctaButton({ label: "Open dispute", href: `${ctx.adminUrl}/disputes`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `New dispute - ${dispute.reference}`,
-    textLines: [`New dispute ${dispute.reference}.`, `View: ${ctx.adminUrl}/disputes/${dispute.reference}`],
+  return render(ctx, body, {
+    subject: `New dispute — ${dispute.reference}`,
+    textLines: [`New dispute ${dispute.reference}.`, `View: ${ctx.adminUrl}/disputes`],
+    preheader: `New dispute ${dispute.reference}.`,
   });
 };
 
 const adminNewContact = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { contact } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Contact Message</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>From: ${contact.name} (${contact.email})</p>
-    <p><strong>Subject:</strong> ${contact.subject}</p>
-    <p>${contact.message}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/contacts" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open in Admin</a>
-    </p>
+  const body = `
+    ${heading("New contact message")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You've received a new contact form submission.`)}
+    ${dataTable([
+      { label: "From", value: `${contact.name} (${contact.email})` },
+      { label: "Subject", value: contact.subject },
+    ])}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f9fafb;border-radius:10px;margin:16px 0;">
+      <tr><td style="padding:16px;font-size:14px;color:#374151;line-height:1.6;">${contact.message}</td></tr>
+    </table>
+    ${ctaButton({ label: "Open in admin", href: `${ctx.adminUrl}/contacts`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New contact message`,
     textLines: [`New contact from ${contact.email}`, `Open: ${ctx.adminUrl}/contacts`],
+    preheader: `New contact from ${contact.name}.`,
   });
 };
 
 const adminPayoutApprovalRequired = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payout } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Payout Approval Required</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A payout of <strong>${payout.currency} ${payout.amount}</strong> is awaiting your approval.</p>
-    <p><strong>Reference:</strong> ${payout.reference}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/payouts/${payout.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Payout</a>
-    </p>
+  const body = `
+    ${heading("Payout approval required")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A payout is awaiting your approval.`)}
+    ${highlightBox({ label: "Amount", value: fmtMoney(payout.amount, payout.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([{ label: "Reference", value: payout.reference }])}
+    ${ctaButton({ label: "Review payout", href: `${ctx.adminUrl}/payouts`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Payout approval required`,
-    textLines: [`Payout approval required: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts/${payout.reference}`],
+    textLines: [`Payout approval required: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts`],
+    preheader: `Payout approval required.`,
   });
 };
 
 const adminManualPayoutRequest = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payout } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Manual Payout Request</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A manual payout request of <strong>${payout.currency} ${payout.amount}</strong> has been submitted.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/payouts/manual" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Review Request</a>
-    </p>
+  const body = `
+    ${heading("Manual payout request")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A manual payout request has been submitted.`)}
+    ${highlightBox({ label: "Amount", value: fmtMoney(payout.amount, payout.currency), secondaryColor: ctx.secondaryColor })}
+    ${ctaButton({ label: "Review request", href: `${ctx.adminUrl}/payouts`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Manual payout request`,
-    textLines: [`Manual payout request: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts/manual`],
+    textLines: [`Manual payout request: ${payout.reference}`, `Review: ${ctx.adminUrl}/payouts`],
+    preheader: `Manual payout request.`,
   });
 };
 
 const adminCommissionLedgerAlert = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { ledger } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Commission Ledger Alert</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Partner <strong>${ledger.partnerName}</strong> has outstanding commission of <strong>${ledger.currency} ${ledger.amount}</strong>.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/commissions" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Ledger</a>
-    </p>
+  const body = `
+    ${heading("Commission ledger alert")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Partner <strong>${ledger.partnerName}</strong> has outstanding commission.`)}
+    ${highlightBox({ label: "Outstanding", value: fmtMoney(ledger.amount, ledger.currency), secondaryColor: ctx.secondaryColor })}
+    ${ctaButton({ label: "Open ledger", href: `${ctx.adminUrl}/commissions`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Commission ledger alert`,
-    textLines: [`Commission owed: ${ledger.currency} ${ledger.amount}`, `Open: ${ctx.adminUrl}/commissions`],
+    textLines: [`Commission owed: ${fmtMoney(ledger.amount, ledger.currency)}`],
+    preheader: `Commission ledger alert.`,
   });
 };
 
 const adminFailedPayment = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payment } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Failed Payment Alert</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Payment <strong>${payment.reference}</strong> failed.</p>
-    <p><strong>Reason:</strong> ${payment.failureReason || "Unknown"}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/payments/${payment.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Payment</a>
-    </p>
+  const body = `
+    ${heading("Failed payment alert")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A customer payment failed.`)}
+    ${dataTable([
+      { label: "Reference", value: payment.reference },
+      { label: "Reason", value: payment.failureReason || "Unknown" },
+    ])}
+    ${ctaButton({ label: "View payment", href: `${ctx.adminUrl}/payments`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Failed payment alert`,
-    textLines: [`Payment ${payment.reference} failed.`, `View: ${ctx.adminUrl}/payments/${payment.reference}`],
+    textLines: [`Payment ${payment.reference} failed.`],
+    preheader: `Failed payment alert.`,
   });
 };
 
 const adminFailedPayout = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { payout } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Failed Payout Alert</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Payout <strong>${payout.reference}</strong> failed.</p>
-    <p><strong>Reason:</strong> ${payout.failureReason || "Unknown"}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/payouts/${payout.reference}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Payout</a>
-    </p>
+  const body = `
+    ${heading("Failed payout alert")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A payout failed.`)}
+    ${dataTable([
+      { label: "Reference", value: payout.reference },
+      { label: "Reason", value: payout.failureReason || "Unknown" },
+    ])}
+    ${ctaButton({ label: "View payout", href: `${ctx.adminUrl}/payouts`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Failed payout alert`,
-    textLines: [`Payout ${payout.reference} failed.`, `View: ${ctx.adminUrl}/payouts/${payout.reference}`],
+    textLines: [`Payout ${payout.reference} failed.`],
+    preheader: `Failed payout alert.`,
   });
 };
 
 const adminBackupCompleted = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { backup } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Backup Completed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Backup <strong>${backup.filename}</strong> completed successfully.</p>
-    <p><strong>Size:</strong> ${backup.size} bytes</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/backups" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Backups</a>
-    </p>
+  const body = `
+    ${heading("Backup completed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`The scheduled backup completed successfully.`)}
+    ${dataTable([
+      { label: "Filename", value: backup.filename },
+      { label: "Size", value: `${backup.size} bytes` },
+    ])}
+    ${ctaButton({ label: "View backups", href: `${ctx.adminUrl}/backups`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Backup completed`,
-    textLines: [`Backup ${backup.filename} completed.`, `View: ${ctx.adminUrl}/backups`],
+    textLines: [`Backup ${backup.filename} completed.`],
+    preheader: `Backup completed.`,
   });
 };
 
 const adminBackupFailed = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Backup Failed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>The scheduled backup failed.</p>
-    <p><strong>Reason:</strong> ${payload.reason}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/backups" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Backups</a>
-    </p>
+  const body = `
+    ${heading("Backup failed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`The scheduled backup failed.`)}
+    ${dataTable([{ label: "Reason", value: payload.reason || "Unknown" }])}
+    ${ctaButton({ label: "Open backups", href: `${ctx.adminUrl}/backups`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Backup failed`,
-    textLines: [`Backup failed: ${payload.reason}`, `Open: ${ctx.adminUrl}/backups`],
+    textLines: [`Backup failed: ${payload.reason}`],
+    preheader: `Backup failed.`,
   });
 };
 
 const adminRevenueSummary = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { summary, period } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">${period} Revenue Summary</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>Total Revenue:</strong> ${summary.currency} ${summary.total}</p>
-    <p><strong>Food Commission:</strong> ${summary.currency} ${summary.food}</p>
-    <p><strong>Transport Commission:</strong> ${summary.currency} ${summary.transport}</p>
-    <p><strong>Accommodation Commission:</strong> ${summary.currency} ${summary.accommodation}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/reports" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">View Reports</a>
-    </p>
+  const body = `
+    ${heading(`${period} revenue summary`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${highlightBox({ label: "Total revenue", value: fmtMoney(summary.total, summary.currency), secondaryColor: ctx.secondaryColor })}
+    ${dataTable([
+      { label: "Food", value: fmtMoney(summary.food, summary.currency) },
+      { label: "Transport", value: fmtMoney(summary.transport, summary.currency) },
+      { label: "Accommodation", value: fmtMoney(summary.accommodation, summary.currency) },
+    ])}
+    ${ctaButton({ label: "View reports", href: `${ctx.adminUrl}/reports`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `${period} revenue summary`,
-    textLines: [`${period} revenue: ${summary.currency} ${summary.total}`, `Reports: ${ctx.adminUrl}/reports`],
+    textLines: [`${period} revenue: ${fmtMoney(summary.total, summary.currency)}`],
+    preheader: `${period} revenue summary.`,
   });
 };
 
 const adminSystemHealthAlert = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { alert } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">System Health Alert</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>Alert:</strong> ${alert.title}</p>
-    <p>${alert.message}</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}/health" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Health</a>
-    </p>
+  const body = `
+    ${heading("System health alert")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${dataTable([{ label: "Alert", value: alert.title }])}
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#fff8f7;border:1px solid #eed3cf;border-radius:10px;margin:16px 0;">
+      <tr><td style="padding:16px;color:#914940;font-size:14px;line-height:1.6;">${alert.message}</td></tr>
+    </table>
+    ${ctaButton({ label: "Open health", href: `${ctx.adminUrl}/health`, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `System alert - ${alert.title}`,
+  return render(ctx, body, {
+    subject: `System alert — ${alert.title}`,
     textLines: [`System alert: ${alert.title}`, `Open: ${ctx.adminUrl}/health`],
+    preheader: `System alert: ${alert.title}`,
   });
 };
 
@@ -1228,106 +1601,120 @@ const adminInvited = (recipient, payload = {}) => {
   const inviterName = payload.inviter?.firstName
     ? `${payload.inviter.firstName}${payload.inviter.lastName ? " " + payload.inviter.lastName : ""}`
     : "The Digital Safaris team";
-  const tempPassword = payload.tempPassword || "—";
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">You're Invited</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>${inviterName} has invited you as an admin on ${ctx.appName}.</p>
-    <p><strong>Email:</strong> ${recipient.email}</p>
-    <p><strong>Temporary password:</strong> ${tempPassword}</p>
-    <p>Change your password after first login.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Log in to Admin</a>
-    </p>
+  const body = `
+    ${heading("You're invited as admin")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`${inviterName} has invited you to join as an admin on ${ctx.appName}.`)}
+    ${dataTable([
+      { label: "Email", value: recipient.email },
+      { label: "Temporary password", value: payload.tempPassword || "—" },
+    ])}
+    ${ctaButton({ label: "Log in to admin", href: ctx.adminUrl, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`You'll be prompted to change your password after first login.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `You've been invited as admin`,
-    textLines: [`Admin invitation. Temp password: ${tempPassword}`, `Log in: ${ctx.adminUrl}`],
+    textLines: [`Admin invitation. Temp password: ${payload.tempPassword}`, `Log in: ${ctx.adminUrl}`],
+    preheader: `You've been invited to join ${ctx.appName} as admin.`,
   });
 };
 
 const adminAccountCreated = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Admin Account Created</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your admin account has been created.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.adminUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Open Admin</a>
-    </p>
+  const body = `
+    ${heading("Admin account created")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your admin account has been created.`)}
+    ${ctaButton({ label: "Open admin", href: ctx.adminUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Admin account created`,
-    textLines: [`Your admin account has been created.`, `Open: ${ctx.adminUrl}`],
+    textLines: [`Your admin account has been created.`],
+    preheader: `Admin account created.`,
   });
 };
 
 const adminRoleChanged = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const { oldRole, newRole } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Role Changed</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your role changed from <strong>${oldRole}</strong> to <strong>${newRole}</strong>.</p>
+  const body = `
+    ${heading("Your role has changed")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your role has been updated.`)}
+    ${dataTable([
+      { label: "Previous role", value: payload.oldRole },
+      { label: "New role", value: payload.newRole },
+    ])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your role was changed`,
-    textLines: [`Role changed from ${oldRole} to ${newRole}.`],
+    textLines: [`Role changed from ${payload.oldRole} to ${payload.newRole}.`],
+    preheader: `Role changed.`,
   });
 };
 
 const adminAccountSuspended = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Admin Account Suspended</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your admin account has been suspended.</p>
-    <p><strong>Reason:</strong> ${payload.reason}</p>
+  const body = `
+    ${heading("Admin account suspended")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your admin account has been suspended.`)}
+    ${dataTable([{ label: "Reason", value: payload.reason || "Policy violation" }])}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Admin account suspended`,
-    textLines: [`Admin account suspended.`],
+    textLines: [`Admin account suspended. Reason: ${payload.reason}`],
+    preheader: `Admin account suspended.`,
   });
 };
 
+// ══════════════════════════════════════════════════════════════
+// MARKETING / LIFECYCLE
+// ══════════════════════════════════════════════════════════════
+
 const welcomeSeriesDay0 = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Welcome to ${ctx.appName}</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Start exploring accommodations, restaurants, and transport in one app.</p>
+  const body = `
+    ${heading(`Welcome to ${ctx.appName}`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Start exploring accommodations, restaurants, and transport in one app.`)}
+    ${ctaButton({ label: "Explore now", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Welcome to ${ctx.appName}`,
     textLines: [`Welcome to ${ctx.appName}.`],
+    preheader: `Welcome to ${ctx.appName}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
 
 const welcomeSeriesDay3 = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Have You Tried the Concierge?</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Ask our AI concierge anything — from restaurant recommendations to local tips.</p>
+  const body = `
+    ${heading("Have you tried the AI concierge?")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Ask our concierge anything — restaurant recommendations, local tips, or travel advice.`)}
+    ${ctaButton({ label: "Try the concierge", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Try the Digital Safaris concierge`,
+  return render(ctx, body, {
+    subject: `Try the ${ctx.appName} concierge`,
     textLines: [`Try the AI concierge.`],
+    preheader: `Meet your AI travel concierge.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
 
 const welcomeSeriesDay7 = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your First Booking Awaits</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Book your first stay and get exclusive member rates.</p>
+  const body = `
+    ${heading("Your first booking awaits")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Book your first stay and unlock exclusive member rates.`)}
+    ${ctaButton({ label: "Book now", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Book your first stay`,
     textLines: [`Book your first stay.`],
+    preheader: `Your first booking awaits.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1335,15 +1722,17 @@ const welcomeSeriesDay7 = (recipient, payload = {}) => {
 const promotionalOffer = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { offer } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">${offer.title}</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>${offer.message}</p>
-    ${offer.code ? `<p style="font-size:20px;font-weight:bold;color:${ctx.secondaryColor};">Use code: ${offer.code}</p>` : ""}
+  const body = `
+    ${heading(offer.title)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(offer.message)}
+    ${offer.code ? highlightBox({ label: "Use code", value: offer.code, secondaryColor: ctx.secondaryColor }) : ""}
+    ${ctaButton({ label: "Claim offer", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: offer.title,
     textLines: [`${offer.title}: ${offer.message}`],
+    preheader: offer.message,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1351,15 +1740,17 @@ const promotionalOffer = (recipient, payload = {}) => {
 const newRestaurantInTown = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Restaurant in ${recipient.town}</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>${restaurant.name}</strong> just joined Digital Safaris.</p>
-    <p>${restaurant.description || ""}</p>
+  const body = `
+    ${heading(`New restaurant in ${recipient.town}`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${restaurant.name}</strong> just joined ${ctx.appName}.`)}
+    ${restaurant.description ? paragraph(restaurant.description) : ""}
+    ${ctaButton({ label: "View restaurant", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New restaurant in ${recipient.town}`,
     textLines: [`New restaurant: ${restaurant.name}`],
+    preheader: `New restaurant in ${recipient.town}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1367,15 +1758,17 @@ const newRestaurantInTown = (recipient, payload = {}) => {
 const newAccommodationInTown = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { accommodation } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">New Stay in ${recipient.town}</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>${accommodation.name}</strong> just joined Digital Safaris.</p>
-    <p>${accommodation.description || ""}</p>
+  const body = `
+    ${heading(`New stay in ${recipient.town}`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${accommodation.name}</strong> just joined ${ctx.appName}.`)}
+    ${accommodation.description ? paragraph(accommodation.description) : ""}
+    ${ctaButton({ label: "View stay", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `New stay in ${recipient.town}`,
     textLines: [`New accommodation: ${accommodation.name}`],
+    preheader: `New stay in ${recipient.town}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1383,17 +1776,17 @@ const newAccommodationInTown = (recipient, payload = {}) => {
 const seasonalDeals = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { deals } = payload;
-  const dealsHtml = deals
-    .map((d) => `<li style="margin-bottom:8px;"><strong>${d.title}</strong> - ${d.description}</li>`)
-    .join("");
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Seasonal Deals</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <ul style="padding-left:20px;">${dealsHtml}</ul>
+  const list = deals.map((d) => `<li style="margin-bottom:8px;"><strong>${d.title}</strong> — ${d.description}</li>`).join("");
+  const body = `
+    ${heading("Seasonal deals")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    <ul style="margin:0 0 16px;padding-left:20px;font-size:14px;line-height:1.75;color:#374151;">${list}</ul>
+    ${ctaButton({ label: "View deals", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Seasonal deals for you`,
     textLines: [`Seasonal deals available.`],
+    preheader: `Seasonal deals available.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1401,17 +1794,16 @@ const seasonalDeals = (recipient, payload = {}) => {
 const abandonedBookingReminder = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { property } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">You Left Something Behind</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>You were looking at <strong>${property.name}</strong>. Complete your booking before it's gone.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Complete Booking</a>
-    </p>
+  const body = `
+    ${heading("You left something behind")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You were looking at <strong>${property.name}</strong>. Complete your booking before it's gone.`)}
+    ${ctaButton({ label: "Complete booking", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Complete your booking`,
-    textLines: [`Complete your booking at ${property.name}.`, `Resume: ${ctx.clientUrl}`],
+    textLines: [`Complete your booking at ${property.name}.`],
+    preheader: `Complete your booking at ${property.name}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1419,17 +1811,16 @@ const abandonedBookingReminder = (recipient, payload = {}) => {
 const abandonedOrderReminder = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { restaurant } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Still Hungry?</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>You left items in your cart from <strong>${restaurant.name}</strong>.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Complete Order</a>
-    </p>
+  const body = `
+    ${heading("Still hungry?")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You left items in your cart from <strong>${restaurant.name}</strong>.`)}
+    ${ctaButton({ label: "Complete order", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Complete your order`,
-    textLines: [`Complete your order at ${restaurant.name}.`, `Resume: ${ctx.clientUrl}`],
+    textLines: [`Complete your order at ${restaurant.name}.`],
+    preheader: `Your cart is waiting.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1437,14 +1828,15 @@ const abandonedOrderReminder = (recipient, payload = {}) => {
 const loyaltyMilestone = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { milestone } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Milestone Reached</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>You've reached <strong>${milestone.title}</strong>! ${milestone.reward || ""}</p>
+  const body = `
+    ${heading("Milestone reached")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You've reached <strong>${milestone.title}</strong>! ${milestone.reward || ""}`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `You reached ${milestone.title}`,
     textLines: [`Milestone reached: ${milestone.title}`],
+    preheader: `You reached ${milestone.title}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1452,14 +1844,15 @@ const loyaltyMilestone = (recipient, payload = {}) => {
 const referralRewardEarned = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { reward } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Referral Reward Earned</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>You earned <strong>${reward.amount}</strong> for referring ${reward.friendName}.</p>
+  const body = `
+    ${heading("Referral reward earned")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`You earned <strong>${reward.amount}</strong> for referring ${reward.friendName}.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `You earned a reward`,
     textLines: [`Referral reward: ${reward.amount}`],
+    preheader: `You earned a reward.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1467,14 +1860,15 @@ const referralRewardEarned = (recipient, payload = {}) => {
 const referralJoined = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { friend } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Friend Joined</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p><strong>${friend.firstName}</strong> joined Digital Safaris using your referral code.</p>
+  const body = `
+    ${heading("Your friend joined")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`<strong>${friend.firstName}</strong> joined ${ctx.appName} using your referral code.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `${friend.firstName} joined using your code`,
     textLines: [`${friend.firstName} joined using your code.`],
+    preheader: `${friend.firstName} joined using your code.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1482,30 +1876,30 @@ const referralJoined = (recipient, payload = {}) => {
 const birthdayOffer = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { offer } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Happy Birthday, ${recipient.firstName}!</h2>
-    <p>${offer.message}</p>
-    ${offer.code ? `<p style="font-size:20px;font-weight:bold;color:${ctx.secondaryColor};">Use code: ${offer.code}</p>` : ""}
+  const body = `
+    ${heading(`Happy birthday, ${recipient.firstName}!`)}
+    ${paragraph(offer.message)}
+    ${offer.code ? highlightBox({ label: "Use code", value: offer.code, secondaryColor: ctx.secondaryColor }) : ""}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Happy Birthday, ${recipient.firstName}!`,
-    textLines: [`Happy Birthday! ${offer.message}`],
+  return render(ctx, body, {
+    subject: `Happy birthday, ${recipient.firstName}!`,
+    textLines: [`Happy birthday! ${offer.message}`],
+    preheader: `Happy birthday from ${ctx.appName}.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
 
 const reEngagement = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">We Miss You, ${recipient.firstName}</h2>
-    <p>It's been a while. Come back and see what's new on Digital Safaris.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Come Back</a>
-    </p>
+  const body = `
+    ${heading(`We miss you, ${recipient.firstName}`)}
+    ${paragraph(`It's been a while. Come back and see what's new on ${ctx.appName}.`)}
+    ${ctaButton({ label: "Come back", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `We miss you`,
-    textLines: [`We miss you at Digital Safaris.`, `Visit: ${ctx.clientUrl}`],
+    textLines: [`We miss you at ${ctx.appName}.`],
+    preheader: `We miss you.`,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
@@ -1513,136 +1907,149 @@ const reEngagement = (recipient, payload = {}) => {
 const newsletter = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { issue } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">${issue.title}</h2>
-    <p>Hi ${recipient.firstName},</p>
+  const body = `
+    ${heading(issue.title)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
     ${issue.content}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: issue.title,
     textLines: [issue.title],
+    preheader: issue.title,
     unsubscribeUrl: `${ctx.websiteUrl}/unsubscribe`,
   });
 };
 
+// ══════════════════════════════════════════════════════════════
+// SECURITY / OTP
+// ══════════════════════════════════════════════════════════════
+
 const twoFactorCode = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Two-Factor Code</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your 2FA code is:</p>
-    <p style="font-size:32px;font-weight:bold;letter-spacing:6px;color:${ctx.secondaryColor};margin:24px 0;text-align:center;">${payload.code}</p>
+  const body = `
+    ${heading("Two-factor code")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your 2FA code is:`)}
+    ${highlightBox({ label: "Your code", value: payload.code, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your 2FA code`,
     textLines: [`Your 2FA code is ${payload.code}.`],
+    preheader: `Your 2FA code: ${payload.code}`,
   });
 };
 
 const sessionRevoked = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Session Revoked</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>A session on <strong>${payload.device}</strong> was revoked.</p>
+  const body = `
+    ${heading("Session revoked")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`A session on <strong>${payload.device}</strong> was revoked.`)}
+    ${paragraph(`If this wasn't you, contact ${ctx.supportEmail}.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Session revoked`,
     textLines: [`Session on ${payload.device} was revoked.`],
+    preheader: `A session was revoked.`,
   });
 };
 
 const suspiciousActivity = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Suspicious Activity Detected</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>${payload.activity}</p>
-    <p>If this wasn't you, contact ${ctx.supportEmail}.</p>
+  const body = `
+    ${heading("Suspicious activity detected")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(payload.activity || "Unusual activity was detected on your account.")}
+    ${paragraph(`If this wasn't you, contact ${ctx.supportEmail} immediately.`)}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Suspicious activity on your account`,
     textLines: [`Suspicious activity: ${payload.activity}`],
+    preheader: `Suspicious activity detected.`,
   });
 };
 
 const legalPolicyUpdate = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
   const { policy } = payload;
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Policy Update: ${policy.title}</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>We've updated our ${policy.title}. Please review.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.websiteUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Read Policy</a>
-    </p>
+  const body = `
+    ${heading(`Policy update: ${policy.title}`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`We've updated our ${policy.title}. Please take a moment to review the changes.`)}
+    ${ctaButton({ label: "Read policy", href: ctx.websiteUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Policy update: ${policy.title}`,
-    textLines: [`Policy updated: ${policy.title}`, `Read: ${ctx.websiteUrl}`],
+    textLines: [`Policy updated: ${policy.title}`],
+    preheader: `Policy update: ${policy.title}.`,
   });
 };
 
 const termsAcceptanceReminder = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Please Accept Our Updated Terms</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Please accept the updated Terms of Service to continue using Digital Safaris.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Accept Terms</a>
-    </p>
+  const body = `
+    ${heading("Please accept our updated terms")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Please accept the updated Terms of Service to continue using ${ctx.appName}.`)}
+    ${ctaButton({ label: "Accept terms", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Accept updated terms`,
-    textLines: [`Please accept updated terms.`, `Open: ${ctx.clientUrl}`],
+    textLines: [`Please accept updated terms.`],
+    preheader: `Please accept updated terms.`,
   });
 };
 
 const dataExportReady = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Your Data Export is Ready</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Download link: <a href="${payload.downloadUrl}" style="color:${ctx.secondaryColor};">Download</a></p>
-    <p>Link expires in 24 hours.</p>
+  const body = `
+    ${heading("Your data export is ready")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your data export is ready to download. The link expires in 24 hours.`)}
+    ${ctaButton({ label: "Download", href: payload.downloadUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Your data export is ready`,
     textLines: [`Download your data: ${payload.downloadUrl}`],
+    preheader: `Your data export is ready.`,
   });
 };
 
 const accountDeletionScheduled = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Account Deletion Scheduled</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Your account is scheduled for deletion on <strong>${payload.date}</strong>.</p>
-    <p>Log in before then to cancel.</p>
-    <p style="margin-top:16px;">
-      <a href="${ctx.clientUrl}" style="background-color:${ctx.secondaryColor};color:#FFFFFF;padding:12px 24px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Cancel Deletion</a>
-    </p>
+  const body = `
+    ${heading("Account deletion scheduled")}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Your account is scheduled for deletion on <strong>${payload.date}</strong>.`)}
+    ${paragraph(`Log in before then to cancel the deletion.`)}
+    ${ctaButton({ label: "Cancel deletion", href: ctx.clientUrl, secondaryColor: ctx.secondaryColor })}
   `;
-  return render(ctx, bodyHtml, {
+  return render(ctx, body, {
     subject: `Account deletion scheduled`,
-    textLines: [`Account deletion scheduled for ${payload.date}.`, `Cancel: ${ctx.clientUrl}`],
+    textLines: [`Account deletion scheduled for ${payload.date}.`],
+    preheader: `Account deletion scheduled for ${payload.date}.`,
   });
 };
 
 const changeContactOTP = (recipient, payload = {}) => {
   const ctx = resolveContext(payload);
-  const bodyHtml = `
-    <h2 style="margin:0 0 16px 0;color:${ctx.primaryColor};">Confirm Your ${payload.type} Change</h2>
-    <p>Hi ${recipient.firstName},</p>
-    <p>Use this code to confirm your ${payload.type} change:</p>
-    <p style="font-size:32px;font-weight:bold;letter-spacing:6px;color:${ctx.secondaryColor};margin:24px 0;text-align:center;">${payload.otp}</p>
+  const body = `
+    ${heading(`Confirm your ${payload.type} change`)}
+    ${paragraph(`Hi ${recipient.firstName},`)}
+    ${paragraph(`Use the code below to confirm your ${payload.type} change.`)}
+    ${highlightBox({ label: "Your code", value: payload.otp, secondaryColor: ctx.secondaryColor })}
+    ${smallNote(`Expires in 10 minutes.`)}
   `;
-  return render(ctx, bodyHtml, {
-    subject: `Confirm your ${payload.type} change - ${payload.otp}`,
+  return render(ctx, body, {
+    subject: `Confirm your ${payload.type} change — ${payload.otp}`,
     textLines: [`Your ${payload.type} change code: ${payload.otp}`],
+    preheader: `Your ${payload.type} change code: ${payload.otp}`,
   });
 };
+
+// ══════════════════════════════════════════════════════════════
+// EXPORTS — order preserved from original
+// ══════════════════════════════════════════════════════════════
 
 export {
   welcomeCustomer,
@@ -1696,6 +2103,7 @@ export {
   propertyApproved,
   propertyRejected,
   roomApproved,
+  roomAssigned,
   newOrderReceived,
   newBroadcastReceived,
   orderCancelledByCustomer,

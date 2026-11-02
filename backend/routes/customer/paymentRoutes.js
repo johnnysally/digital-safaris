@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  initiate,
   list,
   details,
   retry,
@@ -9,6 +10,7 @@ import authenticateClient from "../../middleware/client/authenticateClient.js";
 
 const router = Router();
 
+router.post("/initiate", authenticateClient, initiate);
 router.get("/", authenticateClient, list);
 router.get("/:id", authenticateClient, details);
 router.post("/:id/retry", authenticateClient, retry);

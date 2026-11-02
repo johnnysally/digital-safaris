@@ -572,6 +572,9 @@ function PayoutsList() {
   const [rejectReason, setRejectReason] = useState("");
   const [rejectLoading, setRejectLoading] = useState(false);
 
+  const [runNowOpen, setRunNowOpen] = useState(false);
+  const [runNowLoading, setRunNowLoading] = useState(false);
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -658,6 +661,28 @@ function PayoutsList() {
     }
   };
 
+  const handleRunNow = async () => {
+    setRunNowLoading(true);
+    try {
+      const result = await paymentApi.runPayoutsNow();
+      if (result.created > 0) {
+        success(
+          `Payout job ran — ${result.created} payout${
+            result.created === 1 ? "" : "s"
+          } created`
+        );
+      } else {
+        success("Payout job ran — no eligible wallets");
+      }
+      setRunNowOpen(false);
+      fetchData();
+    } catch {
+      toastError("Could not run payout job");
+    } finally {
+      setRunNowLoading(false);
+    }
+  };
+
   const columns = useMemo<Column<Payout>[]>(
     () => [
       {
@@ -725,10 +750,7 @@ function PayoutsList() {
           if (row.status !== "pending") return null;
           return (
             <div className="flex justify-end gap-1">
-              <Button
-                size="sm"
-                onClick={() => setApproveTarget(row)}
-              >
+              <Button size="sm" onClick={() => setApproveTarget(row)}>
                 Approve
               </Button>
               <Button
@@ -770,7 +792,7 @@ function PayoutsList() {
               { label: "Failed", value: "failed" },
             ]}
           />
-          <div className="flex gap-2 md:col-span-2">
+          <div className="flex flex-wrap gap-2 md:col-span-2">
             <Button
               variant="secondary"
               onClick={() => {
@@ -780,11 +802,11 @@ function PayoutsList() {
             >
               Search
             </Button>
-            <Button
-              variant="ghost"
-              onClick={() => setSettingsOpen(true)}
-            >
+            <Button variant="ghost" onClick={() => setSettingsOpen(true)}>
               Payout settings
+            </Button>
+            <Button variant="ghost" onClick={() => setRunNowOpen(true)}>
+              Run payouts now
             </Button>
           </div>
         </div>
@@ -946,6 +968,17 @@ function PayoutsList() {
           placeholder="Why is this payout being rejected?"
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={runNowOpen}
+        onClose={() => setRunNowOpen(false)}
+        onConfirm={handleRunNow}
+        title="Run payout job now?"
+        description="This bypasses the scheduled payout window and immediately queues payouts for every eligible wallet. Duplicates are prevented by the pending-payout guard, but review payout settings before proceeding."
+        confirmText="Run now"
+        variant="primary"
+        loading={runNowLoading}
+      />
     </>
   );
 }

@@ -8,6 +8,8 @@ import bookingRoutes from "./bookingRoutes.js";
 import guestRoutes from "./guestRoutes.js";
 import ratingRoutes from "./ratingRoutes.js";
 import walletRoutes from "./walletRoutes.js";
+import roomUnitRoutes from "./roomUnitRoutes.js";
+import dashboardRoutes from "./dashboardRoutes.js";
 
 const router = Router();
 
@@ -20,5 +22,7 @@ router.use("/bookings", bookingRoutes);
 router.use("/guests", guestRoutes);
 router.use("/ratings", ratingRoutes);
 router.use("/wallet", walletRoutes);
+router.use("/room-units", roomUnitRoutes);
+router.use("/dashboard", dashboardRoutes);
 
 export default router;

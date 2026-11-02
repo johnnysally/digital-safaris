@@ -1,11 +1,13 @@
 import Booking from "../../models/accom/Booking.js";
 import Guest from "../../models/accom/Guest.js";
-import Property from "../../models/accom/Property.js";
+import RoomUnit from "../../models/accom/RoomUnit.js";
+import AccommodationPartner from "../../models/accom/AccommodationPartner.js";
 import Branding from "../../models/admin/Branding.js";
 import SystemSetting from "../../models/admin/SystemSetting.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import logger from "../../utils/logger.js";
 import * as emailService from "../../services/emailService.js";
 import * as smsService from "../../services/smsService.js";
 import * as socketService from "../../services/socketService.js";
@@ -27,6 +29,7 @@ const list = asyncHandler(async (req, res) => {
       .populate("customer", "firstName lastName phone email")
       .populate("property", "name town address")
       .populate("room", "name type basePrice")
+      .populate("roomUnit", "number floor")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(Number(limit))
@@ -51,25 +54,41 @@ const details = asyncHandler(async (req, res) => {
     partner: req.partner._id,
   })
     .populate("customer", "firstName lastName phone email avatar")
-    .populate("property")
-    .populate("room")
+    .populate("property", "name town address images")
+    .populate("room", "name type basePrice images")
+    .populate("roomUnit", "number floor")
     .lean();
 
   if (!booking) throw new ApiError(404, "Booking not found");
 
-  const guests = await Guest.find({ booking: booking._id }).lean();
+  const guestRecords = await Guest.find({ booking: booking._id }).lean();
 
-  res.status(200).json(new ApiResponse(200, { booking, guests }));
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        ...booking,
+        propertyName: booking.property?.name || null,
+        roomName: booking.room?.name || null,
+        guestRecords,
+      },
+      "Booking fetched"
+    )
+  );
 });
 
 const confirm = asyncHandler(async (req, res) => {
   const booking = await Booking.findOne({
     _id: req.params.id,
     partner: req.partner._id,
-  }).populate("customer").populate("property");
+  })
+    .populate("customer")
+    .populate("property");
 
   if (!booking) throw new ApiError(404, "Booking not found");
-  if (booking.status !== "pending") throw new ApiError(400, "Booking cannot be confirmed");
+  if (booking.status !== "pending") {
+    throw new ApiError(400, "Booking cannot be confirmed");
+  }
 
   booking.status = "confirmed";
   booking.confirmedAt = new Date();
@@ -77,21 +96,35 @@ const confirm = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    await emailService.bookingConfirmation(booking.customer, {
-      booking,
-      property: booking.property,
-      branding,
-      settings,
-    });
-    await smsService.bookingConfirmation(booking.customer, {
-      reference: booking.reference,
-      checkIn: new Date(booking.checkIn).toDateString(),
-    });
+    try {
+      await emailService.bookingConfirmation(booking.customer, {
+        booking,
+        property: booking.property,
+        branding,
+        settings,
+      });
+    } catch (err) {
+      logger.error("Booking confirmation email failed", { error: err.message });
+    }
+    try {
+      await smsService.bookingConfirmation(booking.customer, {
+        reference: booking.reference,
+        checkIn: new Date(booking.checkIn).toDateString(),
+      });
+    } catch (err) {
+      logger.error("Booking confirmation SMS failed", { error: err.message });
+    }
   }
 
-  socketService.emitToCustomer(booking.customer._id.toString(), "booking:confirmed", {
-    reference: booking.reference,
-  });
+  try {
+    socketService.emitToCustomer(
+      booking.customer._id.toString(),
+      "booking:confirmed",
+      { reference: booking.reference }
+    );
+  } catch {
+    /* socket optional */
+  }
 
   res.status(200).json(new ApiResponse(200, booking, "Booking confirmed"));
 });
@@ -105,7 +138,9 @@ const reject = asyncHandler(async (req, res) => {
   }).populate("customer");
 
   if (!booking) throw new ApiError(404, "Booking not found");
-  if (booking.status !== "pending") throw new ApiError(400, "Booking cannot be rejected");
+  if (booking.status !== "pending") {
+    throw new ApiError(400, "Booking cannot be rejected");
+  }
 
   booking.status = "cancelled";
   booking.cancelledAt = new Date();
@@ -115,21 +150,35 @@ const reject = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    await emailService.bookingCancelled(booking.customer, {
-      booking,
-      reason: booking.cancellationReason,
-      branding,
-      settings,
-    });
-    await smsService.bookingCancelled(booking.customer, {
-      reference: booking.reference,
-      reason: booking.cancellationReason,
-    });
+    try {
+      await emailService.bookingCancelled(booking.customer, {
+        booking,
+        reason: booking.cancellationReason,
+        branding,
+        settings,
+      });
+    } catch (err) {
+      logger.error("Booking cancellation email failed", { error: err.message });
+    }
+    try {
+      await smsService.bookingCancelled(booking.customer, {
+        reference: booking.reference,
+        reason: booking.cancellationReason,
+      });
+    } catch (err) {
+      logger.error("Booking cancellation SMS failed", { error: err.message });
+    }
   }
 
-  socketService.emitToCustomer(booking.customer._id.toString(), "booking:cancelled", {
-    reference: booking.reference,
-  });
+  try {
+    socketService.emitToCustomer(
+      booking.customer._id.toString(),
+      "booking:cancelled",
+      { reference: booking.reference }
+    );
+  } catch {
+    /* socket optional */
+  }
 
   res.status(200).json(new ApiResponse(200, booking, "Booking rejected"));
 });
@@ -138,10 +187,14 @@ const checkIn = asyncHandler(async (req, res) => {
   const booking = await Booking.findOne({
     _id: req.params.id,
     partner: req.partner._id,
-  }).populate("customer").populate("property");
+  })
+    .populate("customer")
+    .populate("property");
 
   if (!booking) throw new ApiError(404, "Booking not found");
-  if (booking.status !== "confirmed") throw new ApiError(400, "Booking cannot be checked in");
+  if (booking.status !== "confirmed") {
+    throw new ApiError(400, "Booking cannot be checked in");
+  }
 
   booking.status = "checked_in";
   booking.checkedInAt = new Date();
@@ -149,20 +202,34 @@ const checkIn = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    await emailService.checkInConfirmation(booking.customer, {
-      booking,
-      property: booking.property,
-      branding,
-      settings,
-    });
-    await smsService.checkInConfirmation(booking.customer, {
-      property: booking.property.name,
-    });
+    try {
+      await emailService.checkInConfirmation(booking.customer, {
+        booking,
+        property: booking.property,
+        branding,
+        settings,
+      });
+    } catch (err) {
+      logger.error("Check-in email failed", { error: err.message });
+    }
+    try {
+      await smsService.checkInConfirmation(booking.customer, {
+        property: booking.property?.name || "your stay",
+      });
+    } catch (err) {
+      logger.error("Check-in SMS failed", { error: err.message });
+    }
   }
 
-  socketService.emitToCustomer(booking.customer._id.toString(), "booking:checked_in", {
-    reference: booking.reference,
-  });
+  try {
+    socketService.emitToCustomer(
+      booking.customer._id.toString(),
+      "booking:checked_in",
+      { reference: booking.reference }
+    );
+  } catch {
+    /* socket optional */
+  }
 
   res.status(200).json(new ApiResponse(200, booking, "Checked in"));
 });
@@ -171,10 +238,14 @@ const checkOut = asyncHandler(async (req, res) => {
   const booking = await Booking.findOne({
     _id: req.params.id,
     partner: req.partner._id,
-  }).populate("customer").populate("property");
+  })
+    .populate("customer")
+    .populate("property");
 
   if (!booking) throw new ApiError(404, "Booking not found");
-  if (booking.status !== "checked_in") throw new ApiError(400, "Booking cannot be checked out");
+  if (booking.status !== "checked_in") {
+    throw new ApiError(400, "Booking cannot be checked out");
+  }
 
   booking.status = "checked_out";
   booking.checkedOutAt = new Date();
@@ -182,20 +253,34 @@ const checkOut = asyncHandler(async (req, res) => {
 
   if (booking.customer) {
     const { branding, settings } = await getContext();
-    await emailService.checkOutConfirmation(booking.customer, {
-      booking,
-      property: booking.property,
-      branding,
-      settings,
-    });
-    await smsService.checkOutConfirmation(booking.customer, {
-      property: booking.property.name,
-    });
+    try {
+      await emailService.checkOutConfirmation(booking.customer, {
+        booking,
+        property: booking.property,
+        branding,
+        settings,
+      });
+    } catch (err) {
+      logger.error("Check-out email failed", { error: err.message });
+    }
+    try {
+      await smsService.checkOutConfirmation(booking.customer, {
+        property: booking.property?.name || "your stay",
+      });
+    } catch (err) {
+      logger.error("Check-out SMS failed", { error: err.message });
+    }
   }
 
-  socketService.emitToCustomer(booking.customer._id.toString(), "booking:checked_out", {
-    reference: booking.reference,
-  });
+  try {
+    socketService.emitToCustomer(
+      booking.customer._id.toString(),
+      "booking:checked_out",
+      { reference: booking.reference }
+    );
+  } catch {
+    /* socket optional */
+  }
 
   res.status(200).json(new ApiResponse(200, booking, "Checked out"));
 });
@@ -207,7 +292,9 @@ const markNoShow = asyncHandler(async (req, res) => {
   });
 
   if (!booking) throw new ApiError(404, "Booking not found");
-  if (booking.status !== "confirmed") throw new ApiError(400, "Booking cannot be marked no-show");
+  if (booking.status !== "confirmed") {
+    throw new ApiError(400, "Booking cannot be marked no-show");
+  }
 
   booking.status = "no_show";
   await booking.save();
@@ -215,4 +302,161 @@ const markNoShow = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, booking, "Marked no-show"));
 });
 
-export { list, details, confirm, reject, checkIn, checkOut, markNoShow };
+const availableUnits = asyncHandler(async (req, res) => {
+  const booking = await Booking.findOne({
+    _id: req.params.id,
+    partner: req.partner._id,
+  }).lean();
+  if (!booking) throw new ApiError(404, "Booking not found");
+
+  if (!["pending", "confirmed", "checked_in"].includes(booking.status)) {
+    throw new ApiError(400, "Cannot assign rooms for this booking status");
+  }
+
+  const conflictingUnitIds = await Booking.distinct("roomUnit", {
+    _id: { $ne: booking._id },
+    room: booking.room,
+    roomUnit: { $ne: null },
+    status: { $in: ["confirmed", "checked_in"] },
+    checkIn: { $lt: booking.checkOut },
+    checkOut: { $gt: booking.checkIn },
+  });
+
+  const units = await RoomUnit.find({
+    roomType: booking.room,
+    status: "active",
+    isDeleted: false,
+    _id: { $nin: conflictingUnitIds },
+  })
+    .sort({ number: 1 })
+    .lean();
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      units.map((u) => ({
+        _id: u._id,
+        number: u.number,
+        floor: u.floor,
+        status: u.status,
+        isCurrent: String(u._id) === String(booking.roomUnit),
+      }))
+    )
+  );
+});
+
+const assignRoom = asyncHandler(async (req, res) => {
+  const { roomUnitId } = req.body;
+  if (!roomUnitId) throw new ApiError(400, "roomUnitId required");
+
+  const booking = await Booking.findOne({
+    _id: req.params.id,
+    partner: req.partner._id,
+  })
+    .populate("customer")
+    .populate("property")
+    .populate("room");
+  if (!booking) throw new ApiError(404, "Booking not found");
+
+  if (!["pending", "confirmed", "checked_in"].includes(booking.status)) {
+    throw new ApiError(400, "Cannot assign rooms for this booking status");
+  }
+
+  const unit = await RoomUnit.findOne({
+    _id: roomUnitId,
+    roomType: booking.room._id,
+    status: "active",
+    isDeleted: false,
+  });
+  if (!unit) throw new ApiError(404, "Room unit not available");
+
+  const conflict = await Booking.findOne({
+    _id: { $ne: booking._id },
+    roomUnit: unit._id,
+    status: { $in: ["confirmed", "checked_in"] },
+    checkIn: { $lt: booking.checkOut },
+    checkOut: { $gt: booking.checkIn },
+  });
+  if (conflict) {
+    throw new ApiError(400, "This room is already booked for those dates");
+  }
+
+  booking.roomUnit = unit._id;
+  await booking.save();
+
+  if (booking.customer) {
+    const { branding, settings } = await getContext();
+    try {
+      await emailService.roomAssigned(booking.customer, {
+        booking,
+        property: booking.property,
+        roomNumber: unit.number,
+        floor: unit.floor,
+        branding,
+        settings,
+      });
+    } catch (err) {
+      logger.error("Room assigned email failed", { error: err.message });
+    }
+    try {
+      await smsService.roomAssigned(booking.customer, {
+        reference: booking.reference,
+        roomNumber: unit.number,
+      });
+    } catch (err) {
+      logger.error("Room assigned SMS failed", { error: err.message });
+    }
+
+    try {
+      socketService.emitToCustomer(
+        booking.customer._id.toString(),
+        "booking:room_assigned",
+        { reference: booking.reference, roomNumber: unit.number }
+      );
+    } catch {
+      /* socket optional */
+    }
+  }
+
+  res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        bookingId: booking._id,
+        roomUnitId: unit._id,
+        roomNumber: unit.number,
+        floor: unit.floor,
+      },
+      "Room assigned"
+    )
+  );
+});
+
+const unassignRoom = asyncHandler(async (req, res) => {
+  const booking = await Booking.findOne({
+    _id: req.params.id,
+    partner: req.partner._id,
+  });
+  if (!booking) throw new ApiError(404, "Booking not found");
+  if (booking.status === "checked_in") {
+    throw new ApiError(400, "Cannot unassign room after check-in");
+  }
+
+  booking.roomUnit = null;
+  await booking.save();
+
+  res.status(200).json(new ApiResponse(200, null, "Room unassigned"));
+});
+
+export {
+  list,
+  details,
+  confirm,
+  reject,
+  checkIn,
+  checkOut,
+  markNoShow,
+  availableUnits,
+  assignRoom,
+  unassignRoom,
+};

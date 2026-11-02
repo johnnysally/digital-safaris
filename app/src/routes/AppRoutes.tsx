@@ -12,12 +12,16 @@ import ForgotPassword from "../pages/ForgotPassword";
 import ResetPassword from "../pages/ResetPassword";
 import Search from "../pages/Search";
 import AccommodationPage from "../pages/Accommodation";
+import AccommodationDetailPage from "../pages/AccommodationDetail";
+import AccommodationBookingPage from "../pages/AccommodationBooking";
 import RestaurantPage from "../pages/Restaurant";
+import RestaurantDetailsPage from "../pages/RestaurantDetails";
 import TransportPage from "../pages/Transport";
 import AiConcierge from "../pages/AiConcierge";
 import Wallet from "../pages/Wallet";
 import Payment from "../pages/Payment";
 import Reviews from "../pages/Reviews";
+import NewReviewPage from "../pages/NewReview";
 import Notifications from "../pages/Notifications";
 import Profile from "../pages/Profile";
 import Booking from "../pages/Booking";
@@ -107,8 +111,22 @@ export default function AppRoutes() {
       >
         <Route path="/" element={<Home />} />
         <Route path="/search" element={<Search />} />
+
         <Route path="/accommodation" element={<AccommodationPage />} />
+        <Route
+          path="/accommodation/:idOrSlug"
+          element={<AccommodationDetailPage />}
+        />
+        <Route
+          path="/accommodation/:idOrSlug/book"
+          element={<AccommodationBookingPage />}
+        />
+
         <Route path="/restaurant" element={<RestaurantPage />} />
+        <Route
+          path="/restaurant/:idOrSlug"
+          element={<RestaurantDetailsPage />}
+        />
         <Route path="/transport" element={<TransportPage />} />
         <Route path="/ai-concierge" element={<AiConcierge />} />
 
@@ -120,7 +138,10 @@ export default function AppRoutes() {
 
         <Route path="/wallet" element={<Wallet />} />
         <Route path="/payment" element={<Payment />} />
+
         <Route path="/reviews" element={<Reviews />} />
+        <Route path="/reviews/new" element={<NewReviewPage />} />
+
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/profile" element={<Profile />} />
 

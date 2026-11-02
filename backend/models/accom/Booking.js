@@ -23,6 +23,11 @@ const bookingSchema = new mongoose.Schema(
       ref: "Room",
       required: true,
     },
+    roomUnit: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "RoomUnit",
+      default: null,
+    },
     checkIn: { type: Date, required: true },
     checkOut: { type: Date, required: true },
     nights: { type: Number, required: true, min: 1 },
@@ -51,12 +56,19 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "paid", "refunded", "failed"],
       default: "pending",
     },
-    paymentReference: { type: String, default: null },
+    paymentReference: { type: String, default: null, index: true },
     paymentReceipt: { type: String, default: null },
     specialRequests: { type: String, default: null },
     status: {
       type: String,
-      enum: ["pending", "confirmed", "checked_in", "checked_out", "cancelled", "no_show"],
+      enum: [
+        "pending",
+        "confirmed",
+        "checked_in",
+        "checked_out",
+        "cancelled",
+        "no_show",
+      ],
       default: "pending",
     },
     confirmedAt: { type: Date, default: null },
@@ -81,6 +93,7 @@ bookingSchema.index({ customer: 1, createdAt: -1 });
 bookingSchema.index({ partner: 1, createdAt: -1 });
 bookingSchema.index({ property: 1, checkIn: 1 });
 bookingSchema.index({ status: 1 });
+bookingSchema.index({ roomUnit: 1, checkIn: 1 });
 
 const Booking = mongoose.model("Booking", bookingSchema);
 

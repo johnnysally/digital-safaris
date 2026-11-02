@@ -1,8 +1,32 @@
 import axios, { unwrap, unwrapList } from "./axios";
-import type { Order, Paginated, ListParams } from "../types";
+import type {
+  Order,
+  OrderQuoteResponse,
+  Paginated,
+  ListParams,
+} from "../types";
 
 const orderApi = {
-  async create(payload: Record<string, unknown>): Promise<Order> {
+  async quote(payload: {
+    restaurantId: string;
+    items: { menuItem: string; quantity: number; notes?: string }[];
+    type: "delivery" | "pickup";
+    deliveryAddress?: {
+      address: string;
+      town: string;
+      latitude?: number;
+      longitude?: number;
+    } | null;
+  }): Promise<OrderQuoteResponse> {
+    const res = await axios.post("/customer/orders/quote", payload);
+    return unwrap<OrderQuoteResponse>(res.data);
+  },
+
+  async create(payload: {
+    quoteId: string;
+    paymentReference: string;
+    notes?: string;
+  }): Promise<Order> {
     const res = await axios.post("/customer/orders", payload);
     return unwrap<Order>(res.data);
   },

@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
   ArrowRight,
@@ -6,7 +6,6 @@ import {
   Car,
   ChevronRight,
   CreditCard,
-  Map,
   MapPin,
   Search,
   ShieldCheck,
@@ -25,7 +24,6 @@ import { useAuth } from "../context/authContext";
 import { ROUTES } from "../utils/constants";
 import { formatCurrency } from "../utils/formatCurrency";
 import type {
-  Accommodation,
   Booking,
   CustomerWallet,
   Location,
@@ -33,31 +31,20 @@ import type {
   Order,
   Property,
   Restaurant,
-  Room,
   Trip,
 } from "../types";
 
 const SERVICES = [
-  {
-    title: "Accommodation",
-    icon: Bed,
-    to: ROUTES.ACCOMMODATION,
-  },
-  {
-    title: "Food & Drinks",
-    icon: Utensils,
-    to: ROUTES.RESTAURANT,
-  },
-  {
-    title: "Transport",
-    icon: Car,
-    to: ROUTES.TRANSPORT,
-  },
-  {
-    title: "Payments",
-    icon: CreditCard,
-    to: ROUTES.PAYMENT,
-  },
+  { title: "Accommodation", icon: Bed, to: ROUTES.ACCOMMODATION },
+  { title: "Food & Drinks", icon: Utensils, to: ROUTES.RESTAURANT },
+  { title: "Transport", icon: Car, to: ROUTES.TRANSPORT },
+  { title: "Payments", icon: CreditCard, to: ROUTES.PAYMENT },
+];
+
+const QUICK_ACTIONS = [
+  { title: "Book Accommodation", icon: Bed, to: ROUTES.ACCOMMODATION },
+  { title: "Order Food", icon: Utensils, to: ROUTES.RESTAURANT },
+  { title: "Find Transport", icon: Car, to: ROUTES.TRANSPORT },
 ];
 
 interface FeaturedListing {
@@ -73,17 +60,9 @@ interface FeaturedListing {
   to: string;
 }
 
-const QUICK_ACTIONS = [
-  { title: "Book Accommodation", icon: Bed, to: ROUTES.ACCOMMODATION },
-  { title: "Order Food", icon: Utensils, to: ROUTES.RESTAURANT },
-  { title: "Find Transport", icon: Car, to: ROUTES.TRANSPORT },
-];
-
 interface DashboardData {
-  accommodations: Accommodation[];
   properties: Property[];
   restaurants: Restaurant[];
-  rooms: Room[];
   locations: Location[];
   bookings: Booking[];
   trips: Trip[];
@@ -92,17 +71,14 @@ interface DashboardData {
   unreadNotifications: number;
   wallet: CustomerWallet | null;
   totals: {
-    accommodations: number;
     properties: number;
     restaurants: number;
   };
 }
 
 const EMPTY_DASHBOARD: DashboardData = {
-  accommodations: [],
   properties: [],
   restaurants: [],
-  rooms: [],
   locations: [],
   bookings: [],
   trips: [],
@@ -110,12 +86,12 @@ const EMPTY_DASHBOARD: DashboardData = {
   notifications: [],
   unreadNotifications: 0,
   wallet: null,
-  totals: { accommodations: 0, properties: 0, restaurants: 0 },
+  totals: { properties: 0, restaurants: 0 },
 };
 
-interface DashboardRequest {
-  name: string;
-  run: () => Promise<unknown>;
+function numberOrZero(value: unknown): number {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : 0;
 }
 
 function SectionHeading({
@@ -135,7 +111,9 @@ function SectionHeading({
         <h2 className="truncate text-sm font-semibold text-text-primary sm:text-base">
           {title}
         </h2>
-        {detail && <p className="mt-0.5 text-[10px] text-text-muted">{detail}</p>}
+        {detail && (
+          <p className="mt-0.5 text-[10px] text-text-muted">{detail}</p>
+        )}
       </div>
       {action && to && (
         <Link
@@ -154,18 +132,15 @@ export default function Home() {
   const { customer } = useAuth();
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
-  const [dashboard, setDashboard] = useState(EMPTY_DASHBOARD);
+  const [dashboard, setDashboard] = useState<DashboardData>(EMPTY_DASHBOARD);
   const [loading, setLoading] = useState(true);
   const [failedSections, setFailedSections] = useState<string[]>([]);
   const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     let mounted = true;
-    const requests: DashboardRequest[] = [
-      {
-        name: "accommodations",
-        run: () => searchApi.accommodations({ page: 1, limit: 12 }),
-      },
+
+    const requests = [
       {
         name: "properties",
         run: () => searchApi.properties({ page: 1, limit: 12 }),
@@ -174,8 +149,10 @@ export default function Home() {
         name: "restaurants",
         run: () => searchApi.restaurants({ page: 1, limit: 12 }),
       },
-      { name: "room pricing", run: () => searchApi.rooms({ page: 1, limit: 50 }) },
-      { name: "destinations", run: () => searchApi.locations({ limit: 100 }) },
+      {
+        name: "destinations",
+        run: () => searchApi.locations({ limit: 100 }),
+      },
       { name: "bookings", run: () => bookingApi.list({ page: 1, limit: 20 }) },
       { name: "trips", run: () => tripApi.list({ page: 1, limit: 20 }) },
       { name: "orders", run: () => orderApi.list({ page: 1, limit: 10 }) },
@@ -183,57 +160,55 @@ export default function Home() {
         name: "notifications",
         run: () => notificationApi.list({ page: 1, limit: 5 }),
       },
-      { name: "unread notifications", run: () => notificationApi.unreadCount() },
+      {
+        name: "unread notifications",
+        run: () => notificationApi.unreadCount(),
+      },
       { name: "wallet", run: () => walletApi.get() },
     ];
 
     const loadDashboard = async () => {
       setLoading(true);
-      const results = await Promise.allSettled(requests.map(({ run }) => run()));
+      const results = await Promise.allSettled(
+        requests.map(({ run }) => run()),
+      );
       if (!mounted) return;
 
       const errors = results.flatMap((result, index) =>
-        result.status === "rejected" ? [requests[index].name] : []
+        result.status === "rejected" ? [requests[index].name] : [],
       );
       const resultData = (index: number) =>
         results[index].status === "fulfilled"
           ? results[index].value
           : undefined;
-      const accommodations = resultData(0) as
-        | Awaited<ReturnType<typeof searchApi.accommodations>>
-        | undefined;
-      const properties = resultData(1) as
+
+      const properties = resultData(0) as
         | Awaited<ReturnType<typeof searchApi.properties>>
         | undefined;
-      const restaurants = resultData(2) as
+      const restaurants = resultData(1) as
         | Awaited<ReturnType<typeof searchApi.restaurants>>
         | undefined;
-      const rooms = resultData(3) as
-        | Awaited<ReturnType<typeof searchApi.rooms>>
-        | undefined;
-      const locations = resultData(4) as Location[] | undefined;
-      const bookings = resultData(5) as
+      const locations = resultData(2) as Location[] | undefined;
+      const bookings = resultData(3) as
         | Awaited<ReturnType<typeof bookingApi.list>>
         | undefined;
-      const trips = resultData(6) as
+      const trips = resultData(4) as
         | Awaited<ReturnType<typeof tripApi.list>>
         | undefined;
-      const orders = resultData(7) as
+      const orders = resultData(5) as
         | Awaited<ReturnType<typeof orderApi.list>>
         | undefined;
-      const notifications = resultData(8) as
+      const notifications = resultData(6) as
         | Awaited<ReturnType<typeof notificationApi.list>>
         | undefined;
-      const unreadNotifications = resultData(9) as
+      const unreadNotifications = resultData(7) as
         | Awaited<ReturnType<typeof notificationApi.unreadCount>>
         | undefined;
-      const wallet = resultData(10) as CustomerWallet | undefined;
+      const wallet = resultData(8) as CustomerWallet | undefined;
 
       setDashboard({
-        accommodations: accommodations?.data ?? [],
         properties: properties?.data ?? [],
         restaurants: restaurants?.data ?? [],
-        rooms: rooms?.data ?? [],
         locations: locations ?? [],
         bookings: bookings?.data ?? [],
         trips: trips?.data ?? [],
@@ -242,7 +217,6 @@ export default function Home() {
         unreadNotifications: unreadNotifications?.count ?? 0,
         wallet: wallet ?? null,
         totals: {
-          accommodations: accommodations?.meta.total ?? 0,
           properties: properties?.meta.total ?? 0,
           restaurants: restaurants?.meta.total ?? 0,
         },
@@ -257,96 +231,98 @@ export default function Home() {
     };
   }, [reloadKey]);
 
-  const featured: FeaturedListing[] = [
-    ...dashboard.properties.map((item) => ({
+  const featured = useMemo<FeaturedListing[]>(() => {
+    const fromProperties = dashboard.properties.map((item) => ({
       id: item._id,
       title: item.name,
       location: item.town,
       category: item.type,
-      rating: Number(item.rating ?? 0),
-      totalRatings: Number(item.totalRatings ?? 0),
-      image: item.images?.[0],
-      price: dashboard.rooms
-        .filter((room) => room.property === item._id)
-        .reduce<number | undefined>(
-          (lowest, room) =>
-            lowest === undefined ? room.basePrice : Math.min(lowest, room.basePrice),
-          undefined
-        ),
-      currency: dashboard.rooms.find((room) => room.property === item._id)?.currency,
-      to: ROUTES.ACCOMMODATION,
-    })),
-    ...dashboard.accommodations.map((item) => ({
-      id: item._id,
-      title: item.name,
-      location: item.town,
-      category: item.type,
-      rating: Number(item.rating ?? 0),
-      totalRatings: Number(item.totalRatings ?? 0),
-      image: item.coverImage,
-      to: ROUTES.ACCOMMODATION,
-    })),
-    ...dashboard.restaurants.map((item) => ({
+      rating: numberOrZero(item.rating),
+      totalRatings: numberOrZero(item.totalRatings),
+      image: item.coverImage || item.images?.[0],
+      price: item.minPrice ?? undefined,
+      currency: item.currency,
+      to: `/accommodation/${item.slug || item._id}`,
+    }));
+
+    const fromRestaurants = dashboard.restaurants.map((item) => ({
       id: item._id,
       title: item.name,
       location: item.town,
       category: item.cuisineTypes?.[0] || "Restaurant",
-      rating: Number(item.rating ?? 0),
-      totalRatings: Number(item.totalRatings ?? 0),
-      image: item.coverImage,
+      rating: numberOrZero(item.rating),
+      totalRatings: numberOrZero(item.totalRatings),
+      image: item.coverImage || item.logo,
       to: ROUTES.RESTAURANT,
-    })),
-  ]
-    .sort(
-      (left, right) =>
-        right.rating - left.rating || right.totalRatings - left.totalRatings
-    )
-    .slice(0, 8);
+    }));
 
-  const destinations = dashboard.locations
-    .filter(
-      (location) =>
-        location.isOperational && ["town", "city"].includes(location.type)
-    );
+    return [...fromProperties, ...fromRestaurants]
+      .sort(
+        (left, right) =>
+          right.rating - left.rating ||
+          right.totalRatings - left.totalRatings,
+      )
+      .slice(0, 8);
+  }, [dashboard.properties, dashboard.restaurants]);
 
-  const upcomingActivities = [
-    ...dashboard.bookings
+  const destinations = useMemo(
+    () =>
+      dashboard.locations.filter(
+        (location) =>
+          location.isOperational &&
+          ["town", "city"].includes(location.type),
+      ),
+    [dashboard.locations],
+  );
+
+  const upcomingActivities = useMemo(() => {
+    const fromBookings = dashboard.bookings
       .filter(
         (booking) =>
-          !["cancelled", "refunded", "checked_out"].includes(booking.status) &&
-          new Date(booking.checkOut).getTime() >= Date.now()
+          !["cancelled", "refunded", "checked_out"].includes(
+            booking.status,
+          ) && new Date(booking.checkOut).getTime() >= Date.now(),
       )
       .map((booking) => ({
         id: booking._id,
-        title: booking.propertyName || booking.partnerName || "Accommodation",
+        title:
+          booking.propertyName ||
+          (typeof booking.property === "object"
+            ? booking.property?.name
+            : null) ||
+          "Accommodation",
         detail: booking.roomName || booking.status.replace(/_/g, " "),
         date: booking.checkIn,
         status: booking.status,
         image: booking.propertyImages?.[0],
         to: ROUTES.BOOKING,
-      })),
-    ...dashboard.trips
+      }));
+
+    const fromTrips = dashboard.trips
       .filter(
         (trip) =>
           !["cancelled", "completed", "failed"].includes(trip.status) &&
           (new Date(trip.scheduledAt).getTime() >= Date.now() ||
-            ["ongoing", "in_progress"].includes(trip.status))
+            ["ongoing", "in_progress"].includes(trip.status)),
       )
       .map((trip) => ({
         id: trip._id,
-        title: `${trip.pickup.town || "Pickup"} to ${trip.dropoff.town || "Destination"}`,
+        title: `${trip.pickup?.town || "Pickup"} to ${
+          trip.dropoff?.town || "Destination"
+        }`,
         detail: trip.type,
         date: trip.scheduledAt,
         status: trip.status,
-        image: null,
+        image: null as string | null,
         to: ROUTES.TRIP,
-      })),
-    ...dashboard.orders
+      }));
+
+    const fromOrders = dashboard.orders
       .filter(
         (order) =>
           !["cancelled", "delivered", "completed", "rejected"].includes(
-            order.status
-          )
+            order.status,
+          ),
       )
       .map((order) => ({
         id: order._id,
@@ -356,13 +332,18 @@ export default function Home() {
         status: order.status,
         image: order.restaurantLogo,
         to: ROUTES.ORDER,
-      })),
-  ]
-    .sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime())
-    .slice(0, 4);
+      }));
+
+    return [...fromBookings, ...fromTrips, ...fromOrders]
+      .sort(
+        (left, right) =>
+          new Date(left.date).getTime() - new Date(right.date).getTime(),
+      )
+      .slice(0, 4);
+  }, [dashboard.bookings, dashboard.trips, dashboard.orders]);
 
   const serviceCounts: Record<string, string> = {
-    Accommodation: `${dashboard.totals.accommodations + dashboard.totals.properties} listings`,
+    Accommodation: `${dashboard.totals.properties} listings`,
     "Food & Drinks": `${dashboard.totals.restaurants} restaurants`,
     Transport: "Request a ride",
     Payments: dashboard.wallet
@@ -373,19 +354,24 @@ export default function Home() {
   const serviceImage = (title: string): string | undefined => {
     if (title === "Accommodation") {
       return (
-        dashboard.accommodations.find((item) => item.coverImage)?.coverImage ??
+        dashboard.properties.find(
+          (item) => item.coverImage || item.images?.[0],
+        )?.coverImage ??
         dashboard.properties.find((item) => item.images?.[0])?.images?.[0]
       );
     }
     if (title === "Food & Drinks") {
-      return dashboard.restaurants.find((item) => item.coverImage)?.coverImage ?? undefined;
+      return dashboard.restaurants.find((item) => item.coverImage)
+        ?.coverImage as string | undefined;
     }
     return undefined;
   };
 
   const latestActivity = dashboard.notifications.slice(0, 3);
   const heroImage =
-    dashboard.accommodations.find((item) => item.coverImage)?.coverImage ??
+    dashboard.properties.find(
+      (item) => item.coverImage || item.images?.[0],
+    )?.coverImage ??
     dashboard.properties.find((item) => item.images?.[0])?.images?.[0] ??
     dashboard.restaurants.find((item) => item.coverImage)?.coverImage;
 
@@ -402,7 +388,7 @@ export default function Home() {
     navigate(
       query
         ? `${ROUTES.SEARCH}?q=${encodeURIComponent(query)}`
-        : ROUTES.SEARCH
+        : ROUTES.SEARCH,
     );
   };
 
@@ -416,7 +402,10 @@ export default function Home() {
           >
             <p>
               Some live dashboard data could not be loaded:{" "}
-              <span className="font-semibold">{failedSections.join(", ")}</span>.
+              <span className="font-semibold">
+                {failedSections.join(", ")}
+              </span>
+              .
             </p>
             <button
               type="button"
@@ -490,7 +479,7 @@ export default function Home() {
               </button>
             </form>
           </div>
-          <p           className="absolute bottom-8 right-8 hidden -rotate-6 font-serif text-2xl italic leading-tight text-white drop-shadow-lg xl:block">
+          <p className="absolute bottom-8 right-8 hidden -rotate-6 font-serif text-2xl italic leading-tight text-white drop-shadow-lg xl:block">
             Explore
             <br />
             Kenya
@@ -506,44 +495,46 @@ export default function Home() {
             {SERVICES.map(({ title, icon: Icon, to }) => {
               const image = serviceImage(title);
               return (
-              <Link
-                key={title}
-                to={to}
-                className="group relative flex min-h-[228px] flex-col overflow-hidden rounded-2xl border border-[#e9ddcc] bg-white shadow-[0_5px_18px_rgba(69,48,28,.05)] transition duration-200 hover:-translate-y-1 hover:border-[#d9bb91] hover:shadow-[0_14px_30px_rgba(69,48,28,.13)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a66b2b]"
-              >
-                <div className="relative h-[126px] shrink-0 overflow-hidden bg-gradient-to-br from-[#f4e7d4] via-[#f5eee3] to-[#e5cfad] sm:h-[142px]">
-                  {image ? (
-                    <img
-                      src={image}
-                      alt=""
-                      loading="lazy"
-                      className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
-                    />
-                  ) : (
-                    <div className="relative flex h-full items-center justify-center overflow-hidden text-[#a66b2b]">
-                      <span className="absolute -right-5 -top-12 h-36 w-36 rounded-full border border-white/50" />
-                      <span className="absolute -bottom-20 -left-8 h-40 w-40 rounded-full border border-white/50" />
-                      <Icon className="relative h-12 w-12 opacity-80 transition duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]" />
-                    </div>
-                  )}
-                  <span className="absolute inset-0 bg-gradient-to-t from-[#24170e]/35 via-transparent to-[#24170e]/10" />
-                  <span className="absolute right-3 top-3 grid size-9 place-items-center rounded-xl border border-white/50 bg-white/90 text-[#87531d] shadow-sm backdrop-blur-sm transition-transform group-hover:scale-105">
-                    <Icon className="h-[18px] w-[18px]" />
-                  </span>
-                </div>
-                <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
-                  <p className="m-0 truncate text-sm font-semibold tracking-[-.01em] text-text-primary sm:text-base">
-                    {title}
-                  </p>
-                  <p className="mb-3 mt-1.5 min-h-[18px] text-xs leading-relaxed text-text-muted">
-                    {loading ? "Finding what’s available..." : serviceCounts[title]}
-                  </p>
-                  <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#a45f19]">
-                    Explore service
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                  </span>
-                </div>
-              </Link>
+                <Link
+                  key={title}
+                  to={to}
+                  className="group relative flex min-h-[228px] flex-col overflow-hidden rounded-2xl border border-[#e9ddcc] bg-white shadow-[0_5px_18px_rgba(69,48,28,.05)] transition duration-200 hover:-translate-y-1 hover:border-[#d9bb91] hover:shadow-[0_14px_30px_rgba(69,48,28,.13)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#a66b2b]"
+                >
+                  <div className="relative h-[126px] shrink-0 overflow-hidden bg-gradient-to-br from-[#f4e7d4] via-[#f5eee3] to-[#e5cfad] sm:h-[142px]">
+                    {image ? (
+                      <img
+                        src={image}
+                        alt=""
+                        loading="lazy"
+                        className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+                      />
+                    ) : (
+                      <div className="relative flex h-full items-center justify-center overflow-hidden text-[#a66b2b]">
+                        <span className="absolute -right-5 -top-12 h-36 w-36 rounded-full border border-white/50" />
+                        <span className="absolute -bottom-20 -left-8 h-40 w-40 rounded-full border border-white/50" />
+                        <Icon className="relative h-12 w-12 opacity-80 transition duration-300 group-hover:scale-110 group-hover:rotate-[-5deg]" />
+                      </div>
+                    )}
+                    <span className="absolute inset-0 bg-gradient-to-t from-[#24170e]/35 via-transparent to-[#24170e]/10" />
+                    <span className="absolute right-3 top-3 grid size-9 place-items-center rounded-xl border border-white/50 bg-white/90 text-[#87531d] shadow-sm backdrop-blur-sm transition-transform group-hover:scale-105">
+                      <Icon className="h-[18px] w-[18px]" />
+                    </span>
+                  </div>
+                  <div className="flex flex-1 flex-col px-4 pb-4 pt-3.5">
+                    <p className="m-0 truncate text-sm font-semibold tracking-[-.01em] text-text-primary sm:text-base">
+                      {title}
+                    </p>
+                    <p className="mb-3 mt-1.5 min-h-[18px] text-xs leading-relaxed text-text-muted">
+                      {loading
+                        ? "Finding what's available..."
+                        : serviceCounts[title]}
+                    </p>
+                    <span className="mt-auto inline-flex items-center gap-1.5 text-xs font-semibold text-[#a45f19]">
+                      Explore service
+                      <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    </span>
+                  </div>
+                </Link>
               );
             })}
           </div>
@@ -580,7 +571,7 @@ export default function Home() {
                       )}
                     </span>
                   )}
-                  <span className="absolute right-1.5 top-1.5 rounded-full bg-[#238451] px-1.5 py-0.5 text-[8px] font-semibold text-white">
+                  <span className="absolute right-1.5 top-1.5 rounded-full bg-[#238451] px-1.5 py-0.5 text-[8px] font-semibold capitalize text-white">
                     {stay.category}
                   </span>
                 </div>
@@ -595,14 +586,19 @@ export default function Home() {
                   <p className="flex items-center gap-1 text-[10px] text-text-secondary">
                     <Star className="h-3 w-3 fill-[#e9a32c] text-[#e9a32c]" />
                     {stay.rating.toFixed(1)}
-                    <span className="text-text-muted">
-                      ({stay.totalRatings} reviews)
-                    </span>
+                    {stay.totalRatings > 0 && (
+                      <span className="text-text-muted">
+                        ({stay.totalRatings} reviews)
+                      </span>
+                    )}
                   </p>
                   {stay.price !== undefined && stay.currency && (
                     <p className="text-[11px] font-semibold text-text-primary">
                       {formatCurrency(stay.price, stay.currency)}
-                      <span className="font-normal text-text-muted"> / night</span>
+                      <span className="font-normal text-text-muted">
+                        {" "}
+                        / night
+                      </span>
                     </p>
                   )}
                 </div>
@@ -651,7 +647,9 @@ export default function Home() {
               {destinations.slice(0, 4).map((location) => (
                 <Link
                   key={location._id}
-                  to={`${ROUTES.SEARCH}?town=${encodeURIComponent(location.name)}`}
+                  to={`${ROUTES.SEARCH}?town=${encodeURIComponent(
+                    location.name,
+                  )}`}
                   className="flex min-h-[68px] items-center gap-3 rounded-lg border border-[#eadfce] bg-white/70 px-3 py-3 transition hover:border-[#d9c5a5] hover:shadow-sm"
                 >
                   <MapPin className="h-5 w-5 shrink-0 text-[#a66b2b]" />
@@ -679,12 +677,14 @@ export default function Home() {
             {[
               {
                 icon: Bed,
-                title: loading ? "…" : String(dashboard.totals.accommodations + dashboard.totals.properties),
+                title: loading ? "…" : String(dashboard.totals.properties),
                 sub: "Stays & lodges",
               },
               {
                 icon: Utensils,
-                title: loading ? "…" : String(dashboard.totals.restaurants),
+                title: loading
+                  ? "…"
+                  : String(dashboard.totals.restaurants),
                 sub: "Dining partners",
               },
               {
@@ -695,14 +695,17 @@ export default function Home() {
               {
                 icon: CreditCard,
                 title: dashboard.wallet
-                  ? formatCurrency(dashboard.wallet.balance, dashboard.wallet.currency)
+                  ? formatCurrency(
+                      dashboard.wallet.balance,
+                      dashboard.wallet.currency,
+                    )
                   : loading
                     ? "…"
                     : "—",
                 sub: "Wallet balance",
               },
             ].map(({ icon: Icon, title, sub }) => (
-              <div key={title} className="flex items-center gap-3">
+              <div key={sub} className="flex items-center gap-3">
                 <Icon className="h-5 w-5 shrink-0 text-[#f7a12c]" />
                 <span className="min-w-0 text-[11px] leading-tight sm:text-xs">
                   <span className="block truncate font-semibold">{title}</span>
@@ -832,7 +835,7 @@ export default function Home() {
                     : dashboard.wallet
                       ? formatCurrency(
                           dashboard.wallet.balance,
-                          dashboard.wallet.currency
+                          dashboard.wallet.currency,
                         )
                       : "Unavailable"}
                 </span>

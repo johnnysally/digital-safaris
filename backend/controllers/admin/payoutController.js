@@ -3,6 +3,7 @@ import SystemSetting from "../../models/admin/SystemSetting.js";
 import ApiError from "../../utils/apiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import asyncHandler from "../../utils/asyncHandler.js";
+import { runPayoutJob } from "../../schedulers/payoutScheduler.js";
 
 const list = asyncHandler(async (req, res) => {
   const { status, type, page = 1, limit = 20 } = req.query;
@@ -63,4 +64,21 @@ const reject = asyncHandler(async (req, res) => {
   res.status(200).json(new ApiResponse(200, payout, "Payout rejected"));
 });
 
-export { list, getSettings, updateSettings, approve, reject };
+const runNow = asyncHandler(async (req, res) => {
+  const { partnerType } = req.body || {};
+
+  if (partnerType && !["restaurant", "transport", "accommodation"].includes(partnerType)) {
+    throw new ApiError(400, "partnerType must be restaurant, transport, or accommodation");
+  }
+
+  const result = await runPayoutJob({ force: true, partnerType: partnerType || null });
+
+  const msg =
+    result.created > 0
+      ? `Payout job ran — ${result.created} payout(s) created`
+      : "Payout job ran — no eligible wallets";
+
+  res.status(200).json(new ApiResponse(200, result, msg));
+});
+
+export { list, getSettings, updateSettings, approve, reject, runNow };

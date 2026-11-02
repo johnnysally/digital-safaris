@@ -248,6 +248,9 @@ const propertyRejected = (recipient, payload = {}) =>
 const roomApproved = (recipient, payload = {}) =>
   deliver("roomApproved", recipient, payload);
 
+const roomAssigned = (recipient, payload = {}) =>
+  deliver("roomAssigned", recipient, payload);
+
 const newOrderReceived = (recipient, payload = {}) =>
   deliver("newOrderReceived", recipient, payload);
 
@@ -454,6 +457,7 @@ export {
   propertyApproved,
   propertyRejected,
   roomApproved,
+  roomAssigned,
   newOrderReceived,
   newBroadcastReceived,
   orderCancelledByCustomer,

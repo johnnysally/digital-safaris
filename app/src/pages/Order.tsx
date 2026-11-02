@@ -9,7 +9,8 @@ import Select from "../components/ui/Select";
 import Pagination from "../components/ui/Pagination";
 import Alert from "../components/ui/Alert";
 import Spinner from "../components/ui/Spinner";
-import ConfirmDialog from "../components/ui/ConfirmDialog";
+import Modal from "../components/ui/Modal";
+import Input from "../components/ui/Input";
 import { orderApi } from "../api";
 import { useToast } from "../context/toastContext";
 import { DEFAULT_PAGE_SIZE } from "../utils/constants";
@@ -40,6 +41,12 @@ function statusVariant(status: string): Variant {
   }
 }
 
+function extractError(err: unknown, fallback: string): string {
+  const msg = (err as { response?: { data?: { message?: string } } })
+    ?.response?.data?.message;
+  return typeof msg === "string" && msg ? msg : fallback;
+}
+
 export default function Order() {
   const { error: toastError, success: toastSuccess } = useToast();
   const [rows, setRows] = useState<OrderType[]>([]);
@@ -54,6 +61,7 @@ export default function Order() {
   const [detailsLoading, setDetailsLoading] = useState(false);
 
   const [cancelOpen, setCancelOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
   const [cancelLoading, setCancelLoading] = useState(false);
   const [reorderLoading, setReorderLoading] = useState(false);
 
@@ -99,15 +107,19 @@ export default function Order() {
     if (!details) return;
     setCancelLoading(true);
     try {
-      const updated = await orderApi.cancel(details._id);
+      const updated = await orderApi.cancel(
+        details._id,
+        cancelReason.trim() || undefined
+      );
       setDetails(updated);
       setRows((prev) =>
         prev.map((r) => (r._id === updated._id ? updated : r))
       );
       toastSuccess("Order cancelled");
       setCancelOpen(false);
-    } catch {
-      toastError("Could not cancel order");
+      setCancelReason("");
+    } catch (err) {
+      toastError(extractError(err, "Could not cancel order"));
     } finally {
       setCancelLoading(false);
     }
@@ -121,8 +133,8 @@ export default function Order() {
       toastSuccess("Order placed", "A new order has been created.");
       setDetailsId(null);
       fetchData();
-    } catch {
-      toastError("Could not reorder");
+    } catch (err) {
+      toastError(extractError(err, "Could not reorder"));
     } finally {
       setReorderLoading(false);
     }
@@ -358,6 +370,23 @@ export default function Order() {
               </div>
             )}
 
+            {details.status === "cancelled" && details.cancellationReason && (
+              <div className="rounded-md border border-border bg-surface-alt p-3 text-sm">
+                <p className="text-xs text-text-muted">Cancellation reason</p>
+                <p className="mt-1 text-text-primary">
+                  {details.cancellationReason}
+                </p>
+                {details.cancelledBy && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    Cancelled by {details.cancelledBy}
+                    {details.cancelledAt
+                      ? ` · ${formatDateTime(details.cancelledAt)}`
+                      : ""}
+                  </p>
+                )}
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2 pt-2">
               {["pending", "accepted"].includes(details.status) && (
                 <Button
@@ -385,16 +414,48 @@ export default function Order() {
         )}
       </Drawer>
 
-      <ConfirmDialog
+      <Modal
         isOpen={cancelOpen}
-        onClose={() => setCancelOpen(false)}
-        onConfirm={handleCancel}
+        onClose={() => {
+          setCancelOpen(false);
+          setCancelReason("");
+        }}
         title="Cancel order?"
-        description="The restaurant may already be preparing your food. Refund depends on their policy."
-        confirmText="Cancel order"
-        variant="danger"
-        loading={cancelLoading}
-      />
+        size="sm"
+        footer={
+          <>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setCancelOpen(false);
+                setCancelReason("");
+              }}
+            >
+              Keep order
+            </Button>
+            <Button
+              variant="danger"
+              loading={cancelLoading}
+              onClick={handleCancel}
+            >
+              Cancel order
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-3">
+          <p className="text-sm text-text-muted">
+            The restaurant may already be preparing your food. Refunds depend on
+            their policy.
+          </p>
+          <Input
+            label="Reason (optional)"
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            placeholder="Why are you cancelling?"
+          />
+        </div>
+      </Modal>
     </div>
   );
 }
