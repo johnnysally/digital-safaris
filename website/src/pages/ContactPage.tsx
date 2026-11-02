@@ -3,6 +3,8 @@ import { Mail, Phone, MapPin, Send, MessageCircle, CheckCircle2 } from "lucide-r
 import { sendContact } from "../api/publicApi";
 import { useSiteConfig } from "../context/SiteConfigContext";
 
+const CONTACT_PHONE = "+254759589399";
+
 export const ContactPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -14,7 +16,7 @@ export const ContactPage: React.FC = () => {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const config = useSiteConfig();
-  const whatsappUrl = config?.whatsapp_number ? `https://wa.me/${config.whatsapp_number.replace(/\D/g, "")}` : null;
+  const whatsappUrl = `https://wa.me/${CONTACT_PHONE.replace(/\D/g, "")}`;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -87,7 +89,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <h5 className="font-bold text-[#191816]">Telephone</h5>
-                    <p className="text-[#5e5950]">{config?.support_phone || "Contact support"}</p>
+                    <a href={`tel:${CONTACT_PHONE}`} className="text-[#c47c2b] underline">{CONTACT_PHONE}</a>
                   </div>
                 </div>
 
@@ -97,7 +99,7 @@ export const ContactPage: React.FC = () => {
                   </div>
                   <div>
                     <h5 className="font-bold text-[#191816]">WhatsApp Support</h5>
-                    <a href={whatsappUrl || undefined} target="_blank" rel="noopener noreferrer" className="text-[#c47c2b] underline">
+                    <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="text-[#c47c2b] underline">
                       Chat on WhatsApp ➔
                     </a>
                   </div>

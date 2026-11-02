@@ -1,6 +1,6 @@
 import React, { FormEvent, useEffect, useState } from 'react';
 import { ArrowLeft, ArrowRight, CheckCircle2, Building2, CircleAlert, Loader2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSiteConfig } from '../context/SiteConfigContext';
 import { registerPartnerByType } from '../api/partnerApi';
 import { api } from '../api/axios';
@@ -62,11 +62,11 @@ interface TownOption {
 
 export const PartnerRegistrationPage: React.FC = () => {
     const config = useSiteConfig();
+    const navigate = useNavigate();
     const [step, setStep] = useState<'type' | 'form'>('type');
     const [selectedType, setSelectedType] = useState<BusinessType>('');
     const [formData, setFormData] = useState<FormData>(initialForm);
     const [towns, setTowns] = useState<TownOption[]>([]);
-    const [submitted, setSubmitted] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
 
@@ -139,7 +139,9 @@ export const PartnerRegistrationPage: React.FC = () => {
             }
 
             await registerPartnerByType(selectedType, payload as never);
-            setSubmitted(true);
+            navigate('/partner-registration/confirmation', {
+                state: { email: formData.email.trim() },
+            });
         } catch (submitError: unknown) {
             const err = submitError as {
                 response?: { data?: { message?: string } };
@@ -154,40 +156,6 @@ export const PartnerRegistrationPage: React.FC = () => {
             setSubmitting(false);
         }
     };
-
-    if (submitted) {
-        const loginUrl = config?.app_links?.partner_landing;
-        return (
-            <div className="bg-[#f9f7f4] min-h-screen text-[#191816] flex items-center justify-center px-4">
-                <div className="text-center max-w-md">
-                    <div className="mx-auto w-16 h-16 rounded-full bg-[#f4efe8] flex items-center justify-center text-[#c47c2b] mb-6">
-                        <CheckCircle2 className="w-8 h-8" />
-                    </div>
-                    <h1 className="text-3xl font-extrabold">Application received.</h1>
-                    <p className="mt-3 text-sm text-[#5e5950] max-w-sm mx-auto leading-relaxed">
-                        Thanks for registering with {config?.site_name || 'DigitalSafaris'}. Our team will review your application and notify you once approved.
-                    </p>
-                    <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-                        {loginUrl && (
-                            <a
-                                href={String(loginUrl)}
-                                className="inline-flex items-center gap-2 bg-[#c47c2b] hover:bg-[#b06d20] text-white text-xs font-bold uppercase tracking-wider px-6 py-3.5 rounded-full transition-colors"
-                            >
-                                Go to partner portal
-                                <ArrowRight className="w-4 h-4" />
-                            </a>
-                        )}
-                        <Link
-                            to="/"
-                            className="inline-flex items-center gap-2 border border-[#dcd3c7] text-[#191816] text-xs font-bold uppercase tracking-wider px-6 py-3.5 rounded-full hover:bg-[#eae3d9] transition-colors"
-                        >
-                            Return home
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="bg-[#f9f7f4] min-h-screen text-[#191816] pt-32 pb-20">

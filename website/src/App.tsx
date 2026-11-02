@@ -16,6 +16,7 @@ const FAQPage = lazy(() => import("./pages/FAQPage").then(({ FAQPage }) => ({ de
 const ContactPage = lazy(() => import("./pages/ContactPage").then(({ ContactPage }) => ({ default: ContactPage })));
 const GetStartedPage = lazy(() => import("./pages/GetStartedPage").then(({ GetStartedPage }) => ({ default: GetStartedPage })));
 const PartnerRegistrationPage = lazy(() => import("./pages/PartnerRegistrationPage").then(({ PartnerRegistrationPage }) => ({ default: PartnerRegistrationPage })));
+const PartnerRegistrationConfirmationPage = lazy(() => import("./pages/PartnerRegistrationConfirmationPage").then(({ PartnerRegistrationConfirmationPage }) => ({ default: PartnerRegistrationConfirmationPage })));
 const ServiceDetailPage = lazy(() => import("./pages/ServiceDetailPage").then(({ ServiceDetailPage }) => ({ default: ServiceDetailPage })));
 const NotFoundPage = lazy(() => import("./pages/NotFoundPage").then(({ NotFoundPage }) => ({ default: NotFoundPage })));
 const LegalPage = lazy(() => import("./pages/LegalPage").then(({ LegalPage }) => ({ default: LegalPage })));
@@ -91,6 +92,7 @@ export const App: React.FC = () => {
                 <Route path="/contact" element={<ContactPage />} />
                 <Route path="/get-started" element={<GetStartedPage />} />
                 <Route path="/partner-registration" element={<PartnerRegistrationPage />} />
+                <Route path="/partner-registration/confirmation" element={<PartnerRegistrationConfirmationPage />} />
                 <Route path="/privacy-policy" element={<LegalPage documentType="privacy-policy" />} />
                 <Route path="/terms-of-service" element={<LegalPage documentType="terms-of-service" />} />
                 <Route path="*" element={<NotFoundPage />} />
