@@ -15,6 +15,7 @@ const pageMetadata: Record<string, { title: string; description: string }> = {
   "/contact": { title: "Contact DigitalSafaris", description: "Contact the DigitalSafaris support team about travel services, bookings, or becoming a business partner." },
   "/get-started": { title: "Get Started with DigitalSafaris", description: "Choose your path and start using the DigitalSafaris customer or partner platform." },
   "/partner-registration": { title: "Register as a DigitalSafaris Partner", description: "Apply to join DigitalSafaris and connect your hospitality business with travelers across Kenya." },
+  "/partner-registration/confirmation": { title: "Registration Confirmed | DigitalSafaris", description: "Your DigitalSafaris partner registration has been received. We'll be in touch shortly." },
   "/privacy-policy": { title: "Privacy Policy | DigitalSafaris", description: "Read the DigitalSafaris privacy policy and learn how personal information is handled." },
   "/terms-of-service": { title: "Terms of Service | DigitalSafaris", description: "Read the DigitalSafaris terms of service." },
 };
@@ -28,6 +29,7 @@ const pageLabels: Record<string, string> = {
   contact: "Contact",
   "get-started": "Get Started",
   "partner-registration": "Partner Registration",
+  confirmation: "Confirmation",
   "privacy-policy": "Privacy Policy",
   "terms-of-service": "Terms of Service",
 };
@@ -57,9 +59,12 @@ export const SEO: React.FC = () => {
   const config = useSiteConfig();
   const type = pathname.startsWith("/services/") ? pathname.split("/")[2] : undefined;
   const service = type ? SERVICES_DATA.find((item) => item.id === type) : undefined;
+  const parentPath = `/${pathname.split("/").filter(Boolean)[0] || ""}`;
   const metadata = service
     ? { title: `${service.badge} in Kenya | DigitalSafaris`, description: service.description }
-    : pageMetadata[pathname] || { title: "Page Not Found | DigitalSafaris", description: defaultDescription };
+    : pageMetadata[pathname] ||
+      pageMetadata[parentPath] ||
+      { title: "Page Not Found | DigitalSafaris", description: defaultDescription };
   const siteName = config?.site_name || "DigitalSafaris";
   const canonicalUrl = `${window.location.origin}${pathname}`;
 

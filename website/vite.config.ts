@@ -8,4 +8,8 @@ export default defineConfig({
         port: 3003,
         host: true,
     },
+    preview: {
+        port: 3003,
+        host: true,
+    },
 });
