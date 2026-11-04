@@ -53,8 +53,14 @@ const paymentApi = {
     return unwrap<CustomerPayment>(res.data);
   },
 
-  async retry(id: string, phone?: string): Promise<{ reference: string; checkoutRequestId?: string }> {
-    const res = await axios.post(`/customer/payments/${id}/retry`, { phone });
+  async retry(
+    id: string,
+    payload?: { phone?: string }
+  ): Promise<{ reference: string; checkoutRequestId?: string }> {
+    const res = await axios.post(
+      `/customer/payments/${id}/retry`,
+      payload ?? {}
+    );
     return unwrap<{ reference: string; checkoutRequestId?: string }>(res.data);
   },
 

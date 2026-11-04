@@ -19,6 +19,7 @@ import { capitalize } from "../utils/helpers";
 import type { CustomerPayment, PaginationMeta } from "../types";
 
 type Variant = "success" | "warning" | "danger" | "neutral";
+type MethodFilter = "" | "mpesa" | "stripe" | "wallet";
 
 function statusVariant(status: string): Variant {
   switch (status) {
@@ -45,7 +46,7 @@ export default function Payment() {
   const [meta, setMeta] = useState<PaginationMeta | null>(null);
   const [page, setPage] = useState(1);
   const [status, setStatus] = useState("");
-  const [method, setMethod] = useState("");
+  const [method, setMethod] = useState<MethodFilter>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -137,7 +138,11 @@ export default function Payment() {
     setRows((prev) =>
       prev.map((r) =>
         r._id === updated._id
-          ? { ...r, status: updated.status, failureReason: updated.failureReason }
+          ? {
+              ...r,
+              status: updated.status,
+              failureReason: updated.failureReason,
+            }
           : r
       )
     );
@@ -200,7 +205,10 @@ export default function Payment() {
       }
 
       if (pollRef.current.attempts >= POLL_MAX_ATTEMPTS) {
-        toastError("Still pending", "If you entered your PIN, try again soon.");
+        toastError(
+          "Still pending",
+          "If you entered your PIN, try again soon."
+        );
         stopPolling();
         return;
       }
@@ -221,7 +229,9 @@ export default function Payment() {
         retryPhone.trim() !==
           ((details as { meta?: { phone?: string } }).meta?.phone || "");
 
-      const payload = phoneChanged ? { phone: retryPhone.trim() } : {};
+      const payload: { phone?: string } = phoneChanged
+        ? { phone: retryPhone.trim() }
+        : {};
 
       const res = await paymentApi.retry(details._id, payload);
       toastSuccess("STK sent", "Enter your M-Pesa PIN on your phone.");
@@ -388,7 +398,7 @@ export default function Payment() {
             placeholder="All methods"
             value={method}
             onChange={(e) => {
-              setMethod(e.target.value);
+              setMethod(e.target.value as MethodFilter);
               setPage(1);
             }}
             options={[
@@ -521,7 +531,9 @@ export default function Payment() {
               <Alert variant="info" title="Waiting for M-Pesa…">
                 <div className="flex items-center gap-2">
                   <Spinner size="sm" />
-                  <span>Checking every 3 seconds. Do not close this panel.</span>
+                  <span>
+                    Checking every 3 seconds. Do not close this panel.
+                  </span>
                 </div>
               </Alert>
             )}

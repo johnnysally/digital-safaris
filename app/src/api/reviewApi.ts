@@ -1,5 +1,5 @@
 import axios, { unwrap, unwrapList } from "./axios";
-import type { Review, Paginated, ListParams } from "../../types";
+import type { Review, Paginated, ListParams } from "../types";
 
 export interface CreateReviewPayload {
   targetType: "accommodation" | "restaurant" | "transport";

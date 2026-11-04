@@ -1,6 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search as SearchIcon, MapPin, Star, Bed, Utensils } from "lucide-react";
+import {
+  Search as SearchIcon,
+  MapPin,
+  Star,
+  Bed,
+  Utensils,
+} from "lucide-react";
 import Card from "../components/ui/Card";
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
@@ -15,12 +21,7 @@ import { searchApi } from "../api";
 import { useToast } from "../context/toastContext";
 import { ROUTES, DEFAULT_PAGE_SIZE } from "../utils/constants";
 import { formatCurrency } from "../utils/formatCurrency";
-import type {
-  Restaurant,
-  Accommodation,
-  Property,
-  Location,
-} from "../types";
+import type { Restaurant, Property, Location } from "../types";
 
 const TABS = [
   { key: "all", label: "All" },
@@ -40,7 +41,7 @@ export default function Search() {
   const [locations, setLocations] = useState<Location[]>([]);
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [accommodations, setAccommodations] = useState<Accommodation[]>([]);
+  const [accommodations, setAccommodations] = useState<Property[]>([]);
   const [properties, setProperties] = useState<Property[]>([]);
 
   const [loading, setLoading] = useState(false);
@@ -287,13 +288,17 @@ export default function Search() {
                   style={{
                     backgroundImage: a.coverImage
                       ? `url(${a.coverImage})`
-                      : undefined,
+                      : a.images?.[0]
+                        ? `url(${a.images[0]})`
+                        : undefined,
                   }}
                 />
                 <div className="space-y-2 p-4">
                   <div className="flex items-start gap-2">
                     <Avatar
-                      src={a.logo ?? undefined}
+                      src={
+                        a.coverImage ?? a.images?.[0] ?? undefined
+                      }
                       fallback={a.name}
                       size="sm"
                     />

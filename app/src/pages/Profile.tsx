@@ -10,6 +10,13 @@ import {
   Heart,
   Camera,
   Trash2,
+  Download,
+  Copy,
+  Check,
+  Link2,
+  Share2,
+  MessageCircle,
+  Send,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import Card from "../components/ui/Card";
@@ -21,12 +28,19 @@ import Spinner from "../components/ui/Spinner";
 import Modal from "../components/ui/Modal";
 import ConfirmDialog from "../components/ui/ConfirmDialog";
 import { customerApi, axiosInstance, unwrap } from "../api";
+import publicApi from "../api/publicApi";
 import { useAuth } from "../context/authContext";
 import { useToast } from "../context/toastContext";
 import { ROUTES } from "../utils/constants";
 import { formatDate } from "../utils/formatDate";
 import { fullName } from "../utils/helpers";
-import type { CustomerProfile, CustomerPreferences } from "../types";
+import type {
+  CustomerProfile,
+  CustomerPreferences,
+  PublicDownload,
+} from "../types";
+
+type CopyTarget = "code" | "link" | null;
 
 export default function Profile() {
   const { customer, logout, setCustomer } = useAuth();
@@ -36,6 +50,9 @@ export default function Profile() {
   const [profile, setProfile] = useState<CustomerProfile | null>(null);
   const [preference, setPreference] = useState<CustomerPreferences | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const [appDownload, setAppDownload] = useState<PublicDownload | null>(null);
+  const [publicAppUrl, setPublicAppUrl] = useState<string>("");
 
   const [editOpen, setEditOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -53,6 +70,9 @@ export default function Profile() {
   const [logoutOpen, setLogoutOpen] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
 
+  const [shareOpen, setShareOpen] = useState(false);
+  const [copied, setCopied] = useState<CopyTarget>(null);
+
   const load = async () => {
     setLoading(true);
     try {
@@ -69,6 +89,18 @@ export default function Profile() {
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    publicApi
+      .latestAndroidApk()
+      .then(setAppDownload)
+      .catch(() => setAppDownload(null));
+
+    publicApi
+      .publicAppUrl()
+      .then(setPublicAppUrl)
+      .catch(() => setPublicAppUrl(""));
   }, []);
 
   const openEdit = () => {
@@ -110,9 +142,9 @@ export default function Profile() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const body = unwrap<{ avatar?: string } | { customer?: { avatar?: string } }>(
-        res.data
-      );
+      const body = unwrap<
+        { avatar?: string } | { customer?: { avatar?: string } }
+      >(res.data);
       const avatarUrl =
         (body as { avatar?: string }).avatar ||
         (body as { customer?: { avatar?: string } }).customer?.avatar;
@@ -195,6 +227,64 @@ export default function Profile() {
       setLogoutLoading(false);
       setLogoutOpen(false);
     }
+  };
+
+  /* ---------------------------- Referral helpers ---------------------------- */
+
+  const referralCode = customer?.referralCode || "";
+  const referralLink =
+    referralCode && publicAppUrl
+      ? `${publicAppUrl}/register?ref=${encodeURIComponent(referralCode)}`
+      : "";
+
+  const shareMessage = referralLink
+    ? `Join me on Digital Safaris — book stays, food and rides. Use my code ${referralCode} or sign up here: ${referralLink}`
+    : "";
+
+  const copy = async (value: string, target: CopyTarget) => {
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+      } else {
+        const ta = document.createElement("textarea");
+        ta.value = value;
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+      }
+      setCopied(target);
+      setTimeout(() => setCopied(null), 2000);
+      toastSuccess("Copied to clipboard");
+    } catch {
+      toastError("Could not copy");
+    }
+  };
+
+  const openShare = async () => {
+    if (!referralCode || !referralLink) return;
+
+    if (typeof navigator.share === "function") {
+      try {
+        await navigator.share({
+          title: "Join me on Digital Safaris",
+          text: shareMessage,
+          url: referralLink,
+        });
+        return;
+      } catch (err) {
+        const name = (err as Error)?.name;
+        if (name === "AbortError") return;
+      }
+    }
+
+    setShareOpen(true);
+  };
+
+  const shareTo = (url: string) => {
+    window.open(url, "_blank", "noopener,noreferrer");
   };
 
   if (loading && !customer) {
@@ -301,6 +391,37 @@ export default function Profile() {
         </Link>
       </div>
 
+      {appDownload && (
+        <Card title="Get our mobile app">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-start gap-3">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary-500/10 text-secondary-600">
+                <Download className="h-5 w-5" />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-text-primary">
+                  Digital Safaris for Android
+                </p>
+                <p className="mt-0.5 text-xs text-text-muted">
+                  Version {appDownload.version} · {appDownload.size}
+                  {appDownload.minimumOs
+                    ? ` · Requires ${appDownload.minimumOs}`
+                    : ""}
+                </p>
+              </div>
+            </div>
+            <a
+              href={appDownload.url}
+              download
+              className="inline-flex items-center justify-center gap-2 rounded-md bg-secondary-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-secondary-600"
+            >
+              <Download className="h-4 w-4" />
+              Download APP
+            </a>
+          </div>
+        </Card>
+      )}
+
       <Card title="Details">
         <dl className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div className="flex items-start gap-3">
@@ -332,14 +453,64 @@ export default function Profile() {
               </dd>
             </div>
           </div>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start gap-3 md:col-span-2">
             <UserIcon className="mt-0.5 h-4 w-4 text-text-muted" />
-            <div>
+            <div className="min-w-0 flex-1">
               <dt className="text-xs uppercase tracking-wide text-text-muted">
                 Referral code
               </dt>
-              <dd className="font-mono text-sm text-text-primary">
-                {customer?.referralCode || "—"}
+              <dd className="mt-1 flex flex-wrap items-center gap-2">
+                <span className="font-mono text-sm text-text-primary">
+                  {referralCode || "—"}
+                </span>
+                {referralCode ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => copy(referralCode, "code")}
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-text-primary hover:bg-surface-alt"
+                    >
+                      {copied === "code" ? (
+                        <>
+                          <Check className="h-3 w-3 text-green-600" /> Copied
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="h-3 w-3" /> Copy
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => referralLink && copy(referralLink, "link")}
+                      disabled={!referralLink}
+                      className="inline-flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs font-medium text-text-primary hover:bg-surface-alt disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {copied === "link" ? (
+                        <>
+                          <Check className="h-3 w-3 text-green-600" /> Link
+                          copied
+                        </>
+                      ) : (
+                        <>
+                          <Link2 className="h-3 w-3" /> Copy link
+                        </>
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={openShare}
+                      disabled={!referralLink}
+                      className="inline-flex items-center gap-1 rounded-md bg-secondary-500 px-2 py-1 text-xs font-medium text-white hover:bg-secondary-600 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <Share2 className="h-3 w-3" /> Share
+                    </button>
+                  </>
+                ) : (
+                  <span className="text-xs text-text-muted">
+                    Your code will appear here once your account is active.
+                  </span>
+                )}
               </dd>
             </div>
           </div>
@@ -438,7 +609,11 @@ export default function Profile() {
         title="Edit profile"
         footer={
           <>
-            <Button variant="ghost" onClick={() => setEditOpen(false)} disabled={saving}>
+            <Button
+              variant="ghost"
+              onClick={() => setEditOpen(false)}
+              disabled={saving}
+            >
               Cancel
             </Button>
             <Button onClick={saveEdit} loading={saving}>
@@ -533,6 +708,139 @@ export default function Profile() {
 
           <p className="text-center text-xs text-text-muted">
             JPG, PNG, or WebP. Max 5 MB.
+          </p>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={shareOpen}
+        onClose={() => setShareOpen(false)}
+        title="Share your referral"
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div className="rounded-md border border-border bg-surface-alt p-3">
+            <p className="text-xs uppercase tracking-wide text-text-muted">
+              Your code
+            </p>
+            <p className="mt-1 font-mono text-sm text-text-primary">
+              {referralCode}
+            </p>
+            {referralLink && (
+              <p className="mt-2 text-xs text-text-muted break-all">
+                {referralLink}
+              </p>
+            )}
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(
+                  `https://wa.me/?text=${encodeURIComponent(shareMessage)}`
+                )
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <MessageCircle className="h-5 w-5 text-green-600" />
+              WhatsApp
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(`sms:?body=${encodeURIComponent(shareMessage)}`)
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <Phone className="h-5 w-5 text-blue-600" />
+              SMS
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(
+                  `mailto:?subject=${encodeURIComponent(
+                    "Join me on Digital Safaris"
+                  )}&body=${encodeURIComponent(shareMessage)}`
+                )
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <Mail className="h-5 w-5 text-secondary-600" />
+              Email
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(
+                  `https://t.me/share/url?url=${encodeURIComponent(
+                    referralLink
+                  )}&text=${encodeURIComponent(shareMessage)}`
+                )
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <Send className="h-5 w-5 text-sky-500" />
+              Telegram
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(
+                  `https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                    shareMessage
+                  )}`
+                )
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <Share2 className="h-5 w-5 text-neutral-900" />
+              X
+            </button>
+            <button
+              type="button"
+              onClick={() =>
+                shareTo(
+                  `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                    referralLink
+                  )}`
+                )
+              }
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              <Share2 className="h-5 w-5 text-blue-700" />
+              Facebook
+            </button>
+            <button
+              type="button"
+              onClick={() => copy(referralLink, "link")}
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              {copied === "link" ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Link2 className="h-5 w-5 text-text-muted" />
+              )}
+              {copied === "link" ? "Copied" : "Copy link"}
+            </button>
+            <button
+              type="button"
+              onClick={() => copy(referralCode, "code")}
+              className="flex flex-col items-center gap-2 rounded-md border border-border p-3 text-xs font-medium text-text-primary hover:bg-surface-alt"
+            >
+              {copied === "code" ? (
+                <Check className="h-5 w-5 text-green-600" />
+              ) : (
+                <Copy className="h-5 w-5 text-text-muted" />
+              )}
+              {copied === "code" ? "Copied" : "Copy code"}
+            </button>
+          </div>
+
+          <p className="text-center text-xs text-text-muted">
+            Share your code or link — you both benefit when a friend signs up
+            and books.
           </p>
         </div>
       </Modal>

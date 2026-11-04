@@ -12,14 +12,14 @@
       "resizeMode": "contain",
       "backgroundColor": "#2A1C12"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.digitalsafaris.mobile",
       "infoPlist": {
-        "NSHumanReadableCopyright": "© 2026 HDM. All rights reserved."
+        "NSHumanReadableCopyright": "© 2026 HDM. All rights reserved.",
+        "NSPhotoLibraryUsageDescription": "DigitalSafaris needs access to your photos so you can set a profile picture.",
+        "NSCameraUsageDescription": "DigitalSafaris needs access to your camera so you can take a profile photo."
       }
     },
     "android": {
@@ -33,19 +33,14 @@
           "action": "VIEW",
           "autoVerify": true,
           "data": [
-            {
-              "scheme": "digitalsafaris"
-            },
+            { "scheme": "digitalsafaris" },
             {
               "scheme": "https",
               "host": "digitalsafaris.co.ke",
               "pathPrefix": "/verify-email"
             }
           ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
+          "category": ["BROWSABLE", "DEFAULT"]
         }
       ]
     },
@@ -57,7 +52,14 @@
     },
     "plugins": [
       "expo-secure-store",
-      "expo-splash-screen"
+      "expo-splash-screen",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "DigitalSafaris needs access to your photos so you can set a profile picture.",
+          "cameraPermission": "DigitalSafaris needs access to your camera so you can take a profile photo."
+        }
+      ]
     ],
     "extra": {
       "apiUrl": "https://api.digitalsafaris.co.ke/api",
@@ -69,7 +71,6 @@
       "eas": {
         "projectId": "dc473d2a-b229-4622-a732-211567d342ad"
       }
-    },
-    "owner": "davixhdm"
+    }
   }
 }

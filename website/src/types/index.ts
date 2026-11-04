@@ -232,3 +232,30 @@ export interface ApiEnvelope<T> {
   timestamp?: string;
   data: T;
 }
+
+/* ------------------------------------------------------------------ */
+/* Public downloads                                                   */
+/* ------------------------------------------------------------------ */
+
+export type DownloadPlatform =
+  | "windows"
+  | "macos"
+  | "linux"
+  | "android"
+  | "ios"
+  | "web"
+  | "other";
+
+export interface PublicDownload {
+  _id: ID;
+  name: string;
+  platform: DownloadPlatform;
+  architecture: string;
+  version: string;
+  size: string;
+  url: string;
+  minimumOs?: string | null;
+  checksum?: string | null;
+  releaseNotes?: string | null;
+  createdAt: ISODate;
+}

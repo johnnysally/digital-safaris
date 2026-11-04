@@ -337,6 +337,7 @@ export interface MenuItem {
   ingredients?: string[];
   allergens?: string[];
   dietary?: string[];
+  category?: string | null;
   isAvailable: boolean;
   isFeatured: boolean;
   status: "active" | "inactive";
@@ -483,7 +484,7 @@ export interface Booking {
   _id: ID;
   reference: string;
   customer: ID;
-  partner: ID;
+  partner: ID | { _id: ID } | null;
   property: ID | BookingPropertySummary;
   room: ID | BookingRoomSummary;
   roomUnit?: BookingRoomUnit | null;
@@ -505,6 +506,12 @@ export interface Booking {
   status: BookingStatus;
   qrCode?: string | null;
   specialRequests?: string | null;
+  confirmedAt?: ISODate | null;
+  checkedInAt?: ISODate | null;
+  checkedOutAt?: ISODate | null;
+  cancelledAt?: ISODate | null;
+  cancelledBy?: "customer" | "partner" | "admin" | null;
+  cancellationReason?: string | null;
   createdAt: ISODate;
   updatedAt: ISODate;
   propertyName?: string;
@@ -542,6 +549,15 @@ export interface Order {
   orderType: "direct" | "broadcast";
   status: OrderStatus;
   customerNotes?: string | null;
+  restaurantNotes?: string | null;
+  acceptedAt?: ISODate | null;
+  preparedAt?: ISODate | null;
+  outForDeliveryAt?: ISODate | null;
+  deliveredAt?: ISODate | null;
+  completedAt?: ISODate | null;
+  cancelledAt?: ISODate | null;
+  cancelledBy?: "customer" | "restaurant" | "admin" | null;
+  cancellationReason?: string | null;
   createdAt: ISODate;
   updatedAt: ISODate;
   restaurantName?: string;
@@ -629,6 +645,9 @@ export interface Trip {
   notes?: string | null;
   rating?: number | null;
   review?: string | null;
+  cancelledAt?: ISODate | null;
+  cancelledBy?: string | null;
+  cancellationReason?: string | null;
   createdAt: ISODate;
   updatedAt: ISODate;
   driverName?: string;
@@ -733,12 +752,36 @@ export interface PaymentMethodPublic {
   usedFor: string[];
 }
 
+export type DownloadPlatform =
+  | "windows"
+  | "macos"
+  | "linux"
+  | "android"
+  | "ios"
+  | "web"
+  | "other";
+
+export interface PublicDownload {
+  _id: ID;
+  name: string;
+  platform: DownloadPlatform;
+  architecture: string;
+  version: string;
+  size: string;
+  url: string;
+  minimumOs?: string | null;
+  checksum?: string | null;
+  releaseNotes?: string | null;
+  createdAt: ISODate;
+}
+
 export interface SitePayload {
   branding: Branding;
   general: GeneralSettings;
   broadcast: BroadcastSettings;
   paymentMethods: PaymentMethodPublic[];
   locations: Location[];
+  downloads?: PublicDownload[];
 }
 
 export interface AuthTokens {
