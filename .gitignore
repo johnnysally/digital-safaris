@@ -162,47 +162,42 @@ credentials.txt
 *.credentials.json
 
 # ─────────────────────────────────────────
-# MOBILE — EXPO / REACT NATIVE
+# MOBILE — EXPO / REACT NATIVE (scoped only)
 # ─────────────────────────────────────────
+# Nested repos / working dirs
+digitalsafaris-mobile/.git/
+
 # Expo
-.expo/
-.expo-shared/
-expo-env.d.ts
-app-env.d.ts
-
-# Expo prebuild / native folders (managed workflow — EAS generates these)
-android/
-ios/
-
-# React Native
-.metro-health-check*
-*.mobileprovision
-*.orig.*
-
-# Gradle / Android build artifacts (if ever prebuilt)
-.gradle/
-*.apk
-*.aab
-*.hprof
-
-# iOS build artifacts (if ever prebuilt)
-DerivedData/
-Pods/
-*.xcworkspace/xcuserdata/
-*.xcuserstate
-
-# EAS
-.eas/
-eas-build-*.json
-
-# React Native Debugger / Flipper
-react-native.config.js.bak
-.flipper/
-
-# Local dev-only mobile folders (safe to ignore across all envs)
-digitalsafaris-mobile/node_modules/
 digitalsafaris-mobile/.expo/
-digitalsafaris-mobile/dist/
-digitalsafaris-mobile/web-build/
+digitalsafaris-mobile/.expo-shared/
+digitalsafaris-mobile/expo-env.d.ts
+digitalsafaris-mobile/app-env.d.ts
+
+# Expo prebuild / native folders
 digitalsafaris-mobile/android/
 digitalsafaris-mobile/ios/
+
+# RN build artifacts
+digitalsafaris-mobile/.metro-health-check*
+digitalsafaris-mobile/*.mobileprovision
+digitalsafaris-mobile/*.orig.*
+digitalsafaris-mobile/.gradle/
+digitalsafaris-mobile/*.apk
+digitalsafaris-mobile/*.aab
+digitalsafaris-mobile/*.hprof
+digitalsafaris-mobile/DerivedData/
+digitalsafaris-mobile/Pods/
+digitalsafaris-mobile/*.xcworkspace/xcuserdata/
+digitalsafaris-mobile/*.xcuserstate
+
+# EAS
+digitalsafaris-mobile/.eas/
+digitalsafaris-mobile/eas-build-*.json
+
+# Flipper / debugger
+digitalsafaris-mobile/react-native.config.js.bak
+digitalsafaris-mobile/.flipper/
+
+# Mobile build output
+digitalsafaris-mobile/dist/
+digitalsafaris-mobile/web-build/

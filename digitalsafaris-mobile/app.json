@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "name": "DigitalSafaris",
+    "slug": "digitalsafaris-mobile",
+    "version": "1.0.0",
+    "scheme": "digitalsafaris",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash-square.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#2A1C12"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.digitalsafaris.mobile",
+      "infoPlist": {
+        "NSHumanReadableCopyright": "© 2026 HDM. All rights reserved."
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#2A1C12"
+      },
+      "package": "com.digitalsafaris.mobile",
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "digitalsafaris"
+            },
+            {
+              "scheme": "https",
+              "host": "digitalsafaris.co.ke",
+              "pathPrefix": "/verify-email"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "bundler": "metro",
+      "output": "single",
+      "name": "DigitalSafaris"
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-splash-screen"
+    ],
+    "extra": {
+      "apiUrl": "https://api.digitalsafaris.co.ke/api",
+      "socketUrl": "https://api.digitalsafaris.co.ke",
+      "developer": "Davis Okoth",
+      "company": "HDM",
+      "companyUrl": "https://www.hdm.co.ke",
+      "copyright": "© 2026 HDM. All rights reserved.",
+      "eas": {
+        "projectId": "dc473d2a-b229-4622-a732-211567d342ad"
+      }
+    },
+    "owner": "davixhdm"
+  }
+}
