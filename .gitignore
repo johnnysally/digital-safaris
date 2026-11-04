@@ -150,8 +150,16 @@ mongodump-*/
 *.key
 *.crt
 *.p12
+*.jks
+*.keystore
 serviceAccountKey.json
 *-service-account.json
+
+# EAS credentials — never commit
+eascreds.txt
+DSeascreds.txt
+credentials.txt
+*.credentials.json
 
 # ─────────────────────────────────────────
 # MOBILE — EXPO / REACT NATIVE
@@ -168,8 +176,6 @@ ios/
 
 # React Native
 .metro-health-check*
-*.jks
-*.keystore
 *.mobileprovision
 *.orig.*
 

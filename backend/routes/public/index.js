@@ -10,6 +10,7 @@ import webhookRoutes from "./webhookRoutes.js";
 import paymentRoutes from "./paymentRoutes.js";
 import aiConciergeRoutes from "./aiConciergeRoutes.js";
 import reviewsRoutes from "./reviewsRoutes.js";
+import downloadRoutes from "./downloadRoutes.js";
 
 const router = Router();
 
@@ -24,5 +25,6 @@ router.use("/webhook", webhookRoutes);
 router.use("/payment", paymentRoutes);
 router.use("/ai-concierge", aiConciergeRoutes);
 router.use("/reviews", reviewsRoutes);
+router.use("/downloads", downloadRoutes);
 
 export default router;
