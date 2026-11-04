@@ -1,5 +1,6 @@
 import { Menu, Search, X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { PartnerLogo } from "../../components/brand/PartnerLogo";
 
 export function LandingHeader() {
@@ -9,9 +10,46 @@ export function LandingHeader() {
 		{ label: "Home", href: "#home" },
 		{ label: "Destinations", href: "#destinations" },
 		{ label: "Partners", href: "#services", hasMenu: true },
+		{ label: "Downloads", href: "/partner/downloads" },
 		{ label: "About Us", href: "#about" },
 		{ label: "Contact", href: "#contact" },
 	];
+
+	const renderNavLink = (
+		label: string,
+		href: string,
+		hasMenu: boolean,
+		onClick?: () => void,
+	) => {
+		const className = `inline-flex items-center gap-1 text-sm font-semibold text-white/95 transition duration-200 ease-[ease] hover:text-[#ffc455] ${
+			label === "Home" ? "text-[#ffc455]" : ""
+		}`;
+		const content = (
+			<>
+				{label}
+				{hasMenu ? <span aria-hidden="true">⌄</span> : null}
+			</>
+		);
+
+		if (href.startsWith("/")) {
+			return (
+				<Link
+					className={className}
+					to={href}
+					key={label}
+					onClick={onClick}
+				>
+					{content}
+				</Link>
+			);
+		}
+
+		return (
+			<a className={className} href={href} key={label} onClick={onClick}>
+				{content}
+			</a>
+		);
+	};
 
 	return (
 		<header className="absolute inset-x-0 top-0 z-30 h-[86px] bg-[linear-gradient(180deg,rgb(21_23_17_/_60%),transparent)] text-white max-[767px]:h-[72px]">
@@ -21,11 +59,9 @@ export function LandingHeader() {
 				</a>
 
 				<nav className="hidden items-center gap-8 lg:flex" aria-label="Main navigation">
-					{navLinks.map(({ label, href, hasMenu }) => (
-						<a className={`inline-flex items-center gap-1 text-sm font-semibold text-white/95 transition duration-200 ease-[ease] hover:text-[#ffc455] ${label === "Home" ? "text-[#ffc455]" : ""}`} href={href} key={label}>
-							{label}{hasMenu ? <span aria-hidden="true">⌄</span> : null}
-						</a>
-					))}
+					{navLinks.map(({ label, href, hasMenu }) =>
+						renderNavLink(label, href, Boolean(hasMenu))
+					)}
 				</nav>
 
 				<div className="hidden shrink-0 items-center lg:flex">
@@ -47,9 +83,9 @@ export function LandingHeader() {
 
 			{menuOpen ? (
 				<nav className="grid gap-1 border-t border-white/15 bg-slate-950/90 px-4 py-3 lg:hidden" aria-label="Mobile navigation">
-					{navLinks.map(({ label, href }) => (
-						<a className="rounded px-3 py-2 text-sm text-white/90 transition duration-200 ease-[ease] hover:bg-white/10" href={href} key={label} onClick={() => setMenuOpen(false)}>{label}</a>
-					))}
+					{navLinks.map(({ label, href }) =>
+						renderNavLink(label, href, false, () => setMenuOpen(false))
+					)}
 				</nav>
 			) : null}
 		</header>

@@ -433,6 +433,7 @@ export interface Trip {
   review?: string | null;
   cancellationReason?: string | null;
   cancelledBy?: string | null;
+  cancelledAt?: ISODate | null;
   createdAt: ISODate;
   updatedAt: ISODate;
 }
@@ -536,8 +537,27 @@ export interface Booking {
     avatar?: string | null;
   };
   partner: ID;
-  property: ID;
-  room: ID;
+  property:
+    | ID
+    | {
+        _id?: ID;
+        name?: string;
+        town?: string;
+        address?: string;
+        images?: string[];
+      };
+  room:
+    | ID
+    | {
+        _id?: ID;
+        name?: string;
+        type?: string;
+        basePrice?: number;
+        images?: string[];
+      };
+  propertyName?: string;
+  roomName?: string;
+  partnerName?: string;
   checkIn: ISODate;
   checkOut: ISODate;
   nights: number;

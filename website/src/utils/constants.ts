@@ -10,6 +10,7 @@ export const NAV_ITEMS: NavItem[] = [
     { label: "Services", href: "/services" },
     { label: "For Businesses", href: "/businesses" },
     { label: "FAQ", href: "/faq" },
+    { label: "Downloads", href: "/downloads" },
     { label: "Contact", href: "/contact" },
 ];
 
@@ -130,3 +131,54 @@ export const FAQS = [
     { question: "How can my business join as a partner?", answer: "Visit the 'For Businesses' page or click 'Become a Partner' to fill out the quick partner application form. Our onboarding team will verify your business details and guide you to go live quickly." },
     { question: "What fees does DigitalSafaris charge business partners?", answer: "DigitalSafaris offers competitive, transparent pricing tiers for businesses of all sizes—from boutique BnBs and independent guides to established resort hotels. Contact partners@digitalsafari.co.ke for detailed package structures." }
 ];
+
+/* ------------------------------------------------------------------ */
+/* Live showcase fallback (used on the marketing homepage)            */
+/* ------------------------------------------------------------------ */
+
+export interface ShowcaseStay {
+    name: string;
+    town: string;
+    type: string;
+    image?: string | null;
+    rating?: number;
+    totalRatings?: number;
+    minPrice?: number | null;
+    currency?: string;
+}
+
+export interface ShowcaseFood {
+    name: string;
+    town: string;
+    cuisine: string;
+    rating?: number;
+    totalRatings?: number;
+}
+
+export const SHOWCASE_FALLBACK = {
+    stays: [
+        {
+            name: "HDM Lux",
+            town: "Nakuru",
+            type: "Villa",
+            rating: 4.8,
+            totalRatings: 12,
+            minPrice: 4500,
+            currency: "KES",
+        },
+        {
+            name: "Lakeside Lodge",
+            town: "Naivasha",
+            type: "Lodge",
+            rating: 4.6,
+            totalRatings: 28,
+            minPrice: 6200,
+            currency: "KES",
+        },
+    ] as ShowcaseStay[],
+    food: [
+        { name: "Mama's Kitchen", town: "Nakuru", cuisine: "African" },
+        { name: "Kilimani Grill", town: "Nairobi", cuisine: "Fast food" },
+    ] as ShowcaseFood[],
+    rideTowns: ["Nairobi", "Nakuru", "Naivasha"],
+};

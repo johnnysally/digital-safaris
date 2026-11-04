@@ -16,6 +16,7 @@ const pageMetadata: Record<string, { title: string; description: string }> = {
   "/get-started": { title: "Get Started with DigitalSafaris", description: "Choose your path and start using the DigitalSafaris customer or partner platform." },
   "/partner-registration": { title: "Register as a DigitalSafaris Partner", description: "Apply to join DigitalSafaris and connect your hospitality business with travelers across Kenya." },
   "/partner-registration/confirmation": { title: "Registration Confirmed | DigitalSafaris", description: "Your DigitalSafaris partner registration has been received. We'll be in touch shortly." },
+  "/downloads": { title: "Download the DigitalSafaris App | Android and Windows", description: "Download the DigitalSafaris Android app for travellers and the Windows desktop app for hospitality partners. Book stays, order food, and manage your business on the go." },
   "/privacy-policy": { title: "Privacy Policy | DigitalSafaris", description: "Read the DigitalSafaris privacy policy and learn how personal information is handled." },
   "/terms-of-service": { title: "Terms of Service | DigitalSafaris", description: "Read the DigitalSafaris terms of service." },
 };
@@ -30,6 +31,7 @@ const pageLabels: Record<string, string> = {
   "get-started": "Get Started",
   "partner-registration": "Partner Registration",
   confirmation: "Confirmation",
+  downloads: "Downloads",
   "privacy-policy": "Privacy Policy",
   "terms-of-service": "Terms of Service",
 };

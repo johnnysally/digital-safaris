@@ -2,6 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { ArrowUpRight, Bed, Utensils, Car, Compass } from "lucide-react";
 import { Hero } from "../components/sections/Hero";
+import { LiveShowcase } from "../components/sections/LiveShowcase";
 import { SERVICES_DATA } from "../utils/constants";
 
 const serviceVisuals: Record<string, { image: string; icon: React.ElementType }> = {
@@ -16,6 +17,7 @@ export const HomePage: React.FC = () => {
     <div className="bg-[#f9f7f4] min-h-screen text-[#191816]">
       <Hero />
 
+      <LiveShowcase />
 
       {/* Problem & Solution Section */}
       <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
