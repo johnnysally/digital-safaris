@@ -167,6 +167,18 @@ credentials.txt
 # Nested repos / working dirs
 digitalsafaris-mobile/.git/
 
+# Mobile assets — exclude all generated/raster except the sources
+digitalsafaris-mobile/assets/*.png
+digitalsafaris-mobile/assets/*.jpg
+digitalsafaris-mobile/assets/*.jpeg
+digitalsafaris-mobile/assets/*.webp
+
+# Keep source artwork — always tracked
+!digitalsafaris-mobile/assets/logo.png
+!digitalsafaris-mobile/assets/logo.svg
+!digitalsafaris-mobile/assets/Splash-Proposed.jpg
+!digitalsafaris-mobile/assets/Splash-Proposed.png
+
 # Expo
 digitalsafaris-mobile/.expo/
 digitalsafaris-mobile/.expo-shared/
